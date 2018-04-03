@@ -3,8 +3,8 @@ import os
 import sys
 sys.path.insert(0, os.path.abspath('..'))
 
-from steem import *  # noqa
-from steembase import *  # noqa
+from golos import *  # noqa
+from golosbase import *  # noqa
 
 
 # pylint: disable=unused-import,unused-variable

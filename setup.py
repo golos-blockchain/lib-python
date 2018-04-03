@@ -4,7 +4,6 @@
 # Note: To use the 'upload' functionality of this file, you must:
 #   $ pip install twine
 
-import io
 import os
 import sys
 from shutil import rmtree
@@ -13,9 +12,9 @@ from setuptools import find_packages, setup, Command
 from setuptools.command.test import test as TestCommand
 
 # Package meta-data.
-NAME = 'steem'
-DESCRIPTION = 'Official python steem library.'
-URL = 'https://github.com/steemit/steem-python'
+NAME = 'golos'
+DESCRIPTION = 'Official python golos library. For of the official Steemit library.'
+URL = 'https://github.com/steepshot/golodranets'
 EMAIL = 'john@steemit.com'
 AUTHOR = 'Steemit'
 
@@ -65,6 +64,7 @@ BUILD_REQUIRED = [
 # If you do change the License, remember to change the Trove Classifier for that!
 
 here = os.path.abspath(os.path.dirname(__file__))
+
 
 # Import the README and use it as the long-description.
 # Note: this will only work if 'README.rst' is present in your MANIFEST.in file!
@@ -131,20 +131,20 @@ class UploadCommand(Command):
 # Where the magic happens:
 setup(
     name=NAME,
-    version='1.0.0',
+    version='0.1.0',
     description=DESCRIPTION,
-    keywords=['steem', 'steemit', 'cryptocurrency', 'blockchain'],
+    keywords=['golos', 'cryptocurrency', 'blockchain'],
     # long_description=long_description,
     author=AUTHOR,
     author_email=EMAIL,
     url=URL,
-    packages=find_packages(exclude=('tests','scripts')),
+    packages=find_packages(exclude=('tests', 'scripts')),
     entry_points={
-            'console_scripts': [
-                'piston=steem.cli:legacyentry',
-                'steempy=steem.cli:legacyentry',
-                'steemtail=steem.cli:steemtailentry',
-            ],
+        'console_scripts': [
+            'piston=golos.cli:legacyentry',
+            'steempy=golos.cli:legacyentry',
+            'steemtail=golos.cli:steemtailentry',
+        ],
     },
     install_requires=REQUIRED,
     extras_require={
@@ -157,8 +157,8 @@ setup(
     license='MIT',
 
     classifiers=[
-            # Trove classifiers
-            # Full list: https://pypi.python.org/pypi?%3Aaction=list_classifiers
+        # Trove classifiers
+        # Full list: https://pypi.python.org/pypi?%3Aaction=list_classifiers
         'Intended Audience :: Developers',
         'License :: OSI Approved :: MIT License',
         'Natural Language :: English', 'Programming Language :: Python :: 3',

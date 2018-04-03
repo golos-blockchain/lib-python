@@ -1,5 +1,5 @@
 # The purpose of this docker file is to provide a shell with
-# steem-python pre-installed for interactive testing purposes.
+# golos-python pre-installed for interactive testing purposes.
 #
 # Usage:
 # docker build -t steempy .
