@@ -7,7 +7,7 @@ from funcy import first
 from golos.block import Block
 from golos.utils import resolve_identifier
 from golosbase.chains import known_chains
-from golosbase.http_client import HttpClient
+from golosbase.connector import Connector
 from golosbase.storage import configStorage
 from golosbase.transactions import SignedTransaction
 from golosbase.types import PointInTime
@@ -39,7 +39,7 @@ def get_config_node_list():
         return nodes.split(',')
 
 
-class Steemd(HttpClient):
+class Steemd(Connector):
     """ Connect to the Steem network.
 
         Args:
@@ -66,8 +66,7 @@ class Steemd(HttpClient):
 
     def __init__(self, nodes=None, **kwargs):
         if not nodes:
-            # nodes = get_config_node_list() or ['https://ws.golos.io']
-            nodes = get_config_node_list() or ['https://golosd.steepshot.org']
+            nodes = get_config_node_list() or ['https://ws.golos.io']
 
         super(Steemd, self).__init__(nodes, **kwargs)
 
