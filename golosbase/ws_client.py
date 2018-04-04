@@ -83,7 +83,7 @@ class WsClient(BaseClient):
                     )
                     time.sleep(sleeptime)
 
-    def exec(self, name, *args, api=None, return_with_args=None, _ret_cnt=0):
+    def call(self, name, *args, api=None, return_with_args=None, _ret_cnt=0):
         body = WsClient.json_rpc_body(name, *args, api=api)
 
         response = None
