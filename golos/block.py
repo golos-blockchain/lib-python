@@ -1,15 +1,14 @@
 from golosbase.exceptions import BlockDoesNotExistsException
 
-from .instance import shared_steemd_instance
-from .utils import parse_time
+from golos.instance import shared_steemd_instance
+from golos.utils import parse_time
 
 
 class Block(dict):
     """ Read a single block from the chain
 
         :param int block: block number
-        :param Steemd steemd_instance: Steemd() instance to use when
-            accessing a RPC
+        :param Steemd steemd_instance: Steemd() instance to use when accessing a RPC
 
     """
 

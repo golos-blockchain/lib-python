@@ -2,12 +2,11 @@ import hashlib
 import os
 import re
 from binascii import hexlify, unhexlify
-from golos.utils import compat_bytes, compat_chr
 
 import ecdsa
 
-from .base58 import ripemd160, Base58
-from .dictionary import words as BrainKeyDictionary
+from golosbase.base58 import ripemd160, Base58
+from golosbase.dictionary import words as BrainKeyDictionary
 
 
 class PasswordKey(object):
@@ -26,7 +25,7 @@ class PasswordKey(object):
         """ Derive private key from the brain key and the current sequence
             number
         """
-        a = compat_bytes(self.account + self.role + self.password, 'utf8')
+        a = bytes(self.account + self.role + self.password, 'utf8')
         s = hashlib.sha256(a).digest()
         return PrivateKey(hexlify(s).decode('ascii'))
 
@@ -79,8 +78,7 @@ class BrainKey(object):
         return self
 
     def normalize(self, brainkey):
-        """ Correct formating with single whitespace syntax and no trailing
-        space """
+        """ Correct formating with single whitespace syntax and no trailing space """
         return " ".join(re.compile("[\t\n\v\f\r ]+").split(brainkey))
 
     def get_brainkey(self):
@@ -92,7 +90,7 @@ class BrainKey(object):
             number
         """
         encoded = "%s %d" % (self.brainkey, self.sequence)
-        a = compat_bytes(encoded, 'ascii')
+        a = bytes(encoded, 'ascii')
 
         s = hashlib.sha256(hashlib.sha512(a).digest()).digest()
         return PrivateKey(hexlify(s).decode('ascii'))
@@ -137,7 +135,7 @@ class Address(object):
 
     """
 
-    def __init__(self, address=None, pubkey=None, prefix="STM"):
+    def __init__(self, address=None, pubkey=None, prefix="GLS"):
         self.prefix = prefix
         if pubkey is not None:
             self._pubkey = Base58(pubkey, prefix=prefix)
@@ -188,9 +186,9 @@ class Address(object):
     def __bytes__(self):
         """ Returns the raw content of the ``Base58CheckEncoded`` address """
         if self._address is None:
-            return compat_bytes(self.derivesha512address())
+            return bytes(self.derivesha512address())
         else:
-            return compat_bytes(self._address)
+            return bytes(self._address)
 
 
 class PublicKey(object):
@@ -211,7 +209,7 @@ class PublicKey(object):
 
     """
 
-    def __init__(self, pk, prefix="STM"):
+    def __init__(self, pk, prefix="GLS"):
         self.prefix = prefix
         self._pk = Base58(pk, prefix=prefix)
         self.address = Address(pubkey=pk, prefix=prefix)
@@ -232,13 +230,11 @@ class PublicKey(object):
     def compressed(self):
         """ Derive compressed public key """
         order = ecdsa.SECP256k1.generator.order()
-        p = ecdsa.VerifyingKey.from_string(
-            compat_bytes(self), curve=ecdsa.SECP256k1).pubkey.point
+        p = ecdsa.VerifyingKey.from_string(bytes(self), curve=ecdsa.SECP256k1).pubkey.point
         x_str = ecdsa.util.number_to_string(p.x(), order)
         # y_str = ecdsa.util.number_to_string(p.y(), order)
-        compressed = hexlify(
-            compat_bytes(compat_chr(2 + (p.y() & 1)), 'ascii') + x_str).decode('ascii')
-        return (compressed)
+        compressed = hexlify(bytes(chr(2 + (p.y() & 1)), 'ascii') + x_str).decode('ascii')
+        return compressed
 
     def unCompressed(self):
         """ Derive uncompressed key """
@@ -255,8 +251,7 @@ class PublicKey(object):
     def point(self):
         """ Return the point for the public key """
         string = unhexlify(self.unCompressed())
-        return ecdsa.VerifyingKey.from_string(
-            string[1:], curve=ecdsa.SECP256k1).pubkey.point
+        return ecdsa.VerifyingKey.from_string(string[1:], curve=ecdsa.SECP256k1).pubkey.point
 
     def __repr__(self):
         """ Gives the hex representation of the Graphene public key. """
@@ -269,13 +264,12 @@ class PublicKey(object):
         return format(self._pk, self.prefix)
 
     def __format__(self, _format):
-        """ Formats the instance of:doc:`Base58 <base58>` according
-        to ``_format`` """
+        """ Formats the instance of:doc:`Base58 <base58>` according to ``_format`` """
         return format(self._pk, _format)
 
     def __bytes__(self):
         """ Returns the raw public key (has length 33)"""
-        return compat_bytes(self._pk)
+        return bytes(self._pk)
 
 
 class PrivateKey(object):
@@ -302,7 +296,7 @@ class PrivateKey(object):
 
     """
 
-    def __init__(self, wif=None, prefix="STM"):
+    def __init__(self, wif=None, prefix="GLS"):
         if wif is None:
             import os
             self._wif = Base58(hexlify(os.urandom(32)).decode('ascii'))
@@ -313,25 +307,19 @@ class PrivateKey(object):
         # compress pubkeys only
         self._pubkeyhex, self._pubkeyuncompressedhex = self.compressedpubkey()
         self.pubkey = PublicKey(self._pubkeyhex, prefix=prefix)
-        self.uncompressed = PublicKey(
-            self._pubkeyuncompressedhex, prefix=prefix)
-        self.uncompressed.address = Address(
-            pubkey=self._pubkeyuncompressedhex, prefix=prefix)
+        self.uncompressed = PublicKey(self._pubkeyuncompressedhex, prefix=prefix)
+        self.uncompressed.address = Address(pubkey=self._pubkeyuncompressedhex, prefix=prefix)
         self.address = Address(pubkey=self._pubkeyhex, prefix=prefix)
 
     def compressedpubkey(self):
         """ Derive uncompressed public key """
         secret = unhexlify(repr(self._wif))
-        order = ecdsa.SigningKey.from_string(
-            secret, curve=ecdsa.SECP256k1).curve.generator.order()
-        p = ecdsa.SigningKey.from_string(
-            secret, curve=ecdsa.SECP256k1).verifying_key.pubkey.point
+        order = ecdsa.SigningKey.from_string(secret, curve=ecdsa.SECP256k1).curve.generator.order()
+        p = ecdsa.SigningKey.from_string(secret, curve=ecdsa.SECP256k1).verifying_key.pubkey.point
         x_str = ecdsa.util.number_to_string(p.x(), order)
         y_str = ecdsa.util.number_to_string(p.y(), order)
-        compressed = hexlify(
-            compat_chr(2 + (p.y() & 1)).encode('ascii') + x_str).decode('ascii')
-        uncompressed = hexlify(compat_chr(4).encode('ascii') + x_str + y_str).decode(
-            'ascii')
+        compressed = hexlify(bytes(chr(2 + (p.y() & 1)), 'ascii') + x_str).decode('ascii')
+        uncompressed = hexlify(bytes(chr(4), 'ascii') + x_str + y_str).decode('ascii')
         return [compressed, uncompressed]
 
     def __format__(self, _format):
@@ -352,4 +340,4 @@ class PrivateKey(object):
 
     def __bytes__(self):
         """ Returns the raw private key """
-        return compat_bytes(self._wif)
+        return bytes(self._wif)

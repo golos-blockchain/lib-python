@@ -1,11 +1,9 @@
-from funcy.flow import silent
-from funcy.funcs import complement
-from funcy.seqs import take, first
+from funcy import silent, complement, take, first
 
-from .account import Account
-from .instance import shared_steemd_instance
-from .post import Post
-from .utils import is_comment
+from golos.account import Account
+from golos.instance import shared_steemd_instance
+from golos.post import Post
+from golos.utils import is_comment
 
 
 class Blog:
@@ -13,8 +11,7 @@ class Blog:
 
         Args:
             account_name (str): Name of the account
-            comments_only (bool): (Default False). Toggle between posts
-                and comments.
+            comments_only (bool): (Default False). Toggle between posts and comments.
             steemd_instance (Steemd): Steemd instance overload
 
         Returns:
@@ -41,12 +38,12 @@ class Blog:
     """
 
     def __init__(self,
-                 account_name,
-                 comments_only=False,
+                 account_name: str,
+                 comments_only: bool = False,
                  steemd_instance=None):
         self.steem = steemd_instance or shared_steemd_instance()
         self.comments_only = comments_only
-        self.account = Account(account_name)
+        self.account = Account(account_name, steemd_instance=steemd_instance)
         self.history = self.account.history_reverse(filter_by='comment')
         self.seen_items = set()
 
@@ -60,15 +57,11 @@ class Blog:
             List of posts/comments in a batch of size up to `limit`.
         """
         # get main posts only
-        comment_filter = is_comment if self.comments_only else complement(
-            is_comment)
+        comment_filter = is_comment if self.comments_only else complement(is_comment)
         hist = filter(comment_filter, self.history)
 
         # filter out reblogs
-        def match_author(x):
-            return x['author'] == self.account.name
-
-        hist2 = filter(match_author, hist)
+        hist2 = filter(lambda x: x['author'] == self.account.name, hist)
 
         # post edits will re-appear in history
         # we should therefore filter out already seen posts
@@ -89,8 +82,7 @@ class Blog:
         while True:
             chunk = self.take(10)
             if chunk:
-                for little_chunk in iter(chunk):
-                    yield little_chunk
+                yield from iter(chunk)
             else:
                 break
 

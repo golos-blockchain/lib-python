@@ -3,20 +3,18 @@ import logging
 import re
 from datetime import datetime
 
-from funcy.colls import walk_values, get_in
-from funcy.flow import silent
-from funcy.seqs import flatten
+from funcy import walk_values, get_in, silent, flatten
+
 from golosbase.exceptions import (
     PostDoesNotExist,
     VotingInvalidOnArchivedPost,
 )
 from golosbase.operations import CommentOptions
 
-from .amount import Amount
-from .commit import Commit
-from .instance import shared_steemd_instance
-from .utils import construct_identifier, resolve_identifier
-from .utils import parse_time, remove_from_dict
+from golos.amount import Amount
+from golos.commit import Commit
+from golos.instance import shared_steemd_instance
+from golos.utils import construct_identifier, resolve_identifier, parse_time, remove_from_dict, calculate_trending, calculate_hot
 
 log = logging.getLogger(__name__)
 
@@ -26,10 +24,7 @@ class Post(dict):
         abstraction layer for Comments in Steem
 
         Args:
-
-            post (str or dict): ``author/permlink`` or raw ``comment`` as
-            dictionary.
-
+            post (str or dict): ``@author/permlink`` or raw ``comment`` as dictionary.
             steemd_instance (Steemd): Steemd node to connect to
 
     """
@@ -45,11 +40,8 @@ class Post(dict):
 
         if isinstance(post, str):  # From identifier
             self.identifier = self.parse_identifier(post)
-        elif isinstance(post,
-                        dict) and "author" in post and "permlink" in post:
-
-            self.identifier = construct_identifier(post["author"],
-                                                   post["permlink"])
+        elif isinstance(post, dict) and "author" in post and "permlink" in post:
+            self.identifier = construct_identifier(post["author"], post["permlink"])
         else:
             raise ValueError("Post expects an identifier or a dict "
                              "with author and permlink!")
@@ -71,25 +63,36 @@ class Post(dict):
         if "body" in post and re.match("^@@", post["body"]):
             self.patched = True
 
+        # TODO: Check
+        # This field is returned from blockchain, but it's empty. Fill it
+        # post['reblogged_by'] = [i for i in self.steemd.get_reblogged_by(post_author, post_permlink) if i != post_author]
+        post['reblogged_by'] = []
+
         # Parse Times
-        parse_times = [
-            "active", "cashout_time", "created", "last_payout", "last_update",
-            "max_cashout_time"
-        ]
+        parse_times = ["active",
+                       "cashout_time",
+                       "created",
+                       "last_payout",
+                       "last_update",
+                       "max_cashout_time"]
         for p in parse_times:
             post[p] = parse_time(post.get(p, "1970-01-01T00:00:00"))
 
         # Parse Amounts
         sbd_amounts = [
-            "total_payout_value",
-            "max_accepted_payout",
-            "pending_payout_value",
-            "curator_payout_value",
-            "total_pending_payout_value",
-            "promoted",
+            'total_payout_value',
+            'max_accepted_payout',
+            'pending_payout_value',
+            'curator_payout_value',
+            'total_pending_payout_value',
+            'promoted',
         ]
         for p in sbd_amounts:
-            post[p] = Amount(post.get(p, "0.000 SBD"))
+            post[p] = Amount(post.get(p, "0.000 GBG"))
+
+        # calculate trending and hot scores for sorting
+        post['score_trending'] = calculate_trending(post.get('net_rshares', 0), post['created'])
+        post['score_hot'] = calculate_hot(post.get('net_rshares', 0), post['created'])
 
         # turn json_metadata into python dict
         meta_str = post.get("json_metadata", "{}")
@@ -101,10 +104,10 @@ class Post(dict):
             if post["depth"] == 0:
                 tags = [post["parent_permlink"]]
                 tags += get_in(post, ['json_metadata', 'tags'], default=[])
-                post["tags"] = set(tags)
+                tags_set = set(tags)
+                post["tags"] = [tag for tag in tags if tag not in tags_set]
 
-            post['community'] = get_in(
-                post, ['json_metadata', 'community'], default='')
+            post['community'] = get_in(post, ['json_metadata', 'community'], default='')
 
         # If this post is a comment, retrieve the root comment
         self.root_identifier, self.category = self._get_root_identifier(post)
@@ -169,8 +172,7 @@ class Post(dict):
         children = list(flatten([list(x.get_replies()) for x in comments]))
         if not children:
             return all_comments or comments
-        return Post.get_all_replies(
-            comments=children, all_comments=comments + children)
+        return Post.get_all_replies(comments=children, all_comments=comments + children)
 
     @property
     def reward(self):
@@ -224,8 +226,7 @@ class Post(dict):
     def upvote(self, weight=+100, voter=None):
         """ Upvote the post
 
-            :param float weight: (optional) Weight for posting (-100.0 -
-            +100.0) defaults to +100.0
+            :param float weight: (optional) Weight for posting (-100.0 - +100.0) defaults to +100.0
             :param str voter: (optional) Voting account
         """
         return self.vote(weight, voter=voter)
@@ -233,8 +234,7 @@ class Post(dict):
     def downvote(self, weight=-100, voter=None):
         """ Downvote the post
 
-            :param float weight: (optional) Weight for posting (-100.0 -
-            +100.0) defaults to -100.0
+            :param float weight: (optional) Weight for posting (-100.0 - +100.0) defaults to -100.0
             :param str voter: (optional) Voting account
         """
         return self.vote(weight, voter=voter)
@@ -247,8 +247,8 @@ class Post(dict):
         """
         # Test if post is archived, if so, voting is worthless but just
         # pollutes the blockchain and account history
-        if self.get('net_rshares', None) == None:
-            raise VotingInvalidOnArchivedPost
+        # if self.is_main_post() and self.get('net_rshares') is None:
+        #     raise VotingInvalidOnArchivedPost
         return self.commit.vote(self.identifier, weight, account=voter)
 
     def edit(self, body, meta=None, replace=False):
@@ -277,7 +277,9 @@ class Post(dict):
                 return
 
         reply_identifier = construct_identifier(
-            original_post["parent_author"], original_post["parent_permlink"])
+            original_post["parent_author"],
+            original_post["parent_permlink"]
+        )
 
         new_meta = {}
         if meta:
@@ -317,13 +319,10 @@ class Post(dict):
     def set_comment_options(self, options):
         op = CommentOptions(
             **{
-                "author":
-                    self["author"],
-                "permlink":
-                    self["permlink"],
+                "author": self["author"],
+                "permlink": self["permlink"],
                 "max_accepted_payout":
-                    options.get("max_accepted_payout",
-                                str(self["max_accepted_payout"])),
+                    options.get("max_accepted_payout", str(self["max_accepted_payout"])),
                 "percent_steem_dollars":
                     int(
                         options.get("percent_steem_dollars",
@@ -331,7 +330,10 @@ class Post(dict):
                 "allow_votes":
                     options.get("allow_votes", self["allow_votes"]),
                 "allow_curation_rewards":
-                    options.get("allow_curation_rewards", self[
-                        "allow_curation_rewards"]),
-            })
+                    options.get("allow_curation_rewards", self["allow_curation_rewards"]),
+                # TODO: ensure that it is supported
+                "extensions":
+                    options.get("extensions", []),
+            }
+        )
         return self.commit.finalizeOp(op, self["author"], "posting")

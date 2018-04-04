@@ -1,23 +1,16 @@
 class Amount(dict):
-    """ This class helps deal and calculate with the different assets on the
-            chain.
+    """ This class helps deal and calculate with the different assets on the chain.
 
-        :param str amountString: Amount string as used by the backend
-            (e.g. "10 SBD")
+        :param str amountString: Amount string as used by the backend (e.g. "10 GBG")
     """
-
-    def __init__(self, amount_string="0 SBD"):
+    def __init__(self, amount_string="0 GBG"):
         if isinstance(amount_string, Amount):
             self["amount"] = amount_string["amount"]
             self["asset"] = amount_string["asset"]
         elif isinstance(amount_string, str):
             self["amount"], self["asset"] = amount_string.split(" ")
-        elif isinstance(amount_string, unicode):
-            self["amount"], self["asset"] = amount_string.split(" ")
         else:
-            raise ValueError(
-                "Need an instance of 'Amount' or a string with amount " +
-                "and asset")
+            raise ValueError("Need an instance of 'Amount' or a string with amount and asset")
 
         self["amount"] = float(self["amount"])
 
@@ -34,19 +27,18 @@ class Amount(dict):
         return self["asset"]
 
     def __str__(self):
-        # STEEM
-        if self["asset"] == "SBD":
+        # GOLOS
+        if self["asset"] == "GBG":
             prec = 3
-        elif self["asset"] == "STEEM":
+        elif self["asset"] == "GOLOS":
             prec = 3
-        elif self["asset"] == "VESTS":
+        elif self["asset"] == "GESTS":
             prec = 6
 
         # default
         else:
             prec = 6
-        return "{:.{prec}f} {}".format(
-            self["amount"], self["asset"], prec=prec)
+        return "{:.{prec}f} {}".format(self["amount"], self["asset"], prec=prec)
 
     def __float__(self):
         return self["amount"]
@@ -209,8 +201,8 @@ class Amount(dict):
 
 
 if __name__ == "__main__":
-    a = Amount("2 SBD")
-    b = Amount("9 SBD")
+    a = Amount("2 GBG")
+    b = Amount("9 GBG")
     print(a + b)
     print(b)
     b **= 2
@@ -218,7 +210,7 @@ if __name__ == "__main__":
     print(b)
     print(b > a)
 
-    c = Amount("100 STEEM")
+    c = Amount("100 GOLOG")
     print(c * .10)
 
     # print(a + c)

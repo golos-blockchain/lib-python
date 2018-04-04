@@ -1,12 +1,11 @@
 import logging
 import os
 
-from .instance import shared_steemd_instance
+from golos.instance import shared_steemd_instance
 from golosbase import bip38
 from golosbase.account import PrivateKey
 from golosbase.exceptions import (InvalidWifError, WalletExists)
-
-from .account import Account
+from golos.account import Account
 
 log = logging.getLogger(__name__)
 
@@ -77,8 +76,7 @@ class Wallet:
         """ This method is strictly only for in memory keys that are
             passed to Wallet/Steem with the ``keys`` argument
         """
-        log.debug(
-            "Force setting of private keys. Not using the wallet database!")
+        log.debug("Force setting of private keys. Not using the wallet database!")
         if isinstance(loadkeys, dict):
             Wallet.keyMap = loadkeys
             loadkeys = list(loadkeys.values())
@@ -88,7 +86,7 @@ class Wallet:
         for wif in loadkeys:
             try:
                 key = PrivateKey(wif)
-            except:  # noqa FIXME(sneak)
+            except:
                 raise InvalidWifError
             Wallet.keys[format(key.pubkey, self.prefix)] = str(key)
 
@@ -154,8 +152,7 @@ class Wallet:
         """ Encrypt a wif key
         """
         self.unlock()
-        return format(
-            bip38.encrypt(PrivateKey(wif), self.masterpassword), "encwif")
+        return format(bip38.encrypt(PrivateKey(wif), self.masterpassword), "encwif")
 
     def decrypt_wif(self, encwif):
         """ decrypt a wif key
@@ -164,7 +161,7 @@ class Wallet:
             # Try to decode as wif
             PrivateKey(encwif)
             return encwif
-        except:  # noqa FIXME(sneak)
+        except:
             pass
         self.unlock()
         return format(bip38.decrypt(encwif, self.masterpassword), "wif")
@@ -187,7 +184,9 @@ class Wallet:
                     continue
                 else:
                     pwck = self.getPassword(
-                        confirm=False, text="Confirm Passphrase: ")
+                        confirm=False,
+                        text="Confirm Passphrase: "
+                    )
                     if pw == pwck:
                         return pw
                     else:
@@ -207,9 +206,8 @@ class Wallet:
             wif = str(wif)
         try:
             pub = format(PrivateKey(wif).pubkey, self.prefix)
-        except:  # noqa FIXME(sneak)
-            raise InvalidWifError(
-                "Invalid Private Key Format. Please use WIF!")
+        except:
+            raise InvalidWifError("Invalid Private Key Format. Please use WIF!")
 
         if self.keyStorage:
             # Test if wallet exists
@@ -235,8 +233,7 @@ class Wallet:
             if not self.created():
                 self.newWallet()
 
-            return self.decrypt_wif(
-                self.keyStorage.getPrivateKeyForPublicKey(pub))
+            return self.decrypt_wif(self.keyStorage.getPrivateKeyForPublicKey(pub))
 
     def removePrivateKeyFromPublicKey(self, pub):
         """ Remove a key from the wallet database
@@ -326,8 +323,7 @@ class Wallet:
         # FIXME, this only returns the first associated key.
         # If the key is used by multiple accounts, this
         # will surely lead to undesired behavior
-        names = self.steemd.call(
-            'get_key_references', [pub], api="account_by_key_api")[0]
+        names = self.steemd.call('get_key_references', [pub], api="account_by_key_api")[0]
         if not names:
             return None
         else:
@@ -342,7 +338,7 @@ class Wallet:
         else:
             try:
                 account = Account(name)
-            except:  # noqa FIXME(sneak)
+            except:
                 return
             keyType = self.getKeyType(account, pub)
             return {

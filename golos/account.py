@@ -1,18 +1,17 @@
 import datetime
 import math
 import time
+from contextlib import suppress
 
-from funcy.colls import walk_values, get_in
-from funcy.seqs import take
-from funcy import rpartial
-from golosbase.exceptions import AccountDoesNotExistsException
+from funcy import walk_values, get_in, take, rpartial
 from toolz import dissoc
 
-from .amount import Amount
-from .blockchain import Blockchain
-from .converter import Converter
-from .instance import shared_steemd_instance
-from .utils import parse_time, json_expand
+from golos.amount import Amount
+from golos.blockchain import Blockchain
+from golos.converter import Converter
+from golos.instance import shared_steemd_instance
+from golos.utils import parse_time, json_expand
+from golosbase.exceptions import AccountDoesNotExistsException
 
 
 class Account(dict):
@@ -56,11 +55,8 @@ class Account(dict):
 
     @property
     def profile(self):
-        try:
+        with suppress(TypeError):
             return get_in(self, ['json_metadata', 'profile'], default={})
-        except TypeError:
-            pass
-
         return {}
 
     @property
@@ -78,29 +74,26 @@ class Account(dict):
 
     def get_balances(self):
         available = {
-            'STEEM': Amount(self['balance']).amount,
-            'SBD': Amount(self['sbd_balance']).amount,
-            'VESTS': Amount(self['vesting_shares']).amount,
+            'GOLOS': Amount(self['balance']).amount,
+            'GBG': Amount(self['sbd_balance']).amount,
+            'GESTS': Amount(self['vesting_shares']).amount,
         }
 
         savings = {
-            'STEEM': Amount(self['savings_balance']).amount,
-            'SBD': Amount(self['savings_sbd_balance']).amount,
+            'GOLOS': Amount(self['savings_balance']).amount,
+            'GBG': Amount(self['savings_sbd_balance']).amount,
         }
 
         rewards = {
-            'STEEM': Amount(self['reward_steem_balance']).amount,
-            'SBD': Amount(self['reward_sbd_balance']).amount,
-            'VESTS': Amount(self['reward_vesting_balance']).amount,
+            'GOLOS': Amount(self['reward_steem_balance']).amount,
+            'GBG': Amount(self['reward_sbd_balance']).amount,
+            'GESTS': Amount(self['reward_vesting_balance']).amount,
         }
 
         totals = {
-            'STEEM':
-                sum([available['STEEM'], savings['STEEM'], rewards['STEEM']]),
-            'SBD':
-                sum([available['SBD'], savings['SBD'], rewards['SBD']]),
-            'VESTS':
-                sum([available['VESTS'], rewards['VESTS']]),
+            'GOLOS': sum([available['GOLOS'], savings['GOLOS']]),
+            'GBG': sum([available['GBG'], savings['GBG']]),
+            'GESTS': sum([available['GESTS']]),
         }
 
         total = walk_values(rpartial(round, 3), totals)
@@ -124,44 +117,53 @@ class Account(dict):
     def voting_power(self):
         return self['voting_power'] / 100
 
-    def get_followers(self):
-        return [
-            x['follower'] for x in self._get_followers(direction="follower")
-        ]
+    def get_followers(self, limit: int = None, offset: str = None):
+        return [x['follower'] for x in self._get_followers(direction="follower", limit=limit, offset=offset)]
 
-    def get_following(self):
-        return [
-            x['following'] for x in self._get_followers(direction="following")
-        ]
+    def get_following(self, limit: int = None, offset: str = None):
+        return [x['following'] for x in self._get_followers(direction="following", limit=limit, offset=offset)]
 
-    def _get_followers(self, direction="follower", last_user=""):
-        if direction == "follower":
+    def _get_followers(self, direction='follower', limit=None, offset=''):
+        users = []
 
-            followers = self.steemd.get_followers(self.name, last_user, "blog",
-                                                  100)
-        elif direction == "following":
-            followers = self.steemd.get_following(self.name, last_user, "blog",
-                                                  100)
-        if len(followers) >= 100:
-            followers += self._get_followers(
-                direction=direction, last_user=followers[-1][direction])[1:]
-        return followers
+        get_users = {
+            'follower': self.steemd.get_followers,
+            'following': self.steemd.get_following
+        }[direction]
+
+        limit = limit or 10 ** 6
+        max_request_limit = 100
+        left_number = limit
+
+        while left_number > 0:
+            select_limit = min(left_number, max_request_limit)
+            result = get_users(self.name, offset, 'blog', select_limit)
+            users.extend(result)
+
+            has_next = len(users) < limit and len(result) >= select_limit
+            if has_next:
+                if users:
+                    del users[-1]
+                offset = result[-1][direction]
+
+                left_number = left_number - len(result) + 1
+            else:
+                left_number = 0
+
+        return users
 
     def has_voted(self, post):
         active_votes = {v["voter"]: v for v in getattr(post, "active_votes")}
         return self.name in active_votes
 
     def curation_stats(self):
-        trailing_24hr_t = time.time() - datetime.timedelta(
-            hours=24).total_seconds()
-        trailing_7d_t = time.time() - datetime.timedelta(
-            days=7).total_seconds()
+        trailing_24hr_t = time.time() - datetime.timedelta(hours=24).total_seconds()
+        trailing_7d_t = time.time() - datetime.timedelta(days=7).total_seconds()
 
         reward_24h = 0.0
         reward_7d = 0.0
 
-        for reward in take(
-                5000, self.history_reverse(filter_by="curation_reward")):
+        for reward in take(5000, self.history_reverse(filter_by="curation_reward")):
 
             timestamp = parse_time(reward['timestamp']).timestamp()
             if timestamp > trailing_7d_t:
@@ -216,11 +218,9 @@ class Account(dict):
         return filtered_items
 
     def export(self, load_extras=True):
-        """ This method returns a dictionary that is type-safe to store as
-                JSON or in a database.
+        """ This method returns a dictionary that is type-safe to store as JSON or in a database.
 
-            :param bool load_extras: Fetch extra information related to the
-                account (this might take a while).
+            :param bool load_extras: Fetch extra information related to the account (this might take a while).
         """
         extras = dict()
         if load_extras:
@@ -330,16 +330,15 @@ class Account(dict):
         start_index = start + batch_size
         i = start_index
         while i < max_index + batch_size:
-            for account_history in self.get_account_history(
-                    index=i,
-                    limit=batch_size,
-                    start=i - batch_size,
-                    stop=max_index,
-                    order=1,
-                    filter_by=filter_by,
-                    raw_output=raw_output,
-            ):
-                yield account_history
+            yield from self.get_account_history(
+                index=i,
+                limit=batch_size,
+                start=i - batch_size,
+                stop=max_index,
+                order=1,
+                filter_by=filter_by,
+                raw_output=raw_output,
+            )
             i += (batch_size + 1)
 
     def history_reverse(self,
@@ -356,12 +355,11 @@ class Account(dict):
         while i > 0:
             if i - batch_size < 0:
                 batch_size = i
-            for account_history in self.get_account_history(
-                    index=i,
-                    limit=batch_size,
-                    order=-1,
-                    filter_by=filter_by,
-                    raw_output=raw_output,
-            ):
-                yield account_history
+            yield from self.get_account_history(
+                index=i,
+                limit=batch_size,
+                order=-1,
+                filter_by=filter_by,
+                raw_output=raw_output,
+            )
             i -= (batch_size + 1)

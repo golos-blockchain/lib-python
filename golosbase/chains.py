@@ -1,13 +1,6 @@
-default_prefix = "STM"
+default_prefix = "GLS"
 
 known_chains = {
-    "STEEM": {
-        "chain_id": "0" * int(256 / 4),
-        "prefix": "STM",
-        "steem_symbol": "STEEM",
-        "sbd_symbol": "SBD",
-        "vests_symbol": "VESTS",
-    },
     "GOLOS": {
         "chain_id": "782a3039b478c839e4cb0c941ff4eaeb7df40bdd68bd441afd444b9da763de12",
         "prefix": "GLS",
@@ -15,16 +8,18 @@ known_chains = {
         "sbd_symbol": "GBG",
         "vests_symbol": "GESTS",
     },
+    "STEEM": {
+        "chain_id": "0" * int(256 / 4),
+        "prefix": "STM",
+        "steem_symbol": "STEEM",
+        "sbd_symbol": "SBD",
+        "vests_symbol": "VESTS",
+    },
     "TEST": {
-        "chain_id":
-            "9afbce9f2416520733bacb370315d32b6b2c43d6097576df1c1222859d91eecc",
-        "prefix":
-            "TST",
-        "steem_symbol":
-            "TESTS",
-        "sbd_symbol":
-            "TBD",
-        "vests_symbol":
-            "VESTS",
+        "chain_id": "18dcf0a285365fc58b71f18b3d3fec954aa0c141c44e4e5cb4cf777b9eab274e",
+        "prefix": "TST",
+        "steem_symbol": "CORE",
+        "sbd_symbol": "TEST",
+        "vests_symbol": "CESTS",
     },
 }

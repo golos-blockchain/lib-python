@@ -4,21 +4,15 @@ import logging
 import os
 import re
 import time
-import sys
 from datetime import datetime
-
-import future
-from builtins import bytes
+from json import JSONDecodeError
+from math import log10
+from urllib.parse import urlparse
 
 import w3lib.url
 from langdetect import DetectorFactory, detect
 from langdetect.lang_detect_exception import LangDetectException
 from toolz import update_in, assoc
-
-if sys.version >= '3.0':
-    from urllib.parse import urlparse
-else:
-    from urlparse import urlparse
 
 logger = logging.getLogger(__name__)
 
@@ -32,8 +26,29 @@ RE_HUNK_HEADER = re.compile(
 DetectorFactory.seed = 0
 MIN_TEXT_LENGTH_FOR_DETECTION = 20
 
+epoch = datetime(1970, 1, 1)
 
-def block_num_from_hash(block_hash):
+
+rus_d = {
+    'а': 'a', 'б': 'b', 'в': 'v', 'г': 'g', 'д': 'd',
+    'е': 'e', 'ё': 'yo', 'ж': 'zh', 'з': 'z', 'и': 'i',
+    'й': 'ij', 'к': 'k', 'л': 'l', 'м': 'm', 'н': 'n',
+    'о': 'o', 'п': 'p', 'р': 'r', 'с': 's', 'т': 't',
+    'у': 'u', 'ф': 'f', 'х': 'kh', 'ц': 'cz', 'ч': 'ch',
+    'ш': 'sh', 'щ': 'shch', 'ъ': 'xx', 'ы': 'y', 'ь': 'x',
+    'э': 'ye', 'ю': 'yu', 'я': 'ya',
+
+    'А': "A", 'Б': "B", 'В': "V", 'Г': "G", 'Д': "D",
+    'Е': "E", 'Ё': "yo", 'Ж': "ZH", 'З': "Z", 'И': "I",
+    'Й': "IJ", 'К': "K", 'Л': "L", 'М': "M", 'Н': "N",
+    'О': "O", 'П': "P", 'Р': "R", 'С': "S", 'Т': "T",
+    'У': "U", 'Ф': "F", 'Х': "KH", 'Ц': "CZ", 'Ч': "CH",
+    'Ш': "SH", 'Щ': "SHCH", 'Ъ': "XX", 'Ы': "Y", 'Ь': "X",
+    'Э': "YE", 'Ю': "YU", 'Я': "YA",
+}
+
+
+def block_num_from_hash(block_hash: str) -> int:
     """
     return the first 4 bytes (8 hex digits) of the block ID (the block_num)
     Args:
@@ -45,7 +60,7 @@ def block_num_from_hash(block_hash):
     return int(str(block_hash)[:8], base=16)
 
 
-def block_num_from_previous(previous_block_hash):
+def block_num_from_previous(previous_block_hash: str) -> int:
     """
 
     Args:
@@ -183,15 +198,13 @@ def detect_language(text):
 
 def is_comment(item):
     """Quick check whether an item is a comment (reply) to another post.
-    The item can be a Post object or just a raw comment object from the
-    blockchain.
+    The item can be a Post object or just a raw comment object from the blockchain.
     """
     return item['permlink'][:3] == "re-" and item['parent_author']
 
 
 def time_elapsed(posting_time):
-    """Takes a string time from a post or blockchain event, and returns a
-    time delta from now.
+    """Takes a string time from a post or blockchain event, and returns a time delta from now.
     """
     if type(posting_time) == str:
         posting_time = parse_time(posting_time)
@@ -199,8 +212,7 @@ def time_elapsed(posting_time):
 
 
 def parse_time(block_time):
-    """Take a string representation of time from the blockchain, and parse
-    it into datetime object.
+    """Take a string representation of time from the blockchain, and parse it into datetime object.
     """
     return datetime.strptime(block_time, '%Y-%m-%dT%H:%M:%S')
 
@@ -272,6 +284,10 @@ def sanitize_permlink(permlink):
     permlink = permlink.strip()
     permlink = re.sub("_|\s|\.", "-", permlink)
     permlink = re.sub("[^\w-]", "", permlink)
+    pattern = re.compile('|'.join(rus_d.keys()))
+    new_permlink = pattern.sub(lambda x: rus_d[x.group()], permlink)
+    if new_permlink != permlink:
+        permlink = 'ru--%s' % new_permlink
     permlink = re.sub("[^a-zA-Z0-9-]", "", permlink)
     permlink = permlink.lower()
     return permlink
@@ -321,8 +337,7 @@ def fmt_time_from_now(secs=0):
         :rtype: str
 
     """
-    return datetime.utcfromtimestamp(time.time() + int(secs)).strftime(
-        '%Y-%m-%dT%H:%M:%S')
+    return datetime.utcfromtimestamp(time.time() + int(secs)).strftime('%Y-%m-%dT%H:%M:%S')
 
 
 def env_unlocked():
@@ -370,6 +385,31 @@ def is_valid_account_name(name):
     return re.match('^[a-z][a-z0-9\-.]{2,15}$', name)
 
 
+def epoch_seconds(date: datetime):
+    return (date - epoch).total_seconds()
+
+
+def calculate_score(S: int, T: int, score: int, created_tm: datetime):
+    # implemented libraries/plugins/tags/tags_plugin.cpp from Node sources, method calculate_score
+    if isinstance(score, str):
+        try:
+            score = int(score)
+        except ValueError:
+            score = 0
+    mod_score = score / S
+    order = log10(max(abs(mod_score), 1))
+    sign = 1 if mod_score > 0 else -1 if mod_score < 0 else 0
+    return sign * order + epoch_seconds(created_tm) / T
+
+
+def calculate_hot(score: int, created_tm: datetime):
+    return calculate_score(10000000, 10000, score, created_tm)
+
+
+def calculate_trending(score: int, created_tm: datetime):
+    return calculate_score(10000000, 480000, score, created_tm)
+
+
 def compat_compose_dictionary(dictionary, **kwargs):
     """
     This method allows us the one line dictionary composition that is offered by the ** dictionary unpacking
@@ -383,62 +423,3 @@ def compat_compose_dictionary(dictionary, **kwargs):
     composed_dict.update(kwargs)
 
     return composed_dict
-
-
-def compat_bytes(item, encoding=None):
-    """
-    This method is required because Python 2.7 `bytes` is simply an alias for `str`. Without this method,
-    code execution would look something like:
-
-    class clazz(object):
-
-        def __bytes__(self):
-            return bytes(5)
-
-
-    Python 2.7:
-
-    c = clazz()
-    bytes(c)
-    >>'<__main__.clazz object at 0x105171a90>'
-
-    In this example, when `bytes(c)` is invoked, the interpreter then calls `str(c)`, and prints the above string.
-    the method `__bytes__` is never invoked.
-
-    Python 3.6:
-    c = clazz()
-    bytes(c)
-    >>b'\x00\x00\x00\x00\x00'
-
-    This is the expected and necessary behavior across both platforms.
-
-    w/ compat_bytes method, we will ensure that the correct bytes method is always invoked, avoiding the `str` alias in
-    2.7.
-
-    :param item: this is the object who's bytes method needs to be invoked
-    :param encoding: optional encoding parameter to handle the Python 3.6 two argument 'bytes' method.
-    :return: a bytes object that functions the same across 3.6 and 2.7
-    """
-    if hasattr(item, '__bytes__'):
-        return item.__bytes__()
-    else:
-        if encoding:
-            return bytes(item, encoding)
-        else:
-            return bytes(item)
-
-
-def compat_chr(item):
-    """
-    This is necessary to maintain compatibility across Python 2.7 and 3.6.
-    In 3.6, 'chr' handles any unicode character, whereas in 2.7, `chr` only handles
-    ASCII characters. Thankfully, the Python 2.7 method `unichr` provides the same
-    functionality as 3.6 `chr`.
-
-    :param item: a length 1 string who's `chr` method needs to be invoked
-    :return: the unichr code point of the single character string, item
-    """
-    if sys.version >= '3.0':
-        return chr(item)
-    else:
-        return unichr(item)

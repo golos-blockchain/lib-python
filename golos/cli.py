@@ -2,31 +2,34 @@ import argparse
 import json
 import logging
 import os
-import pkg_resources
 import pprint
 import re
-import steem as stm
 import sys
 
+import pkg_resources
 from prettytable import PrettyTable
-from golosbase.storage import configStorage
-from golosbase.account import PrivateKey
 
-from .account import Account
-from .amount import Amount
-from .block import Block
-from .blockchain import Blockchain
-from .dex import Dex
-from .instance import shared_steemd_instance
-from .post import Post
-from .utils import construct_identifier, strfage
-from .witness import Witness
+from golos import Steem
+from golos.account import Account
+from golos.amount import Amount
+from golos.block import Block
+from golos.blockchain import Blockchain
+from golos.dex import Dex
+from golos.instance import shared_steemd_instance
+from golos.post import Post
+from golos.utils import construct_identifier, strfage
+from golos.witness import Witness
+from golosbase.account import PrivateKey
+from golosbase.storage import configStorage
 
 availableConfigurationKeys = [
     "default_account",
     "default_vote_weight",
     "nodes",
 ]
+
+
+# TODO: replace STEEM -> GOLOS, SBD -> GBG, VESTS -> GESTS
 
 
 def legacyentry():
@@ -38,7 +41,9 @@ def legacyentry():
 
     parser = argparse.ArgumentParser(
         formatter_class=argparse.RawDescriptionHelpFormatter,
-        description="Command line tool to interact with the Steem network")
+        description="Command line tool to interact with the Steem network"
+    )
+
     """
         Default settings for all tools
     """
@@ -46,7 +51,7 @@ def legacyentry():
         '--node',
         type=str,
         default=configStorage["node"],
-        help='URL for public Steem API (default: "https://api.steemit.com")'
+        help='URL for public Golos API (default: "https://ws.golos.io")'
     )
 
     parser.add_argument(
@@ -221,7 +226,7 @@ def legacyentry():
     parser_transfer.add_argument(
         'asset',
         type=str,
-        choices=["STEEM", "SBD"],
+        choices=["GOLOS", "GBG"],
         help='Asset to transfer (i.e. STEEM or SDB)')
     parser_transfer.add_argument(
         'memo', type=str, nargs="?", default="", help='Optional memo')
@@ -300,7 +305,7 @@ def legacyentry():
         help='Convert STEEMDollars to Steem (takes a week to settle)')
     parser_convert.set_defaults(command="convert")
     parser_convert.add_argument(
-        'amount', type=float, help='Amount of SBD to convert')
+        'amount', type=float, help='Amount of GBG to convert')
     parser_convert.add_argument(
         '--account',
         type=str,
@@ -524,14 +529,14 @@ def legacyentry():
         Command "buy"
     """
     parser_buy = subparsers.add_parser(
-        'buy', help='Buy STEEM or SBD from the internal market')
+        'buy', help='Buy GOLOS or GBG from the internal market')
     parser_buy.set_defaults(command="buy")
     parser_buy.add_argument('amount', type=float, help='Amount to buy')
     parser_buy.add_argument(
         'asset',
         type=str,
-        choices=["STEEM", "SBD"],
-        help='Asset to buy (i.e. STEEM or SDB)')
+        choices=["GOLOS", "GBG"],
+        help='Asset to buy (i.e. GOLOS or GBG)')
     parser_buy.add_argument(
         'price', type=float, help='Limit buy price denoted in (SBD per STEEM)')
     parser_buy.add_argument(
@@ -773,7 +778,7 @@ def legacyentry():
     if args.no_wallet:
         options.update({"wif": []})
 
-    steem = stm.Steem(no_broadcast=args.no_broadcast, **options)
+    steem = Steem(no_broadcast=args.no_broadcast, **options)
 
     if args.command == "set":
         # TODO: Evaluate this line with cli refactor.
@@ -1012,32 +1017,32 @@ def legacyentry():
             for account in args.account:
                 a = Account(account)
 
-                print("\n%s" % a.name)
-                t = PrettyTable(["Account", "STEEM", "SBD", "VESTS"])
+                print("\n@%s" % a.name)
+                t = PrettyTable(["Account", "GOLOS", "GBG", "GESTS"])
                 t.align = "r"
                 t.add_row([
                     'Available',
-                    a.balances['available']['STEEM'],
-                    a.balances['available']['SBD'],
-                    a.balances['available']['VESTS'],
+                    a.balances['available']['GOLOS'],
+                    a.balances['available']['GBG'],
+                    a.balances['available']['GESTS'],
                 ])
                 t.add_row([
                     'Rewards',
-                    a.balances['rewards']['STEEM'],
-                    a.balances['rewards']['SBD'],
-                    a.balances['rewards']['VESTS'],
+                    a.balances['rewards']['GOLOS'],
+                    a.balances['rewards']['GBG'],
+                    a.balances['rewards']['GESTS'],
                 ])
                 t.add_row([
                     'Savings',
-                    a.balances['savings']['STEEM'],
-                    a.balances['savings']['SBD'],
+                    a.balances['savings']['GOLOS'],
+                    a.balances['savings']['GBG'],
                     'N/A',
                 ])
                 t.add_row([
                     'TOTAL',
-                    a.balances['total']['STEEM'],
-                    a.balances['total']['SBD'],
-                    a.balances['total']['VESTS'],
+                    a.balances['total']['GOLOS'],
+                    a.balances['total']['GBG'],
+                    a.balances['total']['GESTS'],
                 ])
                 print(t)
         else:
@@ -1200,7 +1205,7 @@ def legacyentry():
         steem.commit.broadcast(tx)
 
     elif args.command == "buy":
-        if args.asset == "SBD":
+        if args.asset == "GBG":
             price = 1.0 / args.price
         else:
             price = args.price
@@ -1209,7 +1214,7 @@ def legacyentry():
             dex.buy(args.amount, args.asset, price, account=args.account))
 
     elif args.command == "sell":
-        if args.asset == "SBD":
+        if args.asset == "GBG":
             price = 1.0 / args.price
         else:
             price = args.price

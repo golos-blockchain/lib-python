@@ -1,7 +1,8 @@
+import base64
+import hashlib
+
 from Crypto import Random
 from Crypto.Cipher import AES
-import hashlib
-import base64
 
 
 class AESCipher(object):
@@ -42,5 +43,4 @@ class AESCipher(object):
         enc = base64.b64decode(enc)
         iv = enc[:AES.block_size]
         cipher = AES.new(self.key, AES.MODE_CBC, iv)
-        return self._unpad(cipher.decrypt(
-            enc[AES.block_size:])).decode('utf-8')
+        return self._unpad(cipher.decrypt(enc[AES.block_size:])).decode('utf-8')

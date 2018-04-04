@@ -1,15 +1,14 @@
 import math
 
-from .amount import Amount
-from .instance import shared_steemd_instance
+from golos.amount import Amount
+from golos.instance import shared_steemd_instance
 
 
 class Converter(object):
     """ Converter simplifies the handling of different metrics of
         the blockchain
 
-        :param Steemd steemd_instance: Steemd() instance to
-        use when accessing a RPC
+        :param Steemd steemd_instance: Steemd() instance to use when accessing a RPC
 
     """
 
@@ -22,16 +21,19 @@ class Converter(object):
         """ Obtain the sbd price as derived from the median over all
             witness feeds. Return value will be SBD
         """
-        return (Amount(self.steemd.get_feed_history()['current_median_history']
-                       ['base']).amount / Amount(self.steemd.get_feed_history(
-        )['current_median_history']['quote']).amount)
+        return (
+            Amount(self.steemd.get_feed_history()['current_median_history']['base']).amount /
+            Amount(self.steemd.get_feed_history()['current_median_history']['quote']).amount
+        )
 
     def steem_per_mvests(self):
         """ Obtain STEEM/MVESTS ratio
         """
         info = self.steemd.get_dynamic_global_properties()
-        return (Amount(info["total_vesting_fund_steem"]).amount /
-                (Amount(info["total_vesting_shares"]).amount / 1e6))
+        return (
+            Amount(info["total_vesting_fund_steem"]).amount /
+            (Amount(info["total_vesting_shares"]).amount / 1e6)
+        )
 
     def vests_to_sp(self, vests):
         """ Obtain SP from VESTS (not MVESTS!)
@@ -50,7 +52,7 @@ class Converter(object):
     def sp_to_rshares(self, sp, voting_power=10000, vote_pct=10000):
         """ Obtain the r-shares
 
-            :param number sp: Steem Power
+            :param number sp: Golos Power
             :param int voting_power: voting power (100% = 10000)
             :param int vote_pct: voting participation (100% = 10000)
         """
@@ -97,11 +99,9 @@ class Converter(object):
         total_reward_fund_steem = Amount(props['total_reward_fund_steem'])
         total_reward_shares2 = int(props['total_reward_shares2'])
 
-        post_rshares2 = (
-                                steem_payout / total_reward_fund_steem) * total_reward_shares2
+        post_rshares2 = (steem_payout / total_reward_fund_steem) * total_reward_shares2
 
-        rshares = math.sqrt(
-            self.CONTENT_CONSTANT ** 2 + post_rshares2) - self.CONTENT_CONSTANT
+        rshares = math.sqrt(self.CONTENT_CONSTANT ** 2 + post_rshares2) - self.CONTENT_CONSTANT
         return rshares
 
     def rshares_2_weight(self, rshares):

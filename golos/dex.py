@@ -1,21 +1,19 @@
 import random
 
+from golos.amount import Amount
+from golos.instance import shared_steemd_instance
 from golosbase import transactions, operations
 from golosbase.storage import configStorage as config
-
-from .amount import Amount
-from .instance import shared_steemd_instance
 
 
 class Dex(object):
     """ This class allows to access calls specific for the internal
         exchange of STEEM.
 
-        :param Steemd steemd_instance: Steemd() instance to use when
-        accessing a RPC
+        :param Steemd steemd_instance: Steemd() instance to use when accessing a RPC
 
     """
-    assets = ["STEEM", "SBD"]
+    assets = ["GOLOS", "GBG"]
 
     def __init__(self, steemd_instance=None):
         self.steemd = steemd_instance or shared_steemd_instance()
@@ -24,21 +22,25 @@ class Dex(object):
         """ Return the properties of the assets tradeable on the
             network.
 
-            :param str symbol: Symbol to get the data for (i.e. STEEM, SBD,
-            VESTS)
-
+            :param str symbol: Symbol to get the data for (i.e. STEEM, SBD, VESTS)
         """
-        if symbol == "STEEM":
-            return {"symbol": "STEEM", "precision": 3}
-        elif symbol == "SBD":
-            return {"symbol": "SBD", "precision": 3}
-        elif symbol == "VESTS":
-            return {"symbol": "VESTS", "precision": 6}
+        if symbol == "GOLOS":
+            return {"symbol": "GOLOS",
+                    "precision": 3
+                    }
+        elif symbol == "GBG":
+            return {"symbol": "GBG",
+                    "precision": 3
+                    }
+        elif symbol == "GESTS":
+            return {"symbol": "GESTS",
+                    "precision": 6
+                    }
         else:
             return None
 
     def _get_assets(self, quote):
-        """ Given the `quote` asset, return base. If quote is SBD, then
+        """ Given the `quote` asset, return base. If quote is GBG, then
             base is STEEM and vice versa.
         """
         assets = self.assets.copy()
@@ -109,14 +111,9 @@ class Dex(object):
     ):
         """ Return the market history (filled orders).
 
-            :param int bucket_seconds: Bucket size in seconds (see
-            `returnMarketHistoryBuckets()`)
-
-            :param int start_age: Age (in seconds) of the start of the
-            window (default: 1h/3600)
-
-            :param int end_age: Age (in seconds) of the end of the window
-            (default: now/0)
+            :param int bucket_seconds: Bucket size in seconds (see `returnMarketHistoryBuckets()`)
+            :param int start_age: Age (in seconds) of the start of the window (default: 1h/3600)
+            :param int end_age: Age (in seconds) of the end of the window (default: now/0)
 
             Example:
 
@@ -155,22 +152,12 @@ class Dex(object):
             method will return the order creating (signed) transaction.
 
             :param number amount: Amount of ``quote`` to buy
-
-            :param str quote_symbol: STEEM, or SBD
-
+            :param str quote_symbol: GOLOS, or GBG
             :param float price: price denoted in ``base``/``quote``
-
-            :param number expiration: (optional) expiration time of the
-            order in seconds (defaults to 7 days)
-
-            :param bool killfill: flag that indicates if the order shall be
-            killed if it is not filled (defaults to False)
-
-            :param str account: (optional) the source account for the
-            transfer if not ``default_account``
-
-            :param int order_id: (optional) a 32bit orderid for tracking of
-            the created order (random by default)
+            :param number expiration: (optional) expiration time of the order in seconds (defaults to 7 days)
+            :param bool killfill: flag that indicates if the order shall be killed if it is not filled (defaults to False)
+            :param str account: (optional) the source account for the transfer if not ``default_account``
+            :param int order_id: (optional) a 32bit orderid for tracking of the created order (random by default)
 
             Prices/Rates are denoted in 'base', i.e. the STEEM:SBD market
             is priced in SBD per STEEM.
@@ -185,10 +172,8 @@ class Dex(object):
         quote, base = self._get_assets(quote=quote_symbol)
         op = operations.LimitOrderCreate(
             **{
-                "owner":
-                    account,
-                "orderid":
-                    order_id or random.getrandbits(32),
+                "owner": account,
+                "orderid": order_id or random.getrandbits(32),
                 "amount_to_sell":
                     '{:.{prec}f} {asset}'.format(
                         amount * rate,
@@ -197,10 +182,8 @@ class Dex(object):
                 "min_to_receive":
                     '{:.{prec}f} {asset}'.format(
                         amount, prec=quote["precision"], asset=quote["symbol"]),
-                "fill_or_kill":
-                    killfill,
-                "expiration":
-                    transactions.fmt_time_from_now(expiration)
+                "fill_or_kill": killfill,
+                "expiration": transactions.fmt_time_from_now(expiration)
             })
         return self.steemd.commit.finalizeOp(op, account, "active")
 
@@ -217,22 +200,12 @@ class Dex(object):
             method will return the order creating (signed) transaction.
 
             :param number amount: Amount of ``quote`` to sell
-
             :param str quote_symbol: STEEM, or SBD
-
             :param float price: price denoted in ``base``/``quote``
-
-            :param number expiration: (optional) expiration time of the
-            order in seconds (defaults to 7 days)
-
-            :param bool killfill: flag that indicates if the order shall be
-            killed if it is not filled (defaults to False)
-
-            :param str account: (optional) the source account for the
-            transfer if not ``default_account``
-
-            :param int orderid: (optional) a 32bit orderid for tracking of
-            the created order (random by default)
+            :param number expiration: (optional) expiration time of the order in seconds (defaults to 7 days)
+            :param bool killfill: flag that indicates if the order shall be killed if it is not filled (defaults to False)
+            :param str account: (optional) the source account for the transfer if not ``default_account``
+            :param int orderid: (optional) a 32bit orderid for tracking of the created order (random by default)
 
             Prices/Rates are denoted in 'base', i.e. the STEEM:SBD market
             is priced in SBD per STEEM.
@@ -246,10 +219,8 @@ class Dex(object):
         quote, base = self._get_assets(quote=quote_symbol)
         op = operations.LimitOrderCreate(
             **{
-                "owner":
-                    account,
-                "orderid":
-                    orderid or random.getrandbits(32),
+                "owner": account,
+                "orderid": orderid or random.getrandbits(32),
                 "amount_to_sell":
                     '{:.{prec}f} {asset}'.format(
                         amount, prec=quote["precision"], asset=quote["symbol"]),
@@ -258,10 +229,8 @@ class Dex(object):
                         amount * rate,
                         prec=base["precision"],
                         asset=base["symbol"]),
-                "fill_or_kill":
-                    killfill,
-                "expiration":
-                    transactions.fmt_time_from_now(expiration)
+                "fill_or_kill": killfill,
+                "expiration": transactions.fmt_time_from_now(expiration)
             })
         return self.steemd.commit.finalizeOp(op, account, "active")
 
@@ -269,10 +238,7 @@ class Dex(object):
         """ Cancels an order you have placed in a given market.
 
             :param int orderid: the 32bit orderid
-
-            :param str account: (optional) the source account for the
-            transfer if not ``default_account``
-
+            :param str account: (optional) the source account for the transfer if not ``default_account``
         """
         if not account:
             if "default_account" in config:

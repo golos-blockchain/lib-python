@@ -25,6 +25,10 @@ class NumRetriesReached(Exception):
     pass
 
 
+class InvalidNodeSchemes(Exception):
+    pass
+
+
 class NoAccessApi(RPCError):
     pass
 

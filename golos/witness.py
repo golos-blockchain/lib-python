@@ -1,4 +1,4 @@
-from .instance import shared_steemd_instance
+from golos.instance import shared_steemd_instance
 
 from golosbase.exceptions import WitnessDoesNotExistsException
 
@@ -7,8 +7,7 @@ class Witness(dict):
     """ Read data about a witness in the chain
 
         :param str witness: Name of the witness
-        :param Steemd steemd_instance: Steemd() instance to use when
-        accessing a RPC
+        :param Steemd steemd_instance: Steemd() instance to use when accessing a RPC
 
     """
 
