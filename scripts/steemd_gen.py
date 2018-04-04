@@ -3,8 +3,11 @@ from functools import partial
 from pprint import pprint
 
 from funcy.colls import where, pluck
-from funcy.seqs import first, distinct, flatten
+from funcy.seqs import first, distinct
+
 from golos import Steem
+from golos.steemd import ACCOUNT_BY_KEY_API, MARKET_HISTORY_API, FOLLOW_API, \
+    SOCIAL_NETWORK_API
 
 # todo
 # "get_expiring_vesting_delegations": [('author', 'str'), ('from_time', 'object'), ('limit', 'int')],  # ?
@@ -43,17 +46,17 @@ api_methods = [
                                                                   'int')],
     },
     {
-        'api': 'database_api',
+        'api': SOCIAL_NETWORK_API,
         'method': 'get_trending_tags',
         'params': [('after_tag', 'str'), ('limit', 'int')],
     },
     {
-        'api': 'database_api',
+        'api': SOCIAL_NETWORK_API,
         'method': 'get_tags_used_by_author',
         'params': [('account', 'str')],
     },
     {
-        'api': 'database_api',
+        'api': SOCIAL_NETWORK_API,
         'method': 'get_discussions_by_trending',
         'params': [('discussion_query', 'dict')],
     },
@@ -68,27 +71,27 @@ api_methods = [
         'params': [('discussion_query', 'dict')],
     },
     {
-        'api': 'database_api',
+        'api': SOCIAL_NETWORK_API,
         'method': 'get_discussions_by_created',
         'params': [('discussion_query', 'dict')],
     },
     {
-        'api': 'database_api',
+        'api': SOCIAL_NETWORK_API,
         'method': 'get_discussions_by_active',
         'params': [('discussion_query', 'dict')],
     },
     {
-        'api': 'database_api',
+        'api': SOCIAL_NETWORK_API,
         'method': 'get_discussions_by_cashout',
         'params': [('discussion_query', 'dict')],
     },
     {
-        'api': 'database_api',
+        'api': SOCIAL_NETWORK_API,
         'method': 'get_discussions_by_payout',
         'params': [('discussion_query', 'dict')],
     },
     {
-        'api': 'database_api',
+        'api': SOCIAL_NETWORK_API,
         'method': 'get_discussions_by_votes',
         'params': [('discussion_query', 'dict')],
     },
@@ -98,27 +101,27 @@ api_methods = [
         'params': [('discussion_query', 'dict')],
     },
     {
-        'api': 'database_api',
+        'api': SOCIAL_NETWORK_API,
         'method': 'get_discussions_by_hot',
         'params': [('discussion_query', 'dict')],
     },
     {
-        'api': 'database_api',
+        'api': SOCIAL_NETWORK_API,
         'method': 'get_discussions_by_feed',
         'params': [('discussion_query', 'dict')],
     },
     {
-        'api': 'database_api',
+        'api': SOCIAL_NETWORK_API,
         'method': 'get_discussions_by_blog',
         'params': [('discussion_query', 'dict')],
     },
     {
-        'api': 'database_api',
+        'api': SOCIAL_NETWORK_API,
         'method': 'get_discussions_by_comments',
         'params': [('discussion_query', 'dict')],
     },
     {
-        'api': 'database_api',
+        'api': SOCIAL_NETWORK_API,
         'method': 'get_discussions_by_promoted',
         'params': [('discussion_query', 'dict')],
     },
@@ -300,40 +303,35 @@ api_methods = [
         'params': [('account', 'str'), ('keys', 'list')],
     },
     {
-        'api': 'database_api',
+        'api': SOCIAL_NETWORK_API,
         'method': 'get_active_votes',
         'params': [('author', 'str'), ('permlink', 'str')],
     },
     {
-        'api': 'database_api',
+        'api': SOCIAL_NETWORK_API,
         'method': 'get_account_votes',
         'params': [('account', 'str')],
     },
     {
-        'api': 'database_api',
+        'api': SOCIAL_NETWORK_API,
         'method': 'get_content',
         'params': [('author', 'str'), ('permlink', 'str')],
     },
     {
-        'api': 'database_api',
+        'api': SOCIAL_NETWORK_API,
         'method': 'get_content_replies',
         'params': [('author', 'str'), ('permlink', 'str')],
     },
     {
-        'api':
-        'database_api',
-        'method':
-        'get_discussions_by_author_before_date',
+        'api': SOCIAL_NETWORK_API,
+        'method': 'get_discussions_by_author_before_date',
         'params': [('author', 'str'), ('start_permlink', 'str'),
                    ('before_date', 'object'), ('limit', 'int')],
     },
     {
-        'api':
-        'database_api',
-        'method':
-        'get_replies_by_last_update',
-        'params': [('account', 'str'), ('start_permlink', 'str'), ('limit',
-                                                                   'int')],
+        'api': SOCIAL_NETWORK_API,
+        'method': 'get_replies_by_last_update',
+        'params': [('account', 'str'), ('start_permlink', 'str'), ('limit', 'int')],
     },
     {
         'api': 'database_api',
@@ -393,7 +391,7 @@ api_methods = [
     },
     {
         'api':
-        'follow_api',
+        FOLLOW_API,
         'method':
         'get_followers',
         'params': [('account', 'str'), ('start_follower', 'str'),
@@ -401,49 +399,49 @@ api_methods = [
     },
     {
         'api':
-        'follow_api',
+        FOLLOW_API,
         'method':
         'get_following',
         'params': [('account', 'str'), ('start_follower', 'str'),
                    ('follow_type', 'str'), ('limit', 'int')],
     },
     {
-        'api': 'follow_api',
+        'api': FOLLOW_API,
         'method': 'get_follow_count',
         'params': [('account', 'str')],
     },
     {
-        'api': 'follow_api',
+        'api': FOLLOW_API,
         'method': 'get_feed_entries',
         'params': [('account', 'str'), ('entry_id', 'int'), ('limit', 'int')],
     },
     {
-        'api': 'follow_api',
+        'api': FOLLOW_API,
         'method': 'get_feed',
         'params': [('account', 'str'), ('entry_id', 'int'), ('limit', 'int')],
     },
     {
-        'api': 'follow_api',
+        'api': FOLLOW_API,
         'method': 'get_blog_entries',
         'params': [('account', 'str'), ('entry_id', 'int'), ('limit', 'int')],
     },
     {
-        'api': 'follow_api',
+        'api': FOLLOW_API,
         'method': 'get_blog',
         'params': [('account', 'str'), ('entry_id', 'int'), ('limit', 'int')],
     },
     {
-        'api': 'follow_api',
+        'api': FOLLOW_API,
         'method': 'get_account_reputations',
         'params': [('account', 'str'), ('limit', 'int')],
     },
     {
-        'api': 'follow_api',
+        'api': FOLLOW_API,
         'method': 'get_reblogged_by',
         'params': [('author', 'str'), ('permlink', 'str')],
     },
     {
-        'api': 'follow_api',
+        'api': FOLLOW_API,
         'method': 'get_blog_authors',
         'params': [('blog_account', 'str')],
     },
@@ -473,49 +471,49 @@ api_methods = [
         'params': [('max_block_age', 'int')],
     },
     {
-        'api': 'market_history_api',
+        'api': MARKET_HISTORY_API,
         'method': 'get_ticker',
         'params': [],
     },
     {
-        'api': 'market_history_api',
+        'api': MARKET_HISTORY_API,
         'method': 'get_volume',
         'params': [],
     },
     {
-        'api': 'market_history_api',
+        'api': MARKET_HISTORY_API,
         'method': 'get_order_book',
         'params': [('limit', 'int')],
     },
     {
         'api':
-        'market_history_api',
+        MARKET_HISTORY_API,
         'method':
         'get_trade_history',
         'params': [('start', 'PointInTime'), ('end', 'PointInTime'), ('limit',
                                                                       'int')],
     },
     {
-        'api': 'market_history_api',
+        'api': MARKET_HISTORY_API,
         'method': 'get_recent_trades',
         'params': [('limit', 'int')],
         'returns': 'List[Any]',
     },
     {
         'api':
-        'market_history_api',
+        MARKET_HISTORY_API,
         'method':
         'get_market_history',
         'params': [('bucket_seconds', 'int'), ('start', 'PointInTime'),
                    ('end', 'PointInTime')],
     },
     {
-        'api': 'market_history_api',
+        'api': MARKET_HISTORY_API,
         'method': 'get_market_history_buckets',
         'params': [],
     },
     {
-        'api': 'account_by_key_api',
+        'api': ACCOUNT_BY_KEY_API,
         'method': 'get_key_references',
         'params': [('public_keys', 'List[str]')],
     },

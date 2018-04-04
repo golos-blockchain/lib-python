@@ -48,7 +48,7 @@ class HttpClient(object):
        rpc.call(
            'get_followers',
            'furion', 'abit', 'blog', 10,
-           api='follow_api'
+           api='follow'
        )
 
     """
@@ -127,7 +127,7 @@ class HttpClient(object):
 
             args: A list of arguments belonging to the calling method.
 
-            api (None, str): If api is provided (ie: `follow_api`),
+            api (None, str): If api is provided (ie: `follow`),
              we generate a body that uses `call` method appropriately.
 
             as_json (bool): Should this function return json as dictionary

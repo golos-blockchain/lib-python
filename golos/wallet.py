@@ -1,11 +1,12 @@
 import logging
 import os
 
+from golos.account import Account
 from golos.instance import shared_steemd_instance
+from golos.steemd import ACCOUNT_BY_KEY_API
 from golosbase import bip38
 from golosbase.account import PrivateKey
 from golosbase.exceptions import (InvalidWifError, WalletExists)
-from golos.account import Account
 
 log = logging.getLogger(__name__)
 
@@ -323,7 +324,7 @@ class Wallet:
         # FIXME, this only returns the first associated key.
         # If the key is used by multiple accounts, this
         # will surely lead to undesired behavior
-        names = self.steemd.call('get_key_references', [pub], api="account_by_key_api")[0]
+        names = self.steemd.call('get_key_references', [pub], api=ACCOUNT_BY_KEY_API)[0]
         if not names:
             return None
         else:

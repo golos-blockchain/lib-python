@@ -279,15 +279,15 @@ class Steemd(HttpClient):
 
     def get_trending_tags(self, after_tag, limit):
         """ get_trending_tags """
-        return self.call('get_trending_tags', after_tag, limit, api='database_api')
+        return self.call('get_trending_tags', after_tag, limit, api=SOCIAL_NETWORK_API)
 
     def get_tags_used_by_author(self, account):
         """ get_tags_used_by_author """
-        return self.call('get_tags_used_by_author', account, api='database_api')
+        return self.call('get_tags_used_by_author', account, api=SOCIAL_NETWORK_API)
 
     def get_discussions_by_trending(self, discussion_query):
         """ get_discussions_by_trending """
-        return self.call('get_discussions_by_trending', discussion_query, api='database_api')
+        return self.call('get_discussions_by_trending', discussion_query, api=SOCIAL_NETWORK_API)
 
     def get_comment_discussions_by_payout(self, discussion_query):
         """ get_comment_discussions_by_payout """
@@ -299,23 +299,23 @@ class Steemd(HttpClient):
 
     def get_discussions_by_created(self, discussion_query):
         """ get_discussions_by_created """
-        return self.call('get_discussions_by_created', discussion_query, api='database_api')
+        return self.call('get_discussions_by_created', discussion_query, api=SOCIAL_NETWORK_API)
 
     def get_discussions_by_active(self, discussion_query):
         """ get_discussions_by_active """
-        return self.call('get_discussions_by_active', discussion_query, api='database_api')
+        return self.call('get_discussions_by_active', discussion_query, api=SOCIAL_NETWORK_API)
 
     def get_discussions_by_cashout(self, discussion_query):
         """ get_discussions_by_cashout """
-        return self.call('get_discussions_by_cashout', discussion_query, api='database_api')
+        return self.call('get_discussions_by_cashout', discussion_query, api=SOCIAL_NETWORK_API)
 
     def get_discussions_by_payout(self, discussion_query):
         """ get_discussions_by_payout """
-        return self.call('get_discussions_by_payout', discussion_query, api='database_api')
+        return self.call('get_discussions_by_payout', discussion_query, api=SOCIAL_NETWORK_API)
 
     def get_discussions_by_votes(self, discussion_query):
         """ get_discussions_by_votes """
-        return self.call('get_discussions_by_votes', discussion_query, api='database_api')
+        return self.call('get_discussions_by_votes', discussion_query, api=SOCIAL_NETWORK_API)
 
     def get_discussions_by_children(self, discussion_query):
         """ get_discussions_by_children """
@@ -323,23 +323,23 @@ class Steemd(HttpClient):
 
     def get_discussions_by_hot(self, discussion_query):
         """ get_discussions_by_hot """
-        return self.call('get_discussions_by_hot', discussion_query, api='database_api')
+        return self.call('get_discussions_by_hot', discussion_query, api=SOCIAL_NETWORK_API)
 
     def get_discussions_by_feed(self, discussion_query):
         """ get_discussions_by_feed """
-        return self.call('get_discussions_by_feed', discussion_query, api='database_api')
+        return self.call('get_discussions_by_feed', discussion_query, api=SOCIAL_NETWORK_API)
 
     def get_discussions_by_blog(self, discussion_query):
         """ get_discussions_by_blog """
-        return self.call('get_discussions_by_blog', discussion_query, api='database_api')
+        return self.call('get_discussions_by_blog', discussion_query, api=SOCIAL_NETWORK_API)
 
     def get_discussions_by_comments(self, discussion_query):
         """ get_discussions_by_comments """
-        return self.call('get_discussions_by_comments', discussion_query, api='database_api')
+        return self.call('get_discussions_by_comments', discussion_query, api=SOCIAL_NETWORK_API)
 
     def get_discussions_by_promoted(self, discussion_query):
         """ get_discussions_by_promoted """
-        return self.call('get_discussions_by_promoted', discussion_query, api='database_api')
+        return self.call('get_discussions_by_promoted', discussion_query, api=SOCIAL_NETWORK_API)
 
     def get_block_header(self, block_num):
         """ Get block headers, given a block number.
@@ -739,7 +739,7 @@ class Steemd(HttpClient):
                  'voter': 'flourish',
                  'weight': '2334690471157'}]
         """
-        return self.call('get_active_votes', author, permlink, api='database_api')
+        return self.call('get_active_votes', author, permlink, api=SOCIAL_NETWORK_API)
 
     def get_account_votes(self, account):
         """ All votes the given account ever made.
@@ -762,15 +762,15 @@ class Steemd(HttpClient):
 
 
         """
-        return self.call('get_account_votes', account, api='database_api')
+        return self.call('get_account_votes', account, api=SOCIAL_NETWORK_API)
 
     def get_content(self, author: str, permlink: str):
         """ get_content """
-        return self.call('get_content', author, permlink, api='database_api')
+        return self.call('get_content', author, permlink, api=SOCIAL_NETWORK_API)
 
     def get_content_replies(self, author, permlink):
         """ get_content_replies """
-        return self.call('get_content_replies', author, permlink, api='database_api')
+        return self.call('get_content_replies', author, permlink, api=SOCIAL_NETWORK_API)
 
     def get_discussions_by_author_before_date(self,
                                               author: str,
@@ -784,11 +784,11 @@ class Steemd(HttpClient):
             start_permlink,
             before_date,
             limit,
-            api='database_api')
+            api=SOCIAL_NETWORK_API)
 
     def get_replies_by_last_update(self, account: str, start_permlink: str, limit: int):
         """ get_replies_by_last_update """
-        return self.call('get_replies_by_last_update', account, start_permlink, limit, api='database_api')
+        return self.call('get_replies_by_last_update', account, start_permlink, limit, api=SOCIAL_NETWORK_API)
 
     def get_witnesses(self, witness_ids: list):
         """ get_witnesses """
@@ -832,43 +832,43 @@ class Steemd(HttpClient):
 
     def get_followers(self, account: str, start_follower: str, follow_type: str, limit: int):
         """ get_followers """
-        return self.call('get_followers', account, start_follower, follow_type, limit, api='follow_api')
+        return self.call('get_followers', account, start_follower, follow_type, limit, api=FOLLOW_API)
 
     def get_following(self, account: str, start_follower: str, follow_type: str, limit: int):
         """ get_following """
-        return self.call('get_following', account, start_follower, follow_type, limit, api='follow_api')
+        return self.call('get_following', account, start_follower, follow_type, limit, api=FOLLOW_API)
 
     def get_follow_count(self, account: str):
         """ get_follow_count """
-        return self.call('get_follow_count', account, api='follow_api')
+        return self.call('get_follow_count', account, api=FOLLOW_API)
 
     def get_feed_entries(self, account: str, entry_id: int, limit: int):
         """ get_feed_entries """
-        return self.call('get_feed_entries', account, entry_id, limit, api='follow_api')
+        return self.call('get_feed_entries', account, entry_id, limit, api=FOLLOW_API)
 
     def get_feed(self, account: str, entry_id: int, limit: int):
         """ get_feed """
-        return self.call('get_feed', account, entry_id, limit, api='follow_api')
+        return self.call('get_feed', account, entry_id, limit, api=FOLLOW_API)
 
     def get_blog_entries(self, account: str, entry_id: int, limit: int):
         """ get_blog_entries """
-        return self.call('get_blog_entries', account, entry_id, limit, api='follow_api')
+        return self.call('get_blog_entries', account, entry_id, limit, api=FOLLOW_API)
 
     def get_blog(self, account: str, entry_id: int, limit: int):
         """ get_blog """
-        return self.call('get_blog', account, entry_id, limit, api='follow_api')
+        return self.call('get_blog', account, entry_id, limit, api=FOLLOW_API)
 
     def get_account_reputations(self, account: str, limit: int):
         """ get_account_reputations """
-        return self.call('get_account_reputations', account, limit, api='follow_api')
+        return self.call('get_account_reputations', account, limit, api=FOLLOW_API)
 
     def get_reblogged_by(self, author: str, permlink: str):
         """ get_reblogged_by """
-        return self.call('get_reblogged_by', author, permlink, api='follow_api')
+        return self.call('get_reblogged_by', author, permlink, api=FOLLOW_API)
 
     def get_blog_authors(self, blog_account: str):
         """ get_blog_authors """
-        return self.call('get_blog_authors', blog_account, api='follow_api')
+        return self.call('get_blog_authors', blog_account, api=FOLLOW_API)
 
     def broadcast_transaction(self, signed_transaction: SignedTransaction):
         """ broadcast_transaction """
@@ -888,33 +888,33 @@ class Steemd(HttpClient):
 
     def get_ticker(self):
         """ Returns the market ticker for the internal SBD:STEEM market. """
-        return self.call('get_ticker', api='market_history_api')
+        return self.call('get_ticker', api=MARKET_HISTORY_API)
 
     def get_volume(self):
         """ Returns the market volume for the past 24 hours. """
-        return self.call('get_volume', api='market_history_api')
+        return self.call('get_volume', api=MARKET_HISTORY_API)
 
     def get_trade_history(self, start: PointInTime, end: PointInTime, limit: int):
         """ Returns the trade history for the internal SBD:STEEM market. """
-        return self.call('get_trade_history', start, end, limit, api='market_history_api')
+        return self.call('get_trade_history', start, end, limit, api=MARKET_HISTORY_API)
 
     def get_recent_trades(self, limit: int) -> List[Any]:
         """ Returns the N most recent trades for the internal GBG:GOLOS market. """
-        return self.call('get_recent_trades', limit, api='market_history_api')
+        return self.call('get_recent_trades', limit, api=MARKET_HISTORY_API)
 
     def get_market_history(self, bucket_seconds: int, start: PointInTime, end: PointInTime):
         """ Returns the market history for the internal SBD:STEEM market. """
-        return self.call('get_market_history', bucket_seconds, start, end, api='market_history_api')
+        return self.call('get_market_history', bucket_seconds, start, end, api=MARKET_HISTORY_API)
 
     def get_market_history_buckets(self):
         """ Returns the bucket seconds being tracked by the plugin. """
-        return self.call('get_market_history_buckets', api='market_history_api')
+        return self.call('get_market_history_buckets', api=MARKET_HISTORY_API)
 
     def get_key_references(self, public_keys: List[str]):
         """ get_key_references """
         if type(public_keys) == str:
             public_keys = [public_keys]
-        return self.call('get_key_references', public_keys, api='account_by_key_api')
+        return self.call('get_key_references', public_keys, api=ACCOUNT_BY_KEY_API)
 
 
 if __name__ == '__main__':
