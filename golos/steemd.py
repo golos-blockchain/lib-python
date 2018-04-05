@@ -52,9 +52,7 @@ logger = logging.getLogger(__name__)
 # RAW_BLOCK_API = 'raw_block'
 #       get_raw_block
 # SOCIAL_NETWORK_API = 'social_network'
-#       get_all_content_replies
-#       get_trending_categories
-#       get_active_categories
+#
 #       get_recent_categories
 #       get_best_categories
 #       get_languages
@@ -742,6 +740,10 @@ class Steemd(Connector):
         """ get_content_replies """
         return self.call('get_content_replies', author, permlink, api=SOCIAL_NETWORK_API)
 
+    def get_all_content_replies(self, author: str, permlink: str):
+        """ get all content replies """
+        return self.call('get_all_content_replies', author, permlink, api=SOCIAL_NETWORK_API)
+
     def get_discussions_by_author_before_date(self,
                                               author: str,
                                               start_permlink: str,
@@ -755,6 +757,26 @@ class Steemd(Connector):
             before_date,
             limit,
             api=SOCIAL_NETWORK_API)
+
+    def get_trending_categories(self, after: str, limit: int):
+        """ get trending categories """
+        return self.call('get_trending_categories', after, limit, api=SOCIAL_NETWORK_API)
+
+    def get_active_categories(self, after: str, limit: int):
+        """ get active categories """
+        return self.call('get_active_categories', after, limit, api=SOCIAL_NETWORK_API)
+
+    def get_recent_categories(self, after: str, limit: int):
+        """ get recent categories """
+        return self.call('get_recent_categories', after, limit, api=SOCIAL_NETWORK_API)
+
+    def get_best_categories(self, after: str, limit: int):
+        """ get best categories """
+        return self.call('get_best_categories', after, limit, api=SOCIAL_NETWORK_API)
+
+    def get_languages(self):
+        """ get languages """
+        return self.call('get_languages', api=SOCIAL_NETWORK_API)
 
     def get_replies_by_last_update(self, account: str, start_permlink: str, limit: int):
         """ get_replies_by_last_update """
