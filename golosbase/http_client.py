@@ -10,6 +10,7 @@ import urllib3
 from urllib3.connection import HTTPConnection
 from urllib3.exceptions import MaxRetryError, ReadTimeoutError, ProtocolError
 
+from golos.steemd import NETWORK_BROADCAST_API
 from golosbase.base_client import BaseClient
 
 logger = logging.getLogger(__name__)
@@ -121,7 +122,7 @@ class HttpClient(BaseClient):
                 ProtocolError) as e:
             # if we broadcasted a transaction, always raise
             # this is to prevent potential for double spend scenario
-            if api == 'network_broadcast_api':
+            if api == NETWORK_BROADCAST_API:
                 raise e
 
             # try switching nodes before giving up

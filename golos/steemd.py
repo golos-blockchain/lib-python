@@ -22,6 +22,48 @@ PRIVATE_MESSAGE_API = 'private_message'
 ACCOUNT_BY_KEY_API = 'account_by_key'
 NETWORK_BROADCAST_API = 'network_broadcast_api'
 
+# Additional api methods from source code
+# AUTH_UTIL_API = 'auth_util'
+#       check_authority_signature
+# BLOCK_INFO_API = 'block_info_api'
+#       get_block_info
+#       get_blocks_with_info
+# DATABASE_API = 'database_api'
+#       set_block_applied_callback
+#       get_miner_queue
+#
+#   Doesn't exist
+#       get_reward_fund
+#       get_expiring_vesting_delegations
+#       get_comment_discussions_by_payout
+#       get_post_discussions_by_payout
+#       get_state
+#       get_account_references
+#       get_liquidity_queue
+#       get_vesting_delegations
+# DEBUG_NODE_API = 'debug_node'
+#       debug_generate_blocks
+#       debug_generate_blocks_until
+#       debug_push_blocks
+#       debug_pop_block
+#       debug_get_witness_schedule
+#       debug_set_hardfork
+#       debug_has_hardfork
+# NETWORK_BROADCAST_API = 'network_broadcast_api'
+#       broadcast_transaction_with_callback
+# PRIVATE_MESSAGE_API = 'private_message'
+#       get_inbox
+#       get_outbox
+# RAW_BLOCK_API = 'raw_block'
+#       get_raw_block
+# SOCIAL_NETWORK_API = 'social_network'
+#       get_all_content_replies
+#       get_trending_categories
+#       get_active_categories
+#       get_recent_categories
+#       get_best_categories
+#       get_languages
+
 API_LIST = (
     DATABASE_API,
     SOCIAL_NETWORK_API,
@@ -247,34 +289,11 @@ class Steemd(Connector):
         return self.get_blocks(list(range(start, end)))
 
     def get_reward_fund(self, fund_name: str = 'post'):
-        """ Get details for a reward fund.
-
-        Right now the only pool available is 'post'.
-
-        Example:
-
-            .. code-block:: python
-
-                s.get_reward_fund('post')
-
-            ::
-
-                {'content_constant': '2000000000000',
-                 'id': 0,
-                 'last_update': '2017-04-09T19:18:57',
-                 'name': 'post',
-                 'percent_content_rewards': 10000,
-                 'percent_curation_rewards': 2500,
-                 'recent_claims': '10971122501158586840771928156084',
-                 'reward_balance': '555660.895 STEEM'}
-
-        """
-        return self.call('get_reward_fund', fund_name, api='database_api')
+        raise DeprecationWarning('This method not supported!')
 
     def get_expiring_vesting_delegations(self, account,
                                          start, limit):
-        """ get_expiring_vesting_delegations """
-        return self.call('get_expiring_vesting_delegations', account, start, limit, api='database_api')
+        raise DeprecationWarning('This method not supported!')
 
     def get_trending_tags(self, after_tag, limit):
         """ get_trending_tags """
@@ -289,12 +308,10 @@ class Steemd(Connector):
         return self.call('get_discussions_by_trending', discussion_query, api=SOCIAL_NETWORK_API)
 
     def get_comment_discussions_by_payout(self, discussion_query):
-        """ get_comment_discussions_by_payout """
-        return self.call('get_comment_discussions_by_payout', discussion_query, api='database_api')
+        raise DeprecationWarning('This method not supported!')
 
     def get_post_discussions_by_payout(self, discussion_query):
-        """ get_post_discussions_by_payout """
-        return self.call('get_post_discussions_by_payout', discussion_query, api='database_api')
+        raise DeprecationWarning('This method not supported!')
 
     def get_discussions_by_created(self, discussion_query):
         """ get_discussions_by_created """
@@ -318,7 +335,7 @@ class Steemd(Connector):
 
     def get_discussions_by_children(self, discussion_query):
         """ get_discussions_by_children """
-        return self.call('get_discussions_by_children', discussion_query, api='database_api')
+        return self.call('get_discussions_by_children', discussion_query, api=SOCIAL_NETWORK_API)
 
     def get_discussions_by_hot(self, discussion_query):
         """ get_discussions_by_hot """
@@ -363,7 +380,7 @@ class Steemd(Connector):
                  'transaction_merkle_root': '4ddc419e531cccee6da660057d606d11aab9f3a5',
                  'witness': 'chainsquad.com'}
         """
-        return self.call('get_block_header', block_num, api='database_api')
+        return self.call('get_block_header', block_num, api=DATABASE_API)
 
     def get_block(self, block_num: int):
         """ Get the full block, transactions and all, given a block number.
@@ -404,23 +421,22 @@ class Steemd(Connector):
 
 
         """
-        return self.call('get_block', block_num, api='database_api')
+        return self.call('get_block', block_num, api=DATABASE_API)
 
     def get_ops_in_block(self, block_num, virtual_only):
         """ get_ops_in_block """
-        return self.call('get_ops_in_block', block_num, virtual_only, api='database_api')
+        return self.call('get_ops_in_block', block_num, virtual_only, api=DATABASE_API)
 
     def get_state(self, path):
-        """ get_state """
-        return self.call('get_state', path, api='database_api')
+        raise DeprecationWarning('This method not supported!')
 
     def get_config(self):
         """ Get internal chain configuration. """
-        return self.call('get_config', api='database_api')
+        return self.call('get_config', api=DATABASE_API)
 
     def get_dynamic_global_properties(self):
         """ get_dynamic_global_properties """
-        return self.call('get_dynamic_global_properties', api='database_api')
+        return self.call('get_dynamic_global_properties', api=DATABASE_API)
 
     def get_chain_properties(self):
         """ Get witness elected chain properties.
@@ -432,7 +448,7 @@ class Steemd(Connector):
              'sbd_interest_rate': 250}
 
         """
-        return self.call('get_chain_properties', api='database_api')
+        return self.call('get_chain_properties', api=DATABASE_API)
 
     def get_feed_history(self):
         """ Get the hourly averages of witness reported STEEM/SBD prices.
@@ -448,7 +464,7 @@ class Steemd(Connector):
               {'base': '0.093 SBD', 'quote': '1.010 STEEM'},
 
         """
-        return self.call('get_feed_history', api='database_api')
+        return self.call('get_feed_history', api=DATABASE_API)
 
     def get_current_median_history_price(self):
         """ Get the average STEEM/SBD price.
@@ -460,11 +476,11 @@ class Steemd(Connector):
             {'base': '0.093 SBD', 'quote': '1.010 STEEM'}
 
         """
-        return self.call('get_current_median_history_price', api='database_api')
+        return self.call('get_current_median_history_price', api=DATABASE_API)
 
     def get_witness_schedule(self):
         """ get_witness_schedule """
-        return self.call('get_witness_schedule', api='database_api')
+        return self.call('get_witness_schedule', api=DATABASE_API)
 
     def get_hardfork_version(self):
         """ Get the current version of the chain.
@@ -473,26 +489,25 @@ class Steemd(Connector):
             This is not the same as latest minor version.
 
         """
-        return self.call('get_hardfork_version', api='database_api')
+        return self.call('get_hardfork_version', api=DATABASE_API)
 
     def get_next_scheduled_hardfork(self):
         """ get_next_scheduled_hardfork """
-        return self.call('get_next_scheduled_hardfork', api='database_api')
+        return self.call('get_next_scheduled_hardfork', api=DATABASE_API)
 
     def get_accounts(self, account_names: list):
         """ Lookup account information such as user profile, public keys, balances, etc.
 
         This method is same as ``get_account``, but supports querying for multiple accounts at the time.
         """
-        return self.call('get_accounts', account_names, api='database_api')
+        return self.call('get_accounts', account_names, api=DATABASE_API)
 
     def get_account_references(self, account_id: int):
-        """ get_account_references """
-        return self.call('get_account_references', account_id, api='database_api')
+        raise DeprecationWarning('This method not supported!')
 
     def lookup_account_names(self, account_names: list):
         """ lookup_account_names """
-        return self.call('lookup_account_names', account_names, api='database_api')
+        return self.call('lookup_account_names', account_names, api=DATABASE_API)
 
     def lookup_accounts(self, after, limit):
         """Get a list of usernames from all registered accounts.
@@ -505,15 +520,15 @@ class Steemd(Connector):
             list: List of usernames in requested chunk.
 
         """
-        return self.call('lookup_accounts', after, limit, api='database_api')
+        return self.call('lookup_accounts', after, limit, api=DATABASE_API)
 
     def get_account_count(self):
         """ How many accounts are currently registered on STEEM? """
-        return self.call('get_account_count', api='database_api')
+        return self.call('get_account_count', api=DATABASE_API)
 
     def get_conversion_requests(self, account: str):
         """ get_conversion_requests """
-        return self.call('get_conversion_requests', account, api='database_api')
+        return self.call('get_conversion_requests', account, api=DATABASE_API)
 
     def get_account_history(self, account: str, index_from: int, limit: int):
         """ History of all operations for a given account.
@@ -592,35 +607,35 @@ class Steemd(Connector):
 
 
         """
-        return self.call('get_account_history', account, index_from, limit, api='database_api')
+        return self.call('get_account_history', account, index_from, limit, api=DATABASE_API)
 
     def get_owner_history(self, account: str):
         """ get_owner_history """
-        return self.call('get_owner_history', account, api='database_api')
+        return self.call('get_owner_history', account, api=DATABASE_API)
 
     def get_recovery_request(self, account: str):
         """ get_recovery_request """
-        return self.call('get_recovery_request', account, api='database_api')
+        return self.call('get_recovery_request', account, api=DATABASE_API)
 
     def get_escrow(self, from_account: str, escrow_id: int):
         """ get_escrow """
-        return self.call('get_escrow', from_account, escrow_id, api='database_api')
+        return self.call('get_escrow', from_account, escrow_id, api=DATABASE_API)
 
     def get_withdraw_routes(self, account: str, withdraw_route_type: str):
         """ get_withdraw_routes """
-        return self.call('get_withdraw_routes', account, withdraw_route_type, api='database_api')
+        return self.call('get_withdraw_routes', account, withdraw_route_type, api=DATABASE_API)
 
     def get_account_bandwidth(self, account: str, bandwidth_type: object):
         """ get_account_bandwidth """
-        return self.call('get_account_bandwidth', account, bandwidth_type, api='database_api')
+        return self.call('get_account_bandwidth', account, bandwidth_type, api=DATABASE_API)
 
     def get_savings_withdraw_from(self, account: str):
         """ get_savings_withdraw_from """
-        return self.call('get_savings_withdraw_from', account, api='database_api')
+        return self.call('get_savings_withdraw_from', account, api=DATABASE_API)
 
     def get_savings_withdraw_to(self, account: str):
         """ get_savings_withdraw_to """
-        return self.call('get_savings_withdraw_to', account, api='database_api')
+        return self.call('get_savings_withdraw_to', account, api=DATABASE_API)
 
     def get_order_book(self, limit):
         """ Get the internal market order book.
@@ -666,44 +681,38 @@ class Steemd(Connector):
 
 
         """
-        return self.call('get_order_book', limit, api='database_api')
+        return self.call('get_order_book', limit, api=MARKET_HISTORY_API)
 
     def get_open_orders(self, account: str):
-        """ get_open_orders """
-        return self.call('get_open_orders', account, api='database_api')
+        """ get_open_orders. Also this api methods exist in DATABASE_API"""
+        return self.call('get_open_orders', account, api=MARKET_HISTORY_API)
 
     def get_liquidity_queue(self, start_account: str, limit: int):
-        """ Get the liquidity queue.
-
-        Warning:
-            This feature is currently not in use, and might be deprecated in the future.
-
-        """
-        return self.call('get_liquidity_queue', start_account, limit, api='database_api')
+        raise DeprecationWarning('This method not supported!')
 
     def get_transaction_hex(self, signed_transaction: SignedTransaction):
         """ get_transaction_hex """
-        return self.call('get_transaction_hex', signed_transaction, api='database_api')
+        return self.call('get_transaction_hex', signed_transaction, api=DATABASE_API)
 
     def get_transaction(self, transaction_id: str):
         """ get_transaction """
-        return self.call('get_transaction', transaction_id, api='database_api')
+        return self.call('get_transaction', transaction_id, api=DATABASE_API)
 
     def get_required_signatures(self, signed_transaction: SignedTransaction, available_keys: list):
         """ get_required_signatures """
-        return self.call('get_required_signatures', signed_transaction, available_keys, api='database_api')
+        return self.call('get_required_signatures', signed_transaction, available_keys, api=DATABASE_API)
 
     def get_potential_signatures(self, signed_transaction: SignedTransaction):
         """ get_potential_signatures """
-        return self.call('get_potential_signatures', signed_transaction, api='database_api')
+        return self.call('get_potential_signatures', signed_transaction, api=DATABASE_API)
 
     def verify_authority(self, signed_transaction: SignedTransaction):
         """ verify_authority """
-        return self.call('verify_authority', signed_transaction, api='database_api')
+        return self.call('verify_authority', signed_transaction, api=DATABASE_API)
 
     def verify_account_authority(self, account: str, keys: list):
         """ verify_account_authority """
-        return self.call('verify_account_authority', account, keys, api='database_api')
+        return self.call('verify_account_authority', account, keys, api=DATABASE_API)
 
     def get_active_votes(self, author: str, permlink: str):
         """ Get all votes for the given post.
@@ -791,43 +800,39 @@ class Steemd(Connector):
 
     def get_witnesses(self, witness_ids: list):
         """ get_witnesses """
-        return self.call('get_witnesses', witness_ids, api='database_api')
+        return self.call('get_witnesses', witness_ids, api=DATABASE_API)
 
     def get_witness_by_account(self, account: str):
         """ get_witness_by_account """
-        return self.call('get_witness_by_account', account, api='database_api')
+        return self.call('get_witness_by_account', account, api=DATABASE_API)
 
     def get_witnesses_by_vote(self, from_account: str, limit: int):
         """ get_witnesses_by_vote """
-        return self.call('get_witnesses_by_vote', from_account, limit, api='database_api')
+        return self.call('get_witnesses_by_vote', from_account, limit, api=DATABASE_API)
 
     def lookup_witness_accounts(self, from_account: str, limit: int):
         """ lookup_witness_accounts """
-        return self.call('lookup_witness_accounts', from_account, limit, api='database_api')
+        return self.call('lookup_witness_accounts', from_account, limit, api=DATABASE_API)
 
     def get_witness_count(self):
         """ get_witness_count """
-        return self.call('get_witness_count', api='database_api')
+        return self.call('get_witness_count', api=DATABASE_API)
 
     def get_active_witnesses(self):
         """ Get a list of currently active witnesses. """
-        return self.call('get_active_witnesses', api='database_api')
+        return self.call('get_active_witnesses', api=DATABASE_API)
 
     def get_vesting_delegations(self, account: str, from_account: str, limit: int):
-        """ get_vesting_delegations """
-        return self.call('get_vesting_delegations', account, from_account, limit, api='database_api')
+        raise DeprecationWarning('This method not supported!')
 
     def login(self, username: str, password: str):
-        """ login """
-        return self.call('login', username, password, api='login_api')
+        raise DeprecationWarning('This method not supported!')
 
     def get_api_by_name(self, api_name: str):
-        """ get_api_by_name """
-        return self.call('get_api_by_name', api_name, api='login_api')
+        raise DeprecationWarning('This method not supported!')
 
     def get_version(self):
-        """ Get steemd version of the node currently connected to. """
-        return self.call('get_version', api='login_api')
+        raise DeprecationWarning('This method not supported!')
 
     def get_followers(self, account: str, start_follower: str, follow_type: str, limit: int):
         """ get_followers """
@@ -871,19 +876,18 @@ class Steemd(Connector):
 
     def broadcast_transaction(self, signed_transaction: SignedTransaction):
         """ broadcast_transaction """
-        return self.call('broadcast_transaction', signed_transaction, api='network_broadcast_api')
+        return self.call('broadcast_transaction', signed_transaction, api=NETWORK_BROADCAST_API)
 
     def broadcast_transaction_synchronous(self, signed_transaction: SignedTransaction):
         """ broadcast_transaction_synchronous """
-        return self.call('broadcast_transaction_synchronous', signed_transaction, api='network_broadcast_api')
+        return self.call('broadcast_transaction_synchronous', signed_transaction, api=NETWORK_BROADCAST_API)
 
     def broadcast_block(self, block: Block):
         """ broadcast_block """
-        return self.call('broadcast_block', block, api='network_broadcast_api')
+        return self.call('broadcast_block', block, api=NETWORK_BROADCAST_API)
 
     def set_max_block_age(self, max_block_age: int):
-        """ set_max_block_age """
-        return self.call('set_max_block_age', max_block_age, api='network_broadcast_api')
+        raise DeprecationWarning('This method not supported!')
 
     def get_ticker(self):
         """ Returns the market ticker for the internal SBD:STEEM market. """

@@ -6,7 +6,7 @@ import warnings
 from typing import Union
 
 from golos.instance import shared_steemd_instance
-from golos.steemd import Steemd
+from golos.steemd import Steemd, DATABASE_API
 from golos.utils import parse_time
 
 logger = logging.getLogger(__name__)
@@ -178,18 +178,18 @@ class Blockchain(object):
 
         def get_reliable_block_interval(_client):
             return reliable_query(_client, 'get_config',
-                                  'database_api').get('STEEMIT_BLOCK_INTERVAL')
+                                  DATABASE_API).get('STEEMIT_BLOCK_INTERVAL')
 
         def get_reliable_current_block(_client):
             return reliable_query(_client, 'get_dynamic_global_properties',
-                                  'database_api').get(self.mode)
+                                  DATABASE_API).get(self.mode)
 
         def get_reliable_blockdata(_client, _block_num):
-            return reliable_query(_client, 'get_block', 'database_api',
+            return reliable_query(_client, 'get_block', DATABASE_API,
                                   block_num)
 
         def get_reliable_ops_in_block(_client, _block_num):
-            return reliable_query(_client, 'get_ops_in_block', 'database_api',
+            return reliable_query(_client, 'get_ops_in_block', DATABASE_API,
                                   block_num, False)
 
         if timeout is None:
