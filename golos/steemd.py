@@ -158,7 +158,7 @@ class Steemd(Connector):
             dict: Account information.
 
         """
-        return first(self.call('get_accounts', [account]))
+        return first(self.call('get_accounts', [account], api=DATABASE_API))
 
     def get_all_usernames(self, last_user=''):
         """ Fetch the full list of STEEM usernames. """
