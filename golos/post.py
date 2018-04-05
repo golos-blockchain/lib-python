@@ -5,16 +5,13 @@ from datetime import datetime
 
 from funcy import walk_values, get_in, silent, flatten
 
-from golosbase.exceptions import (
-    PostDoesNotExist,
-    VotingInvalidOnArchivedPost,
-)
-from golosbase.operations import CommentOptions
-
 from golos.amount import Amount
 from golos.commit import Commit
 from golos.instance import shared_steemd_instance
-from golos.utils import construct_identifier, resolve_identifier, parse_time, remove_from_dict, calculate_trending, calculate_hot
+from golos.utils import construct_identifier, resolve_identifier, parse_time, remove_from_dict, calculate_trending, \
+    calculate_hot
+from golosbase.exceptions import PostDoesNotExist
+from golosbase.operations import CommentOptions
 
 log = logging.getLogger(__name__)
 
@@ -65,8 +62,7 @@ class Post(dict):
 
         # TODO: Check
         # This field is returned from blockchain, but it's empty. Fill it
-        # post['reblogged_by'] = [i for i in self.steemd.get_reblogged_by(post_author, post_permlink) if i != post_author]
-        post['reblogged_by'] = []
+        post['reblogged_by'] = [i for i in self.steemd.get_reblogged_by(post_author, post_permlink) if i != post_author]
 
         # Parse Times
         parse_times = ["active",
