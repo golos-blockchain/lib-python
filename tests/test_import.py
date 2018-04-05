@@ -9,5 +9,5 @@ from golosbase import *  # noqa
 
 # pylint: disable=unused-import,unused-variable
 def test_import():
-    _ = Steem()
+    _ = Steem(['wss://golosd.steepshot.org'])
     _ = account.PasswordKey
