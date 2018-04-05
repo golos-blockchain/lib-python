@@ -10,7 +10,7 @@ import urllib3
 from urllib3.connection import HTTPConnection
 from urllib3.exceptions import MaxRetryError, ReadTimeoutError, ProtocolError
 
-from golos.steemd import NETWORK_BROADCAST_API
+from golos.consts import NETWORK_BROADCAST_API
 from golosbase.base_client import BaseClient
 
 logger = logging.getLogger(__name__)

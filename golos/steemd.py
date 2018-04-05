@@ -5,6 +5,9 @@ from typing import List, Any, Union, Set
 from funcy import first
 
 from golos.block import Block
+from golos.consts import DATABASE_API, SOCIAL_NETWORK_API, FOLLOW_API, \
+    MARKET_HISTORY_API, PRIVATE_MESSAGE_API, \
+    ACCOUNT_BY_KEY_API, NETWORK_BROADCAST_API
 from golos.utils import resolve_identifier
 from golosbase.chains import known_chains
 from golosbase.connector import Connector
@@ -13,14 +16,6 @@ from golosbase.transactions import SignedTransaction
 from golosbase.types import PointInTime
 
 logger = logging.getLogger(__name__)
-
-DATABASE_API = 'database_api'
-SOCIAL_NETWORK_API = 'social_network'
-FOLLOW_API = 'follow'
-MARKET_HISTORY_API = 'market_history'
-PRIVATE_MESSAGE_API = 'private_message'
-ACCOUNT_BY_KEY_API = 'account_by_key'
-NETWORK_BROADCAST_API = 'network_broadcast_api'
 
 # Additional api methods from source code
 # AUTH_UTIL_API = 'auth_util'

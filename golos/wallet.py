@@ -3,7 +3,7 @@ import os
 
 from golos.account import Account
 from golos.instance import shared_steemd_instance
-from golos.steemd import ACCOUNT_BY_KEY_API
+from golos.consts import ACCOUNT_BY_KEY_API
 from golosbase import bip38
 from golosbase.account import PrivateKey
 from golosbase.exceptions import (InvalidWifError, WalletExists)
