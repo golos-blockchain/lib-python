@@ -1,0 +1,7 @@
+DATABASE_API = 'database_api'
+SOCIAL_NETWORK_API = 'social_network'
+FOLLOW_API = 'follow'
+MARKET_HISTORY_API = 'market_history'
+PRIVATE_MESSAGE_API = 'private_message'
+ACCOUNT_BY_KEY_API = 'account_by_key'
+NETWORK_BROADCAST_API = 'network_broadcast_api'
