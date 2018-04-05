@@ -7,7 +7,8 @@ from funcy import first
 from golos.block import Block
 from golos.consts import DATABASE_API, SOCIAL_NETWORK_API, FOLLOW_API, \
     MARKET_HISTORY_API, PRIVATE_MESSAGE_API, \
-    ACCOUNT_BY_KEY_API, NETWORK_BROADCAST_API
+    ACCOUNT_BY_KEY_API, NETWORK_BROADCAST_API, \
+    RAW_BLOCK_API, BLOCK_INFO_API
 from golos.utils import resolve_identifier
 from golosbase.chains import known_chains
 from golosbase.connector import Connector
@@ -17,16 +18,7 @@ from golosbase.types import PointInTime
 
 logger = logging.getLogger(__name__)
 
-# Additional api methods from source code
-# AUTH_UTIL_API = 'auth_util'
-#       check_authority_signature
-# BLOCK_INFO_API = 'block_info_api'
-#       get_block_info
-#       get_blocks_with_info
 # DATABASE_API = 'database_api'
-#       set_block_applied_callback
-#       get_miner_queue
-#
 #   Doesn't exist
 #       get_reward_fund
 #       get_expiring_vesting_delegations
@@ -36,26 +28,7 @@ logger = logging.getLogger(__name__)
 #       get_account_references
 #       get_liquidity_queue
 #       get_vesting_delegations
-# DEBUG_NODE_API = 'debug_node'
-#       debug_generate_blocks
-#       debug_generate_blocks_until
-#       debug_push_blocks
-#       debug_pop_block
-#       debug_get_witness_schedule
-#       debug_set_hardfork
-#       debug_has_hardfork
-# NETWORK_BROADCAST_API = 'network_broadcast_api'
-#       broadcast_transaction_with_callback
-# PRIVATE_MESSAGE_API = 'private_message'
-#       get_inbox
-#       get_outbox
-# RAW_BLOCK_API = 'raw_block'
-#       get_raw_block
-# SOCIAL_NETWORK_API = 'social_network'
-#
-#       get_recent_categories
-#       get_best_categories
-#       get_languages
+
 
 API_LIST = (
     DATABASE_API,
@@ -64,7 +37,9 @@ API_LIST = (
     MARKET_HISTORY_API,
     PRIVATE_MESSAGE_API,
     ACCOUNT_BY_KEY_API,
-    NETWORK_BROADCAST_API
+    NETWORK_BROADCAST_API,
+    RAW_BLOCK_API,
+    BLOCK_INFO_API
 )
 
 
@@ -902,6 +877,37 @@ class Steemd(Connector):
         if type(public_keys) == str:
             public_keys = [public_keys]
         return self.call('get_key_references', public_keys, api=ACCOUNT_BY_KEY_API)
+
+    def get_raw_block(self, block: int):
+        """ get raw block """
+        return self.call('get_raw_block', block, api=RAW_BLOCK_API)
+
+    def get_inbox(self, to: str, newest: str, limit: int):
+        """
+        get inbox messages
+        :param to: <skip>
+        :param newest: ISO-formatted datetime string, for example: datetime.utcnow().isoformat()
+        :param limit: limit of the return data
+        """
+        return self.call('get_inbox', to, newest, limit, api=PRIVATE_MESSAGE_API)
+
+    def get_outbox(self, fr: str, newest: str, limit: int):
+        """
+        get outbox messages
+        :param fr: <skip>
+        :param newest: ISO-formatted datetime string, for example: datetime.utcnow().isoformat()
+        :param limit: limit of the return data
+        :return:
+        """
+        return self.call('get_outbox', fr, newest, limit, api=PRIVATE_MESSAGE_API)
+
+    def get_block_info(self, start: int, count: int):
+        """ get block info """
+        return self.call('get_block_info', start, count, api=BLOCK_INFO_API)
+
+    def get_blocks_with_info(self, start: int, count: int):
+        """ get blocks with info """
+        return self.call('get_blocks_with_info', start, count, api=BLOCK_INFO_API)
 
 
 if __name__ == '__main__':
