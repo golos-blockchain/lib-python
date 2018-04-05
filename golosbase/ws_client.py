@@ -104,7 +104,7 @@ class WsClient(BaseClient):
                 sleeptime = (cnt - 1) * 2 if cnt < 10 else 10
                 if sleeptime:
                     logger.warning(
-                        "Lost connection to node during exec(): %s (%d/%d) "
+                        "Lost connection to node during call(): %s (%d/%d) "
                         % (self.url, cnt, self.num_retries) +
                         "Retrying in %d seconds" % sleeptime
                     )
