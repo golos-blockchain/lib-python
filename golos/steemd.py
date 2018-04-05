@@ -211,8 +211,8 @@ class Steemd(Connector):
             A generator with results.
 
         """
-        results = self.call_multi_with_futures('get_block', blocks, max_workers=10)
-        return ({**x, 'block_num': int(x['block_id'][:8], base=16)} for x in results if x)
+        results = self.call_multi_with_futures('get_block', blocks, api=DATABASE_API, max_workers=10)
+        return ({**x, 'block_num': int(x['previous'][:8], base=16) + 1} for x in results if x)
 
     def get_blocks(self, block_nums: List[int]):
         """ Fetch multiple blocks from steemd at once, given a range.
