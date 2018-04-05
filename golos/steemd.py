@@ -118,38 +118,6 @@ class Steemd(Connector):
         assert chain in known_chains, "The chain you are connecting to is not supported"
         return known_chains.get(chain)
 
-    def get_replies(self, author, skip_own=True):
-        """ Get replies for an author
-
-            :param str author: Show replies for this author
-            :param bool skip_own: Do not show my own replies
-        """
-        from golos.post import Post
-
-        state = self.get_state("/@%s/recent-replies" % author)
-        replies = state["accounts"][author].get("recent_replies", [])
-        discussions = []
-        for reply in replies:
-            post = state["content"][reply]
-            if skip_own and post["author"] == author:
-                continue
-            discussions.append(Post(post, steemd_instance=self))
-        return discussions
-
-    def get_promoted(self):
-        """ Get promoted posts
-        """
-        from golos.post import Post
-
-        state = self.get_state("/promoted")
-        # why is there a empty key in the struct?
-        promoted = state["discussion_idx"][''].get("promoted", [])
-        r = []
-        for p in promoted:
-            post = state["content"].get(p)
-            r.append(Post(post, steemd_instance=self))
-        return r
-
     def get_posts(self, limit=10, sort="hot", category=None, start=None):
         """ Get multiple posts in an array.
 
@@ -199,8 +167,7 @@ class Steemd(Connector):
     @property
     def last_irreversible_block_num(self):
         """ Newest irreversible block number. """
-        return self.get_dynamic_global_properties()[
-            'last_irreversible_block_num']
+        return self.get_dynamic_global_properties()['last_irreversible_block_num']
 
     @property
     def head_block_number(self):
