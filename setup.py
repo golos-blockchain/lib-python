@@ -140,13 +140,6 @@ setup(
     author_email=EMAIL,
     url=URL,
     packages=find_packages(exclude=('tests', 'scripts')),
-    entry_points={
-        'console_scripts': [
-            'piston=golos.cli:legacyentry',
-            'steempy=golos.cli:legacyentry',
-            'steemtail=golos.cli:steemtailentry',
-        ],
-    },
     install_requires=REQUIRED,
     extras_require={
         'dev': TEST_REQUIRED + BUILD_REQUIRED,
