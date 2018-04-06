@@ -49,13 +49,7 @@ class Amount(dict):
     def __add__(self, other):
         a = Amount(self)
         if isinstance(other, Amount):
-            # TODO: Currently asset for the following values are different (GOLOS blockchain).
-            # TODO: 'vesting_shares' -> GESTS
-            # TODO: 'received_vesting_shares' -> GOLOS
-            # TODO: 'delegated_vesting_shares' -> GOLOS
-            # TODO: This is strange and as result we temporary commented line with assert
-            # TODO: WE MUST CLEARLY UNDERSTAND OVER WHAT ASSETS WE ARE USED
-            # assert other["asset"] == self["asset"]
+            assert other["asset"] == self["asset"]
             a["amount"] += other["amount"]
         else:
             a["amount"] += float(other)
@@ -64,7 +58,7 @@ class Amount(dict):
     def __sub__(self, other):
         a = Amount(self)
         if isinstance(other, Amount):
-            # assert other["asset"] == self["asset"]
+            assert other["asset"] == self["asset"]
             a["amount"] -= other["amount"]
         else:
             a["amount"] -= float(other)
@@ -112,7 +106,7 @@ class Amount(dict):
 
     def __iadd__(self, other):
         if isinstance(other, Amount):
-            # assert other["asset"] == self["asset"]
+            assert other["asset"] == self["asset"]
             self["amount"] += other["amount"]
         else:
             self["amount"] += other
@@ -120,7 +114,7 @@ class Amount(dict):
 
     def __isub__(self, other):
         if isinstance(other, Amount):
-            # assert other["asset"] == self["asset"]
+            assert other["asset"] == self["asset"]
             self["amount"] -= other["amount"]
         else:
             self["amount"] -= other
@@ -135,7 +129,7 @@ class Amount(dict):
 
     def __idiv__(self, other):
         if isinstance(other, Amount):
-            # assert other["asset"] == self["asset"]
+            assert other["asset"] == self["asset"]
             return self["amount"] / other["amount"]
         else:
             self["amount"] /= other
@@ -161,42 +155,42 @@ class Amount(dict):
 
     def __lt__(self, other):
         if isinstance(other, Amount):
-            # assert other["asset"] == self["asset"]
+            assert other["asset"] == self["asset"]
             return self["amount"] < other["amount"]
         else:
             return self["amount"] < float(other or 0)
 
     def __le__(self, other):
         if isinstance(other, Amount):
-            # assert other["asset"] == self["asset"]
+            assert other["asset"] == self["asset"]
             return self["amount"] <= other["amount"]
         else:
             return self["amount"] <= float(other or 0)
 
     def __eq__(self, other):
         if isinstance(other, Amount):
-            # assert other["asset"] == self["asset"]
+            assert other["asset"] == self["asset"]
             return self["amount"] == other["amount"]
         else:
             return self["amount"] == float(other or 0)
 
     def __ne__(self, other):
         if isinstance(other, Amount):
-            # assert other["asset"] == self["asset"]
+            assert other["asset"] == self["asset"]
             return self["amount"] != other["amount"]
         else:
             return self["amount"] != float(other or 0)
 
     def __ge__(self, other):
         if isinstance(other, Amount):
-            # assert other["asset"] == self["asset"]
+            assert other["asset"] == self["asset"]
             return self["amount"] >= other["amount"]
         else:
             return self["amount"] >= float(other or 0)
 
     def __gt__(self, other):
         if isinstance(other, Amount):
-            # assert other["asset"] == self["asset"]
+            assert other["asset"] == self["asset"]
             return self["amount"] > other["amount"]
         else:
             return self["amount"] > float(other or 0)
@@ -204,20 +198,3 @@ class Amount(dict):
     __repr__ = __str__
     __truediv__ = __div__
     __truemul__ = __mul__
-
-
-if __name__ == "__main__":
-    a = Amount("2 GBG")
-    b = Amount("9 GBG")
-    print(a + b)
-    print(b)
-    b **= 2
-    b += .5
-    print(b)
-    print(b > a)
-
-    c = Amount("100 GOLOG")
-    print(c * .10)
-
-    # print(a + c)
-    # print(a < c)
