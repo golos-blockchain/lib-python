@@ -232,3 +232,18 @@ class SteemdTestCase(unittest.TestCase):
     def test_get_active_witnesses(self):
         witnesses = self.steemd.get_active_witnesses()
         self.assertGreater(len(witnesses), 0)
+
+    def test_get_followers(self):
+        limit = 10
+        followers = self.steemd.get_followers('joseph.kalu', '', 'blog', limit)
+        self.assertEqual(len(followers), limit)
+
+    def test_get_following(self):
+        limit = 10
+        following = self.steemd.get_following('joseph.kalu', '', 'blog', limit)
+        self.assertEqual(len(following), limit)
+
+    def test_get_follow_count(self):
+        follow = self.steemd.get_follow_count('joseph.kalu')
+        self.assertGreater(follow['follower_count'], 0)
+

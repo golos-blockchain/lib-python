@@ -10,7 +10,7 @@ from golos.commit import Commit
 from golos.instance import shared_steemd_instance
 from golos.utils import construct_identifier, resolve_identifier, parse_time, remove_from_dict, calculate_trending, \
     calculate_hot
-from golosbase.exceptions import PostDoesNotExist
+from golosbase.exceptions import PostDoesNotExist, VotingInvalidOnArchivedPost
 from golosbase.operations import CommentOptions
 
 log = logging.getLogger(__name__)
@@ -243,8 +243,8 @@ class Post(dict):
         """
         # Test if post is archived, if so, voting is worthless but just
         # pollutes the blockchain and account history
-        # if self.is_main_post() and self.get('net_rshares') is None:
-        #     raise VotingInvalidOnArchivedPost
+        if self.is_main_post() and self.get('net_rshares') is None:
+            raise VotingInvalidOnArchivedPost
         return self.commit.vote(self.identifier, weight, account=voter)
 
     def edit(self, body, meta=None, replace=False):
