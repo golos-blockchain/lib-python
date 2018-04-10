@@ -30,19 +30,6 @@ logger = logging.getLogger(__name__)
 #       get_vesting_delegations
 
 
-API_LIST = (
-    DATABASE_API,
-    SOCIAL_NETWORK_API,
-    FOLLOW_API,
-    MARKET_HISTORY_API,
-    PRIVATE_MESSAGE_API,
-    ACCOUNT_BY_KEY_API,
-    NETWORK_BROADCAST_API,
-    RAW_BLOCK_API,
-    BLOCK_INFO_API
-)
-
-
 def get_config_node_list():
     nodes = configStorage.get('nodes', None)
     if nodes:
