@@ -57,7 +57,6 @@ class Account(dict):
     def profile(self):
         with suppress(TypeError):
             return get_in(self, ['json_metadata', 'profile'], default={})
-        return {}
 
     @property
     def sp(self):
@@ -207,13 +206,16 @@ class Account(dict):
 
         filtered_items = []
         for item in items:
+            item_time = None
             if 'time' in item:
                 item_time = item['time']
             elif 'timestamp' in item:
                 item_time = item['timestamp']
-            timestamp = parse_time(item_time).timestamp()
-            if end_time > timestamp > start_time:
-                filtered_items.append(item)
+
+            if item_time:
+                timestamp = parse_time(item_time).timestamp()
+                if end_time > timestamp > start_time:
+                    filtered_items.append(item)
 
         return filtered_items
 
@@ -236,9 +238,9 @@ class Account(dict):
                 "conversion_requests": self.get_conversion_requests(),
             }
 
-        composedDict = self.copy()
-        composedDict.update(extras)
-        composedDict.update(
+        composed_dict = self.copy()
+        composed_dict.update(extras)
+        composed_dict.update(
             {
                 "profile": self.profile,
                 "sp": self.sp,
@@ -247,7 +249,7 @@ class Account(dict):
             }
         )
 
-        return composedDict
+        return composed_dict
 
     def get_account_history(self,
                             index,
