@@ -12,7 +12,7 @@ from setuptools import find_packages, setup, Command
 from setuptools.command.test import test as TestCommand
 
 # Package meta-data.
-NAME = 'golos'
+NAME = 'golodranets'
 DESCRIPTION = 'Fork of official python STEEM library for Golos blockchain'
 URL = 'https://github.com/steepshot/golodranets'
 EMAIL = 'steepshot.org@gmail.com'
