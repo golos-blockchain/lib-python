@@ -5,9 +5,9 @@ import time
 import warnings
 from typing import Union
 
+from golos.consts import DATABASE_API
 from golos.instance import shared_steemd_instance
 from golos.steemd import Steemd
-from golos.consts import DATABASE_API
 from golos.utils import parse_time
 
 logger = logging.getLogger(__name__)

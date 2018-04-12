@@ -13,10 +13,10 @@ from setuptools.command.test import test as TestCommand
 
 # Package meta-data.
 NAME = 'golos'
-DESCRIPTION = 'Official python golos library. For of the official Steemit library.'
+DESCRIPTION = 'Fork of official python STEEM library for Golos blockchain'
 URL = 'https://github.com/steepshot/golodranets'
-EMAIL = 'john@steemit.com'
-AUTHOR = 'Steemit'
+EMAIL = 'steepshot.org@gmail.com'
+AUTHOR = '@steepshot'
 
 # What packages are required for this module to be executed?
 REQUIRED = [

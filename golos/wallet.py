@@ -2,8 +2,8 @@ import logging
 import os
 
 from golos.account import Account
-from golos.instance import shared_steemd_instance
 from golos.consts import ACCOUNT_BY_KEY_API
+from golos.instance import shared_steemd_instance
 from golosbase import bip38
 from golosbase.account import PrivateKey
 from golosbase.exceptions import (InvalidWifError, WalletExists)
@@ -46,8 +46,8 @@ class Wallet:
     keyStorage = None
 
     # Manually provided keys
-    keys = {}  # struct with pubkey as key and wif as value
-    keyMap = {}  # type:wif pairs to force certain keys
+    keys = {}  # Structure with pubkey as key and wif as value
+    keyMap = {}  # Type: wif pairs to force certain keys
 
     def __init__(self, steemd_instance=None, **kwargs):
         from golosbase.storage import configStorage

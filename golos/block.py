@@ -1,7 +1,6 @@
-from golosbase.exceptions import BlockDoesNotExistsException
-
 from golos.instance import shared_steemd_instance
 from golos.utils import parse_time
+from golosbase.exceptions import BlockDoesNotExistsException
 
 
 class Block(dict):

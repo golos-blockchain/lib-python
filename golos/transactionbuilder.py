@@ -148,8 +148,8 @@ class TransactionBuilder(dict):
             unsigned/partial transaction in order to simplify later
             signing (e.g. for multisig or coldstorage)
         """
-        accountObj = Account(account, steemd_instance=self.steemd)
-        authority = accountObj[permission]
+        account_obj = Account(account, steemd_instance=self.steemd)
+        authority = account_obj[permission]
         # We add a required_authorities to be able to identify
         # how to sign later. This is an array, because we
         # may later want to allow multiple operations per tx
