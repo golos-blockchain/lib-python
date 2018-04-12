@@ -1,5 +1,6 @@
 from golos.commit import Commit
-from golos.steemd import Steemd, API_LIST
+from golos.consts import API_LIST
+from golos.steemd import Steemd
 from golosbase.exceptions import RPCError
 
 

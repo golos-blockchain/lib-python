@@ -247,3 +247,23 @@ class SteemdTestCase(unittest.TestCase):
         follow = self.steemd.get_follow_count('joseph.kalu')
         self.assertGreater(follow['follower_count'], 0)
 
+    def test_get_account_reputations(self):
+        limit = 10
+        accounts = self.steemd.get_account_reputations('steepshot', limit)
+        self.assertEqual(len(accounts), limit)
+
+    def test_get_reblogged_by(self):
+        reblogged_by = self.steemd.get_reblogged_by(
+            'vp-liganovi4kov',
+            'novaya-rubrika-obratnaya-svyaz-otvety-komandy-golos-io-na-voprosy-novichkov'
+        )
+        self.assertGreater(len(reblogged_by), 0)
+
+    def test_get_ticker(self):
+        ticker = self.steemd.get_ticker()
+        self.assertIsNotNone(ticker)
+
+    def test_get_volume(self):
+        volume = self.steemd.get_volume()
+        self.assertIsNotNone(volume)
+

@@ -327,7 +327,6 @@ class Post(dict):
                     options.get("allow_votes", self["allow_votes"]),
                 "allow_curation_rewards":
                     options.get("allow_curation_rewards", self["allow_curation_rewards"]),
-                # TODO: ensure that it is supported
                 "extensions":
                     options.get("extensions", []),
             }
