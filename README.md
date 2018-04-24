@@ -1,24 +1,34 @@
 # Official Python STEEM Library
 
-`steem-python` is the official Steem library for Python. It comes with a
-BIP38 encrypted wallet and a practical CLI utility called `steempy`.
+`golodranets` is the GOLOS library for Python which was forked from official STEEM library for Python. It comes with a BIP38 encrypted wallet.
 
-This library currently works on Python 2.7, 3.5 and 3.6. Python 3.3 and 3.4 support forthcoming.
+The main differences from the `steem-python`:
+* directed to work with GOLOS blockchain
+* websocket support
+* convert Cyrillic to Latin for tags and categories
+* Golos assets - `STEEM` -> `GOLOS`, `SBD` -> `GBG`, `VESTS` -> `GESTS`
+* renamed modules - `steem` -> `golos`, `steemdata` -> `golosdata`
+* for `Post` instance added two fields - `score_trending` and `score_hot`. This fields may be helpful if you want to sort your saved posts like `get_discussions_by_trending` and `get_discussions_by_trending` methods do. `reblogged_by` field is also filled now
+* for `Account` instance methods `get_followers` and `get_following` were improved - now it takes `limit` and `offset` parameters
+
+GOLOS HF 17 is supported.
+
+This library currently works on Python 3.5 and 3.6.
 
 # Installation
 
 With pip:
 
 ```
-pip3 install steem      # pip install steem for 2.7
+pip3 install golodranets
 ```
 
 From Source:
 
 ```
-git clone https://github.com/steemit/steem-python.git
-cd steem-python
-python3 setup.py install        # python setup.py install for 2.7
+git clone https://github.com/steepshot/golodranets.git
+cd golodranets
+python3 setup.py install
 ```
 
 ## Homebrew Build Prereqs
@@ -31,30 +41,64 @@ export CFLAGS="-I$(brew --prefix openssl)/include $CFLAGS"
 export LDFLAGS="-L$(brew --prefix openssl)/lib $LDFLAGS"
 ```
 
-# CLI tools bundled
-
-The library comes with a few console scripts.
-
-* `steempy`:
-    * rudimentary blockchain CLI (needs some TLC and more TLAs)
-* `steemtail`:
-    * useful for e.g. `steemtail -f -j | jq --unbuffered --sort-keys .`
-
 # Documentation
 
-Documentation is available at **http://steem.readthedocs.io**
+Unfortunately we do not have documentation for Golodranets yet, but documentation from steem-python may help you -  **http://steem.readthedocs.io**
+
+# Usage examples
+
+#### Get trending posts
+
+``` python
+from golos import Steem
+
+steem = Steem(['wss://ws.golos.io'])
+posts = steem.get_posts(limit=20, sort='trending')
+for post in posts:
+    print(post.identifier)
+```
+
+#### Get followers for user
+``` python
+from golos import Steem
+from golos.account import Account
+from golos.instance import set_shared_steemd_instance
+
+steem = Steem(['wss://ws.golos.io'])
+set_shared_steemd_instance(steem)
+account = Account('golos')
+followers = account.get_followers(limit=10)
+for follower in followers:
+    print(follower)
+```
+
+#### Create post
+``` python
+from golos import Steem
+
+steem = Steem(['wss://ws.golos.io'])
+username = 'your account username here'
+posting_key = 'your private posting key here'
+steem.commit.wallet.setKeys(posting_key)
+
+# this method returns the transaction broadcasted to blockchain, you can jst omit it if not needed
+steem.commit.post(
+        title='Test post from Golodranets',
+        body='This post created in Golodranets library!',
+        author=username,
+        tags=['test', 'spam'],
+        beneficiaries=[
+            {'account': 'golos', 'weight': 1000},  # beneficiaries support!
+        ],
+        self_vote=True
+    )
+```
 
 # Tests
 
 Some tests are included.  They can be run via:
 
 * `python setup.py test`
-
-# TODO
-
-* more unit tests
-* 100% documentation coverage, consistent documentation
-* migrate to click CLI library
 
 # Notice
 
