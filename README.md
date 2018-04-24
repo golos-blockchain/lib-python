@@ -1,4 +1,4 @@
-# Official Python STEEM Library
+# Official Python GOLOS Library
 
 `golodranets` is the GOLOS library for Python which was forked from official STEEM library for Python. It comes with a BIP38 encrypted wallet.
 
