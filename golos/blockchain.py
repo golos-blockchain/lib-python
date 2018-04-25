@@ -177,7 +177,7 @@ class Blockchain(object):
 
         def get_reliable_block_interval(_client):
             return reliable_query(_client, 'get_config',
-                                  DATABASE_API).get('STEEMIT_BLOCK_INTERVAL')
+                                  DATABASE_API).get('STEEMIT_BLOCK_INTERVAL') or 3
 
         def get_reliable_current_block(_client):
             return reliable_query(_client, 'get_dynamic_global_properties',
