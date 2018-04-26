@@ -13,7 +13,7 @@ from setuptools.command.test import test as TestCommand
 
 # Package meta-data.
 NAME = 'golodranets'
-VERSION = '0.1.1'
+VERSION = '0.1.1.1'
 DESCRIPTION = 'Fork of official python STEEM library for Golos blockchain'
 URL = 'https://github.com/steepshot/golodranets'
 EMAIL = 'steepshot.org@gmail.com'
