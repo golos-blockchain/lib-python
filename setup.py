@@ -13,6 +13,7 @@ from setuptools.command.test import test as TestCommand
 
 # Package meta-data.
 NAME = 'golodranets'
+VERSION = '0.1.1'
 DESCRIPTION = 'Fork of official python STEEM library for Golos blockchain'
 URL = 'https://github.com/steepshot/golodranets'
 EMAIL = 'steepshot.org@gmail.com'
@@ -132,7 +133,7 @@ class UploadCommand(Command):
 # Where the magic happens:
 setup(
     name=NAME,
-    version='0.1.0',
+    version=VERSION,
     description=DESCRIPTION,
     keywords=['golos', 'cryptocurrency', 'blockchain'],
     # long_description=long_description,
