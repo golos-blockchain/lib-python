@@ -85,7 +85,7 @@ class Steemd(Connector):
             :param str sort: Sort the list by "recent" or "payout"
             :param str category: Only show posts in this category
             :param str start: Show posts after this post. Takes an
-                              identifier of the form ``author/permlink``
+                              identifier of the form ``@author/permlink``
         """
         from golos.post import Post
 
@@ -677,7 +677,7 @@ class Steemd(Connector):
         Returned votes are in the following format:
         ::
 
-           {'authorperm': 'alwaysfelicia/time-line-of-best-times-to-post-on-steemit-mystery-explained',
+           {'authorperm': '@alwaysfelicia/time-line-of-best-times-to-post-on-steemit-mystery-explained',
            'percent': 100,
            'rshares': 709227399,
            'time': '2016-08-07T16:06:24',

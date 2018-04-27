@@ -266,7 +266,7 @@ def construct_identifier(*args):
     # remove the @ sign in case it was passed in by the user.
     author = author.replace('@', '')
     fields = dict(author=author, permlink=permlink)
-    return "{author}/{permlink}".format(**fields)
+    return '@{author}/{permlink}'.format(**fields)
 
 
 def json_expand(json_op, key_name='json'):
@@ -408,18 +408,3 @@ def calculate_hot(score: int, created_tm: datetime):
 
 def calculate_trending(score: int, created_tm: datetime):
     return calculate_score(10000000, 480000, score, created_tm)
-
-
-def compat_compose_dictionary(dictionary, **kwargs):
-    """
-    This method allows us the one line dictionary composition that is offered by the ** dictionary unpacking
-    available in 3.6.
-
-    :param dictionary: the dictionary to add the kwargs elements to.
-    :param kwargs: a set of key/value pairs to add to `dictionary`.
-    :return: the composed dictionary.
-    """
-    composed_dict = dictionary.copy()
-    composed_dict.update(kwargs)
-
-    return composed_dict
