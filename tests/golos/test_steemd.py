@@ -249,7 +249,7 @@ class SteemdTestCase(unittest.TestCase):
 
     def test_get_account_reputations(self):
         limit = 10
-        accounts = self.steemd.get_account_reputations('steepshot', limit)
+        accounts = self.steemd.get_account_reputations(['steepshot'], limit)
         self.assertEqual(len(accounts), limit)
 
     def test_get_reblogged_by(self):

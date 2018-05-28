@@ -142,7 +142,7 @@ class Steemd(Connector):
             dict: Account information.
 
         """
-        return first(self.call('get_accounts', [account], api=DATABASE_API))
+        return first(self.call('get_accounts', [account], api=FOLLOW_API))
 
     def get_all_usernames(self, last_user=''):
         """ Fetch the full list of STEEM usernames. """
@@ -216,11 +216,11 @@ class Steemd(Connector):
 
     def get_trending_tags(self, after_tag, limit):
         """ get_trending_tags """
-        return self.call('get_trending_tags', after_tag, limit, api=SOCIAL_NETWORK_API)
+        return self.call('get_trending_tags', after_tag, limit, api=TAGS_API)
 
-    def get_tags_used_by_author(self, account):
+    def get_tags_used_by_author(self, account: str):
         """ get_tags_used_by_author """
-        return self.call('get_tags_used_by_author', account, api=SOCIAL_NETWORK_API)
+        return self.call('get_tags_used_by_author', account, api=TAGS_API)
 
     def get_discussions_by_trending(self, discussion_query):
         """ get_discussions_by_trending """
@@ -344,7 +344,7 @@ class Steemd(Connector):
 
     def get_ops_in_block(self, block_num, virtual_only):
         """ get_ops_in_block """
-        return self.call('get_ops_in_block', block_num, virtual_only, api=OPERATION_HISTORY)
+        return self.call('get_ops_in_block', block_num, virtual_only, api=OPERATION_HISTORY_API)
 
     def get_state(self, path):
         raise DeprecationWarning('This method not supported!')
@@ -423,7 +423,7 @@ class Steemd(Connector):
 
         This method is same as ``get_account``, but supports querying for multiple accounts at the time.
         """
-        return self.call('get_accounts', account_names, api=DATABASE_API)
+        return self.call('get_accounts', account_names, api=FOLLOW_API)
 
     def get_account_references(self, account_id: int):
         raise DeprecationWarning('This method not supported!')
@@ -530,7 +530,7 @@ class Steemd(Connector):
 
 
         """
-        return self.call('get_account_history', account, index_from, limit, api=ACCOUNT_HISTORY)
+        return self.call('get_account_history', account, index_from, limit, api=ACCOUNT_HISTORY_API)
 
     def get_owner_history(self, account: str):
         """ get_owner_history """
@@ -619,7 +619,7 @@ class Steemd(Connector):
 
     def get_transaction(self, transaction_id: str):
         """ get_transaction """
-        return self.call('get_transaction', transaction_id, api=OPERATION_HISTORY)
+        return self.call('get_transaction', transaction_id, api=OPERATION_HISTORY_API)
 
     def get_required_signatures(self, signed_transaction: SignedTransaction, available_keys: list):
         """ get_required_signatures """
@@ -637,7 +637,7 @@ class Steemd(Connector):
         """ verify_account_authority """
         return self.call('verify_account_authority', account, keys, api=DATABASE_API)
 
-    def get_active_votes(self, author: str, permlink: str):
+    def get_active_votes(self, author: str, permlink: str, vote_limit: int = 10000):
         """ Get all votes for the given post.
 
         Args:
@@ -670,9 +670,9 @@ class Steemd(Connector):
                  'voter': 'flourish',
                  'weight': '2334690471157'}]
         """
-        return self.call('get_active_votes', author, permlink, api=SOCIAL_NETWORK_API)
+        return self.call('get_active_votes', author, permlink, vote_limit, api=SOCIAL_NETWORK_API)
 
-    def get_account_votes(self, account):
+    def get_account_votes(self, account, votes_from: int = 0, vote_limit: int = 10000):
         """ All votes the given account ever made.
 
         Returned votes are in the following format:
@@ -687,31 +687,34 @@ class Steemd(Connector):
 
         Args:
             account (str): STEEM username that we are looking up.
+            votes_from (int): starting index
+            vote_limit (int): limit of returned votes
 
         Returns:
             list: List of votes.
 
 
         """
-        return self.call('get_account_votes', account, api=SOCIAL_NETWORK_API)
+        return self.call('get_account_votes', account, votes_from, vote_limit, api=SOCIAL_NETWORK_API)
 
-    def get_content(self, author: str, permlink: str):
+    def get_content(self, author: str, permlink: str, vote_limit: int = 10000):
         """ get_content """
-        return self.call('get_content', author, permlink, api=SOCIAL_NETWORK_API)
+        return self.call('get_content', author, permlink, vote_limit, api=SOCIAL_NETWORK_API)
 
-    def get_content_replies(self, author, permlink):
+    def get_content_replies(self, author: str, permlink: str, vote_limit: int = 10000):
         """ get_content_replies """
-        return self.call('get_content_replies', author, permlink, api=SOCIAL_NETWORK_API)
+        return self.call('get_content_replies', author, permlink, vote_limit, api=SOCIAL_NETWORK_API)
 
-    def get_all_content_replies(self, author: str, permlink: str):
+    def get_all_content_replies(self, author: str, permlink: str, vote_limit: int = 10000):
         """ get all content replies """
-        return self.call('get_all_content_replies', author, permlink, api=SOCIAL_NETWORK_API)
+        return self.call('get_all_content_replies', author, permlink, vote_limit, api=SOCIAL_NETWORK_API)
 
     def get_discussions_by_author_before_date(self,
                                               author: str,
                                               start_permlink: str,
                                               before_date: PointInTime,
-                                              limit: int):
+                                              limit: int,
+                                              vote_limit: int = 10000):
         """ get_discussions_by_author_before_date """
         return self.call(
             'get_discussions_by_author_before_date',
@@ -719,6 +722,7 @@ class Steemd(Connector):
             start_permlink,
             before_date,
             limit,
+            vote_limit,
             api=SOCIAL_NETWORK_API)
 
     def get_trending_categories(self, after: str, limit: int):
@@ -739,11 +743,16 @@ class Steemd(Connector):
 
     def get_languages(self):
         """ get languages """
-        return self.call('get_languages', api=SOCIAL_NETWORK_API)
+        return self.call('get_languages', api=TAGS_API)
 
-    def get_replies_by_last_update(self, account: str, start_permlink: str, limit: int):
+    def get_replies_by_last_update(self, account: str, start_permlink: str, limit: int, vote_limit: int = 10000):
         """ get_replies_by_last_update """
-        return self.call('get_replies_by_last_update', account, start_permlink, limit, api=SOCIAL_NETWORK_API)
+        return self.call('get_replies_by_last_update',
+                         account,
+                         start_permlink,
+                         limit,
+                         vote_limit,
+                         api=SOCIAL_NETWORK_API)
 
     def get_witnesses(self, witness_ids: list):
         """ get_witnesses """
@@ -809,9 +818,11 @@ class Steemd(Connector):
         """ get_blog """
         return self.call('get_blog', account, entry_id, limit, api=FOLLOW_API)
 
-    def get_account_reputations(self, account: str, limit: int):
+    def get_account_reputations(self, accounts: Union[List[str], str], limit: int):
         """ get_account_reputations """
-        return self.call('get_account_reputations', account, limit, api=FOLLOW_API)
+        if not isinstance(accounts, (list, tuple)):
+            accounts = [accounts]
+        return self.call('get_account_reputations', accounts, limit, api=FOLLOW_API)
 
     def get_reblogged_by(self, author: str, permlink: str):
         """ get_reblogged_by """
