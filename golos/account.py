@@ -65,7 +65,7 @@ class Account(dict):
 
     @property
     def rep(self):
-        return self.reputation()
+        raise DeprecationWarning('Reputations field was removed from result struc')
 
     @property
     def balances(self):
@@ -103,15 +103,6 @@ class Account(dict):
             'rewards': rewards,
             'total': total,
         }
-
-    def reputation(self, precision=2):
-        rep = int(self['reputation'])
-        if rep == 0:
-            return 25
-        score = (math.log10(abs(rep)) - 9) * 9 + 25
-        if rep < 0:
-            score = 50 - score
-        return round(score, precision)
 
     def voting_power(self):
         return self['voting_power'] / 100
@@ -244,7 +235,6 @@ class Account(dict):
             {
                 "profile": self.profile,
                 "sp": self.sp,
-                "rep": self.rep,
                 "balances": self.get_balances(),
             }
         )
