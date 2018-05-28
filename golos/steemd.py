@@ -5,10 +5,7 @@ from typing import List, Any, Union, Set
 from funcy import first
 
 from golos.block import Block
-from golos.consts import DATABASE_API, SOCIAL_NETWORK_API, FOLLOW_API, \
-    MARKET_HISTORY_API, PRIVATE_MESSAGE_API, \
-    ACCOUNT_BY_KEY_API, NETWORK_BROADCAST_API, \
-    RAW_BLOCK_API, BLOCK_INFO_API
+from golos.consts import *
 from golos.utils import resolve_identifier
 from golosbase.chains import known_chains
 from golosbase.connector import Connector
@@ -386,7 +383,7 @@ class Steemd(Connector):
               {'base': '0.093 SBD', 'quote': '1.010 STEEM'},
 
         """
-        return self.call('get_feed_history', api=DATABASE_API)
+        return self.call('get_feed_history', api=WITNESS_API)
 
     def get_current_median_history_price(self):
         """ Get the average STEEM/SBD price.
@@ -398,11 +395,15 @@ class Steemd(Connector):
             {'base': '0.093 SBD', 'quote': '1.010 STEEM'}
 
         """
-        return self.call('get_current_median_history_price', api=DATABASE_API)
+        return self.call('get_current_median_history_price', api=WITNESS_API)
+
+    def get_miner_queue(self):
+        """ get_miner_queue """
+        return self.call('get_miner_queue', api=WITNESS_API)
 
     def get_witness_schedule(self):
         """ get_witness_schedule """
-        return self.call('get_witness_schedule', api=DATABASE_API)
+        return self.call('get_witness_schedule', api=WITNESS_API)
 
     def get_hardfork_version(self):
         """ Get the current version of the chain.
@@ -746,27 +747,27 @@ class Steemd(Connector):
 
     def get_witnesses(self, witness_ids: list):
         """ get_witnesses """
-        return self.call('get_witnesses', witness_ids, api=DATABASE_API)
+        return self.call('get_witnesses', witness_ids, api=WITNESS_API)
 
     def get_witness_by_account(self, account: str):
         """ get_witness_by_account """
-        return self.call('get_witness_by_account', account, api=DATABASE_API)
+        return self.call('get_witness_by_account', account, api=WITNESS_API)
 
     def get_witnesses_by_vote(self, from_account: str, limit: int):
         """ get_witnesses_by_vote """
-        return self.call('get_witnesses_by_vote', from_account, limit, api=DATABASE_API)
+        return self.call('get_witnesses_by_vote', from_account, limit, api=WITNESS_API)
 
     def lookup_witness_accounts(self, from_account: str, limit: int):
         """ lookup_witness_accounts """
-        return self.call('lookup_witness_accounts', from_account, limit, api=DATABASE_API)
+        return self.call('lookup_witness_accounts', from_account, limit, api=WITNESS_API)
 
     def get_witness_count(self):
         """ get_witness_count """
-        return self.call('get_witness_count', api=DATABASE_API)
+        return self.call('get_witness_count', api=WITNESS_API)
 
     def get_active_witnesses(self):
         """ Get a list of currently active witnesses. """
-        return self.call('get_active_witnesses', api=DATABASE_API)
+        return self.call('get_active_witnesses', api=WITNESS_API)
 
     def get_vesting_delegations(self, account: str, from_account: str, limit: int):
         raise DeprecationWarning('This method not supported!')

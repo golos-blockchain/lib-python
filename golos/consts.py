@@ -7,6 +7,7 @@ ACCOUNT_BY_KEY_API = 'account_by_key'
 NETWORK_BROADCAST_API = 'network_broadcast_api'
 RAW_BLOCK_API = 'raw_block'
 BLOCK_INFO_API = 'block_info'
+WITNESS_API = 'witness_api'
 
 API_LIST = (
     DATABASE_API,
