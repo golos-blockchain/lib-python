@@ -344,7 +344,7 @@ class Steemd(Connector):
 
     def get_ops_in_block(self, block_num, virtual_only):
         """ get_ops_in_block """
-        return self.call('get_ops_in_block', block_num, virtual_only, api=DATABASE_API)
+        return self.call('get_ops_in_block', block_num, virtual_only, api=OPERATION_HISTORY)
 
     def get_state(self, path):
         raise DeprecationWarning('This method not supported!')
@@ -530,7 +530,7 @@ class Steemd(Connector):
 
 
         """
-        return self.call('get_account_history', account, index_from, limit, api=DATABASE_API)
+        return self.call('get_account_history', account, index_from, limit, api=ACCOUNT_HISTORY)
 
     def get_owner_history(self, account: str):
         """ get_owner_history """
@@ -619,7 +619,7 @@ class Steemd(Connector):
 
     def get_transaction(self, transaction_id: str):
         """ get_transaction """
-        return self.call('get_transaction', transaction_id, api=DATABASE_API)
+        return self.call('get_transaction', transaction_id, api=OPERATION_HISTORY)
 
     def get_required_signatures(self, signed_transaction: SignedTransaction, available_keys: list):
         """ get_required_signatures """

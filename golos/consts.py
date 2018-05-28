@@ -8,6 +8,8 @@ NETWORK_BROADCAST_API = 'network_broadcast_api'
 RAW_BLOCK_API = 'raw_block'
 BLOCK_INFO_API = 'block_info'
 WITNESS_API = 'witness_api'
+ACCOUNT_HISTORY = 'account_history'
+OPERATION_HISTORY = 'operation_history'
 
 API_LIST = (
     DATABASE_API,
@@ -18,5 +20,8 @@ API_LIST = (
     ACCOUNT_BY_KEY_API,
     NETWORK_BROADCAST_API,
     RAW_BLOCK_API,
-    BLOCK_INFO_API
+    BLOCK_INFO_API,
+    WITNESS_API,
+    ACCOUNT_HISTORY,
+    OPERATION_HISTORY
 )

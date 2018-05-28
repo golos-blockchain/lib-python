@@ -5,7 +5,7 @@ import time
 import warnings
 from typing import Union
 
-from golos.consts import DATABASE_API
+from golos.consts import DATABASE_API, OPERATION_HISTORY
 from golos.instance import shared_steemd_instance
 from golos.steemd import Steemd
 from golos.utils import parse_time
@@ -184,7 +184,7 @@ class Blockchain(object):
                                   block_num)
 
         def get_reliable_ops_in_block(_client, _block_num):
-            return reliable_query(_client, 'get_ops_in_block', DATABASE_API,
+            return reliable_query(_client, 'get_ops_in_block', OPERATION_HISTORY,
                                   block_num, False)
 
         if timeout is None:
