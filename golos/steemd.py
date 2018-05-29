@@ -18,13 +18,11 @@ logger = logging.getLogger(__name__)
 # DATABASE_API = 'database_api'
 #   Doesn't exist
 #       get_reward_fund
-#       get_expiring_vesting_delegations
 #       get_comment_discussions_by_payout
 #       get_post_discussions_by_payout
 #       get_state
 #       get_account_references
 #       get_liquidity_queue
-#       get_vesting_delegations
 
 
 def get_config_node_list():
@@ -210,9 +208,11 @@ class Steemd(Connector):
     def get_reward_fund(self, fund_name: str = 'post'):
         raise DeprecationWarning('This method not supported!')
 
-    def get_expiring_vesting_delegations(self, account,
-                                         start, limit):
-        raise DeprecationWarning('This method not supported!')
+    def get_expiring_vesting_delegations(self,
+                                         account: str,
+                                         from_time: PointInTime,
+                                         limit: int = 100):
+        return self.call('get_expiring_vesting_delegations', account, from_time, limit, api=DATABASE_API)
 
     def get_trending_tags(self, after_tag, limit):
         """ get_trending_tags """
@@ -778,8 +778,13 @@ class Steemd(Connector):
         """ Get a list of currently active witnesses. """
         return self.call('get_active_witnesses', api=WITNESS_API)
 
-    def get_vesting_delegations(self, account: str, from_account: str, limit: int):
-        raise DeprecationWarning('This method not supported!')
+    def get_vesting_delegations(self,
+                                account: str,
+                                from_account: str,
+                                limit: int = 100,
+                                delegation_type: str = 'delegated'):
+        """ get_vesting_delegations """
+        return self.call('get_vesting_delegations', account, from_account, limit, delegation_type, api=DATABASE_API)
 
     def login(self, username: str, password: str):
         raise DeprecationWarning('This method not supported!')
@@ -907,6 +912,14 @@ class Steemd(Connector):
     def get_blocks_with_info(self, start: int, count: int):
         """ get blocks with info """
         return self.call('get_blocks_with_info', start, count, api=BLOCK_INFO_API)
+
+    def get_proposed_transaction(self, account: str) -> list:
+        """ get_proposed_transaction """
+        return self.call('get_proposed_transaction', account, api=DATABASE_API)
+
+    def get_database_info(self):
+        """ get_database_info """
+        return self.call('get_database_info', api=DATABASE_API)
 
 
 if __name__ == '__main__':

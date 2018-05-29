@@ -65,7 +65,7 @@ class Account(dict):
 
     @property
     def rep(self):
-        raise DeprecationWarning('Reputations field was removed from result struc')
+        raise DeprecationWarning('Reputations field was removed from result struct')
 
     @property
     def balances(self):
