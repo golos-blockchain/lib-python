@@ -886,16 +886,16 @@ class Steemd(Connector):
         """ get raw block """
         return self.call('get_raw_block', block, api=RAW_BLOCK_API)
 
-    def get_inbox(self, to: str, newest: str, limit: int):
+    def get_inbox(self, to: str, newest: str, limit: int, offset: int):
         """
         get inbox messages
         :param to: <skip>
         :param newest: ISO-formatted datetime string, for example: datetime.utcnow().isoformat()
         :param limit: limit of the return data
         """
-        return self.call('get_inbox', to, newest, limit, api=PRIVATE_MESSAGE_API)
+        return self.call('get_inbox', to, newest, limit, offset, api=PRIVATE_MESSAGE_API)
 
-    def get_outbox(self, fr: str, newest: str, limit: int):
+    def get_outbox(self, fr: str, newest: str, limit: int, offset: int):
         """
         get outbox messages
         :param fr: <skip>
@@ -903,7 +903,7 @@ class Steemd(Connector):
         :param limit: limit of the return data
         :return:
         """
-        return self.call('get_outbox', fr, newest, limit, api=PRIVATE_MESSAGE_API)
+        return self.call('get_outbox', fr, newest, limit, offset, api=PRIVATE_MESSAGE_API)
 
     def get_block_info(self, start: int, count: int):
         """ get block info """
