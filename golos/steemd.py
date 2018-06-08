@@ -701,6 +701,15 @@ class Steemd(Connector):
         """ get_content """
         return self.call('get_content', author, permlink, vote_limit, api=SOCIAL_NETWORK_API)
 
+    def get_post(self, identifier):
+        """ Get the full content of a post.
+
+            :param str identifier: Identifier for the post to upvote Takes
+                                   the form ``@author/permlink``
+        """
+        from golos.post import Post
+        return Post(identifier, steemd_instance=self)
+
     def get_content_replies(self, author: str, permlink: str, vote_limit: int = 10000):
         """ get_content_replies """
         return self.call('get_content_replies', author, permlink, vote_limit, api=SOCIAL_NETWORK_API)
