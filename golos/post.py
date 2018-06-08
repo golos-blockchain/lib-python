@@ -64,7 +64,8 @@ class Post(dict):
 
         # TODO: Check
         # This field is returned from blockchain, but it's empty. Fill it
-        post['reblogged_by'] = [i for i in self.steemd.get_reblogged_by(post_author, post_permlink) if i != post_author]
+        # Disabled: api_itr != _registered_apis.end(): Could not find API follow
+        #post['reblogged_by'] = [i for i in self.steemd.get_reblogged_by(post_author, post_permlink) if i != post_author]
 
         # Parse Times
         parse_times = ["active",
