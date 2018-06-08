@@ -140,7 +140,7 @@ class Steemd(Connector):
             dict: Account information.
 
         """
-        return first(self.call('get_accounts', [account], api=FOLLOW_API))
+        return first(self.call('get_accounts', [account], api=DATABASE_API))
 
     def get_all_usernames(self, last_user=''):
         """ Fetch the full list of STEEM usernames. """
@@ -423,7 +423,7 @@ class Steemd(Connector):
 
         This method is same as ``get_account``, but supports querying for multiple accounts at the time.
         """
-        return self.call('get_accounts', account_names, api=FOLLOW_API)
+        return self.call('get_accounts', account_names, api=DATABASE_API)
 
     def get_account_references(self, account_id: int):
         raise DeprecationWarning('This method not supported!')
