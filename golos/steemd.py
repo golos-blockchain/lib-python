@@ -224,7 +224,7 @@ class Steemd(Connector):
 
     def get_discussions_by_trending(self, discussion_query):
         """ get_discussions_by_trending """
-        return self.call('get_discussions_by_trending', discussion_query, api=SOCIAL_NETWORK_API)
+        return self.call('get_discussions_by_trending', discussion_query, api=TAGS_API)
 
     def get_comment_discussions_by_payout(self, discussion_query):
         raise DeprecationWarning('This method not supported!')
@@ -234,47 +234,47 @@ class Steemd(Connector):
 
     def get_discussions_by_created(self, discussion_query):
         """ get_discussions_by_created """
-        return self.call('get_discussions_by_created', discussion_query, api=SOCIAL_NETWORK_API)
+        return self.call('get_discussions_by_created', discussion_query, api=TAGS_API)
 
     def get_discussions_by_active(self, discussion_query):
         """ get_discussions_by_active """
-        return self.call('get_discussions_by_active', discussion_query, api=SOCIAL_NETWORK_API)
+        return self.call('get_discussions_by_active', discussion_query, api=TAGS_API)
 
     def get_discussions_by_cashout(self, discussion_query):
         """ get_discussions_by_cashout """
-        return self.call('get_discussions_by_cashout', discussion_query, api=SOCIAL_NETWORK_API)
+        return self.call('get_discussions_by_cashout', discussion_query, api=TAGS_API)
 
     def get_discussions_by_payout(self, discussion_query):
         """ get_discussions_by_payout """
-        return self.call('get_discussions_by_payout', discussion_query, api=SOCIAL_NETWORK_API)
+        return self.call('get_discussions_by_payout', discussion_query, api=TAGS_API)
 
     def get_discussions_by_votes(self, discussion_query):
         """ get_discussions_by_votes """
-        return self.call('get_discussions_by_votes', discussion_query, api=SOCIAL_NETWORK_API)
+        return self.call('get_discussions_by_votes', discussion_query, api=TAGS_API)
 
     def get_discussions_by_children(self, discussion_query):
         """ get_discussions_by_children """
-        return self.call('get_discussions_by_children', discussion_query, api=SOCIAL_NETWORK_API)
+        return self.call('get_discussions_by_children', discussion_query, api=TAGS_API)
 
     def get_discussions_by_hot(self, discussion_query):
         """ get_discussions_by_hot """
-        return self.call('get_discussions_by_hot', discussion_query, api=SOCIAL_NETWORK_API)
+        return self.call('get_discussions_by_hot', discussion_query, api=TAGS_API)
 
     def get_discussions_by_feed(self, discussion_query):
         """ get_discussions_by_feed """
-        return self.call('get_discussions_by_feed', discussion_query, api=SOCIAL_NETWORK_API)
+        return self.call('get_discussions_by_feed', discussion_query, api=TAGS_API)
 
     def get_discussions_by_blog(self, discussion_query):
         """ get_discussions_by_blog """
-        return self.call('get_discussions_by_blog', discussion_query, api=SOCIAL_NETWORK_API)
+        return self.call('get_discussions_by_blog', discussion_query, api=TAGS_API)
 
     def get_discussions_by_comments(self, discussion_query):
         """ get_discussions_by_comments """
-        return self.call('get_discussions_by_comments', discussion_query, api=SOCIAL_NETWORK_API)
+        return self.call('get_discussions_by_comments', discussion_query, api=TAGS_API)
 
     def get_discussions_by_promoted(self, discussion_query):
         """ get_discussions_by_promoted """
-        return self.call('get_discussions_by_promoted', discussion_query, api=SOCIAL_NETWORK_API)
+        return self.call('get_discussions_by_promoted', discussion_query, api=TAGS_API)
 
     def get_block_header(self, block_num):
         """ Get block headers, given a block number.
