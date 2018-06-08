@@ -83,12 +83,6 @@ class Account(dict):
             'GBG': Amount(self['savings_sbd_balance']).amount,
         }
 
-        rewards = {
-            'GOLOS': Amount(self['reward_steem_balance']).amount,
-            'GBG': Amount(self['reward_sbd_balance']).amount,
-            'GESTS': Amount(self['reward_vesting_balance']).amount,
-        }
-
         totals = {
             'GOLOS': sum([available['GOLOS'], savings['GOLOS']]),
             'GBG': sum([available['GBG'], savings['GBG']]),
@@ -100,7 +94,6 @@ class Account(dict):
         return {
             'available': available,
             'savings': savings,
-            'rewards': rewards,
             'total': total,
         }
 
