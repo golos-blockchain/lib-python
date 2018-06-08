@@ -24,11 +24,12 @@ class Post(dict):
         Args:
             post (str or dict): ``@author/permlink`` or raw ``comment`` as dictionary.
             steemd_instance (Steemd): Steemd node to connect to
-
+            vote_limit (int): limit number of upvotes
     """
 
-    def __init__(self, post, steemd_instance=None):
+    def __init__(self, post, steemd_instance=None, vote_limit=10000):
         self.steemd = steemd_instance or shared_steemd_instance()
+        self.vote_limit = vote_limit
         self.commit = Commit(steemd_instance=self.steemd)
 
         # will set these during refresh()
@@ -53,7 +54,7 @@ class Post(dict):
 
     def refresh(self):
         post_author, post_permlink = resolve_identifier(self.identifier)
-        post = self.steemd.get_content(post_author, post_permlink)
+        post = self.steemd.get_content(post_author, post_permlink, vote_limit=self.vote_limit)
         if not post["permlink"]:
             raise PostDoesNotExist("Post does not exist: %s" % self.identifier)
 
