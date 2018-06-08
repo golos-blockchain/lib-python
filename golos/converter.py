@@ -14,6 +14,7 @@ class Converter(object):
 
     def __init__(self, steemd_instance=None):
         self.steemd = steemd_instance or shared_steemd_instance()
+        self.config = self.steemd.get_config()
 
         self.CONTENT_CONSTANT = 2000000000000
 
@@ -64,7 +65,9 @@ class Converter(object):
 
         # determine voting power used
         used_power = int((voting_power * vote_pct) / 10000)
-        max_vote_denom = props['vote_power_reserve_rate'] * (5 * 60 * 60 * 24) / (60 * 60 * 24)
+        max_vote_denom = props['vote_regeneration_per_day'] \
+                * self.config.get('STEEMIT_VOTE_REGENERATION_SECONDS') \
+                / (60 * 60 * 24)
         used_power = int((used_power + max_vote_denom - 1) / max_vote_denom)
 
         # calculate vote rshares
