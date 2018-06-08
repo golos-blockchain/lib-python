@@ -38,9 +38,13 @@ op_names = [
     'decline_voting_rights',
     'reset_account',
     'set_reset_account',
-    'claim_reward_balance',
     'delegate_vesting_shares',
     'account_create_with_delegation',
+    'account_metadata',
+    'proposal_create',
+    'proposal_update',
+    'proposal_delete',
+    'chain_properties_update',
     'fill_convert_request',
     'author_reward',
     'curation_reward',
@@ -53,8 +57,8 @@ op_names = [
     'fill_transfer_from_savings',
     'hardfork',
     'comment_payout_update',
-    'return_vesting_delegation',
     'comment_benefactor_reward',
+    'return_vesting_delegation',
 ]
 
 #: assign operation ids
