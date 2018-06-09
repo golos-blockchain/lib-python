@@ -248,7 +248,7 @@ class Account(dict):
 
         Args:
             index (int): start index for get_account_history
-            limit (int): How many items are we interested in.
+            limit (int): How many items in account history will be scanned (any ops, not only filtered)
             start (int): (Optional) skip items until this index
             stop (int): (Optional) stop iteration early at this index
             order: (1, -1): 1 for chronological, -1 for reverse order
@@ -359,7 +359,7 @@ class Account(dict):
 
             :param str account: account name to get history for
             :param int first: sequence number of the first transaction to return
-            :param int limit: limit number of transactions to return
+            :param int limit: limit number of filtered operations to return
             :param array only_ops: Limit generator by these operations
         """
         cnt = 0
