@@ -12,6 +12,22 @@ from golos.utils import parse_time
 
 logger = logging.getLogger(__name__)
 
+virtual_operations = [
+    "fill_convert_request",
+    "author_reward",
+    "curation_reward",
+    "comment_reward",
+    "liquidity_reward",
+    "interest",
+    "fill_vesting_withdraw",
+    "fill_order",
+    "shutdown_witness",
+    "fill_transfer_from_savings",
+    "hardfork",
+    "comment_payout_update",
+    'comment_benefactor_reward',
+    'return_vesting_delegation'
+]
 
 class Blockchain(object):
     """ Access the blockchain and read data from it.
@@ -52,6 +68,7 @@ class Blockchain(object):
                     end_block=None,
                     batch_operations=False,
                     full_blocks=False,
+                    only_virtual_ops=False,
                     **kwargs):
         """ This call yields raw blocks or operations depending on
         ``full_blocks`` param.
@@ -94,11 +111,18 @@ class Blockchain(object):
                         raise StopIteration("Reached stop block at: #%s" % block_num)
 
                 if full_blocks:
-                    yield self.steem.get_block(block_num)
+                    block = self.steem.get_block(block_num)
+                    # inject block number
+                    block.update({"block_num": block_num})
+                    yield block
                 elif batch_operations:
-                    yield self.steem.get_ops_in_block(block_num, False)
+                    yield self.steem.get_ops_in_block(block_num, only_virtual_ops)
                 else:
-                    yield from self.steem.get_ops_in_block(block_num, False)
+                    ops = self.steem.get_ops_in_block(block_num, only_virtual_ops)
+                    for op in ops:
+                        # avoid yielding empty ops
+                        if op:
+                            yield op
 
             # next round
             start_block = head_block + 1
@@ -226,40 +250,56 @@ class Blockchain(object):
                filter_by: Union[str, list] = list(),
                *args,
                **kwargs):
-        """ Yield a stream of operations, starting with current head block.
+        """ Yield a stream of specific operations, starting with current head block.
+
+            This method can work in 2 modes:
+            1. Whether only real operations are requested, it will use get_block() API call, so you don't need to have
+            neigher operation_history nor accunt_history plugins enabled.
+            2. Whether you're requesting any of the virtual operations, your node should have operation_history or
+            accunt_history plugins enabled and appropriate settings for the history-related params should be set
+            (history-start-block, history-whitelist-ops or history-blacklist-ops).
+
+            The dict output is formated such that ``type`` caries the operation type, timestamp and block_num are taken
+            from the block the operation was stored in and the other key depend on the actual operation.
 
             Args:
+                start_block (int): Block to start with. If not provided, current (head) block is used.
+                end_block (int): Stop iterating at this block. If not provided, this generator will run forever (streaming mode).
                 filter_by (str, list): List of operations to filter for
         """
         if isinstance(filter_by, str):
             filter_by = [filter_by]
 
-        for ops in self.stream_from(*args, **kwargs):
+        if not bool(set(filter_by).intersection(virtual_operations)):
+            # uses get_block instead of get_ops_in_block
+            for block in self.stream_from(full_blocks=True, *args, **kwargs):
+                for tx in block.get("transactions"):
+                    for op in tx["operations"]:
+                        if not filter_by or op[0] in filter_by:
+                            r = {
+                                "type": op[0],
+                                "timestamp": block.get("timestamp"),
+                                "block_num": block.get("block_num")
+                            }
+                            r.update(op[1])
+                            yield r
+        else:
+            # uses get_ops_in_block
+            kwargs["only_virtual_ops"] = not bool(set(filter_by).difference(virtual_operations))
+            for op in self.stream_from(full_blocks=False, *args, **kwargs):
+                if kwargs.get('raw_output'):
+                    yield op
 
-            # deal with different self.stream_from() outputs
-            events = ops
-            if type(ops) == dict:
-                if 'witness_signature' in ops:
-                    raise ValueError('Blockchain.stream() is for operation level streams. '
-                                     'For block level streaming, use Blockchain.stream_from()')
-                events = [ops]
-
-            for event in events:
-                op_type, op = event['op']
-                if not filter_by or op_type in filter_by:
-                    # return unmodified steemd output
-                    if kwargs.get('raw_output'):
-                        yield event
-                    else:
-                        updated_op = op.copy()
-                        updated_op.update({
-                            "_id": self.hash_op(event),
-                            "type": op_type,
-                            "timestamp": parse_time(event.get("timestamp")),
-                            "block_num": event.get("block"),
-                            "trx_id": event.get("trx_id"),
-                        })
-                        yield updated_op
+                if not filter_by or op["op"][0] in filter_by:
+                    r = {
+                        "_id": self.hash_op(op),
+                        "type": op["op"][0],
+                        "timestamp": op.get("timestamp"),
+                        "block_num": op.get("block"),
+                        "trx_id": op.get("trx_id")
+                    }
+                    r.update(op["op"][1])
+                    yield r
 
     def history(self,
                 filter_by: Union[str, list] = list(),
