@@ -60,6 +60,9 @@ class Steemd(Connector):
         if not nodes:
             nodes = get_config_node_list() or ['https://ws.golos.io']
 
+        if isinstance(nodes, str):
+            nodes = [nodes]
+
         super(Steemd, self).__init__(nodes, **kwargs)
 
     @property
