@@ -940,10 +940,10 @@ class Commit(object):
                     "account_creation_fee": x,
                     "maximum_block_size": x,
                     "sbd_interest_rate": x,
-                    "create_account_with_golos_modifier": x,
-                    "create_account_delegation_ratio": x,
+                    "create_account_min_golos_fee": x,
+                    "create_account_min_delegation": x,
                     "create_account_delegation_time": x,
-                    "min_delegation_multiplier": x,
+                    "min_delegation": x,
                 }
         """
         if not account:
