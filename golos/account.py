@@ -83,12 +83,6 @@ class Account(dict):
             'GBG': Amount(self['savings_sbd_balance']).amount,
         }
 
-        rewards = {
-            'GOLOS': Amount(self['reward_steem_balance']).amount,
-            'GBG': Amount(self['reward_sbd_balance']).amount,
-            'GESTS': Amount(self['reward_vesting_balance']).amount,
-        }
-
         totals = {
             'GOLOS': sum([available['GOLOS'], savings['GOLOS']]),
             'GBG': sum([available['GBG'], savings['GBG']]),
@@ -100,7 +94,6 @@ class Account(dict):
         return {
             'available': available,
             'savings': savings,
-            'rewards': rewards,
             'total': total,
         }
 
@@ -255,7 +248,7 @@ class Account(dict):
 
         Args:
             index (int): start index for get_account_history
-            limit (int): How many items are we interested in.
+            limit (int): How many items in account history will be scanned (any ops, not only filtered)
             start (int): (Optional) skip items until this index
             stop (int): (Optional) stop iteration early at this index
             order: (1, -1): 1 for chronological, -1 for reverse order
@@ -355,3 +348,39 @@ class Account(dict):
                 raw_output=raw_output,
             )
             i -= (batch_size + 1)
+
+    def rawhistory(
+        self, first=99999999999,
+        limit=-1, only_ops=[], exclude_ops=[]
+    ):
+        """ Returns a generator for individual account transactions. The
+            latest operation will be first. This call can be used in a
+            ``for`` loop.
+
+            :param str account: account name to get history for
+            :param int first: sequence number of the first transaction to return
+            :param int limit: limit number of filtered operations to return
+            :param array only_ops: Limit generator by these operations
+        """
+        cnt = 0
+        _limit = 100
+        if _limit > first:
+            _limit = first
+        while first > 0:
+            # RPC call
+            txs = self.steemd.get_account_history(self.name, first, _limit)
+            for i in txs[::-1]:
+                if exclude_ops and i[1]["op"][0] in exclude_ops:
+                    continue
+                if not only_ops or i[1]["op"][0] in only_ops:
+                    cnt += 1
+                    yield i
+                    if limit >= 0 and cnt >= limit:
+                        break
+            if limit >= 0 and cnt >= limit:
+                break
+            if len(txs) < _limit:
+                break
+            first = txs[0][0] - 1  # new first
+            if _limit > first:
+                _limit = first

@@ -281,6 +281,25 @@ class WitnessProps(GrapheneObject):
             ]))
 
 
+class ChainProps(GrapheneObject):
+    def __init__(self, *args, **kwargs):
+        if isArgsThisClass(self, args):
+            self.data = args[0].data
+        else:
+            if len(args) == 1 and len(kwargs) == 0:
+                kwargs = args[0]
+
+            super().__init__(OrderedDict([
+                ('account_creation_fee', Amount(kwargs["account_creation_fee"])),
+                ('maximum_block_size', Uint32(kwargs["maximum_block_size"])),
+                ('sbd_interest_rate', Uint16(kwargs["sbd_interest_rate"])),
+                ('create_account_min_golos_fee', Amount(kwargs["create_account_min_golos_fee"])),
+                ('create_account_min_delegation', Amount(kwargs["create_account_min_delegation"])),
+                ('create_account_delegation_time', Uint32(kwargs["create_account_delegation_time"])),
+                ('min_delegation', Amount(kwargs["min_delegation"])),
+            ]))
+
+
 class Beneficiary(GrapheneObject):
     def __init__(self, *args, **kwargs):
         if isArgsThisClass(self, args):
@@ -634,6 +653,19 @@ class WitnessUpdate(GrapheneObject):
                 ('block_signing_key', PublicKey(kwargs["block_signing_key"], prefix=prefix)),
                 ('props', WitnessProps(kwargs["props"])),
                 ('fee', Amount(kwargs["fee"])),
+            ]))
+
+
+class ChainPropertiesUpdate(GrapheneObject):
+    def __init__(self, *args, **kwargs):
+        if isArgsThisClass(self, args):
+            self.data = args[0].data
+        else:
+            if len(args) == 1 and len(kwargs) == 0:
+                kwargs = args[0]
+            super().__init__(OrderedDict([
+                ('owner', String(kwargs["owner"])),
+                ('props', ChainProps(kwargs["props"])),
             ]))
 
 

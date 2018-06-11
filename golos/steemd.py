@@ -60,6 +60,9 @@ class Steemd(Connector):
         if not nodes:
             nodes = get_config_node_list() or ['https://ws.golos.io']
 
+        if isinstance(nodes, str):
+            nodes = [nodes]
+
         super(Steemd, self).__init__(nodes, **kwargs)
 
     @property
@@ -140,7 +143,7 @@ class Steemd(Connector):
             dict: Account information.
 
         """
-        return first(self.call('get_accounts', [account], api=FOLLOW_API))
+        return first(self.call('get_accounts', [account], api=DATABASE_API))
 
     def get_all_usernames(self, last_user=''):
         """ Fetch the full list of STEEM usernames. """
@@ -423,7 +426,7 @@ class Steemd(Connector):
 
         This method is same as ``get_account``, but supports querying for multiple accounts at the time.
         """
-        return self.call('get_accounts', account_names, api=FOLLOW_API)
+        return self.call('get_accounts', account_names, api=DATABASE_API)
 
     def get_account_references(self, account_id: int):
         raise DeprecationWarning('This method not supported!')
@@ -700,6 +703,15 @@ class Steemd(Connector):
     def get_content(self, author: str, permlink: str, vote_limit: int = 10000):
         """ get_content """
         return self.call('get_content', author, permlink, vote_limit, api=SOCIAL_NETWORK_API)
+
+    def get_post(self, identifier):
+        """ Get the full content of a post.
+
+            :param str identifier: Identifier for the post to upvote Takes
+                                   the form ``@author/permlink``
+        """
+        from golos.post import Post
+        return Post(identifier, steemd_instance=self)
 
     def get_content_replies(self, author: str, permlink: str, vote_limit: int = 10000):
         """ get_content_replies """
