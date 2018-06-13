@@ -121,6 +121,15 @@ class TransactionBuilder(dict):
         signedtx.sign(self.wifs, chain=self.steemd.chain_params)
         self["signatures"].extend(signedtx.json().get("signatures"))
 
+    def verify_authority(self):
+        """ Verify the authority of the signed transaction
+        """
+        try:
+            if not self.steemd.verify_authority(self.json()):
+                raise InsufficientAuthorityError
+        except Exception as e:
+            raise e
+
     def broadcast(self):
         """ Broadcast a transaction to the Steem network
 
