@@ -18,6 +18,9 @@ class Steem:
             no_broadcast (bool): If set to ``True``, committal actions like
             sending funds will have no effect (simulation only).
 
+            num_retries (int): Limit connection attempts to the node. Defaults to -1
+            (unlimited).
+
         Optional Arguments (kwargs):
 
         Args:
