@@ -44,7 +44,7 @@ class WsClient(BaseClient):
 
         self.return_with_args = kwargs.get('return_with_args', False)
 
-        self.num_retries = kwargs.get("num_retries", 20)
+        self.num_retries = kwargs.get("num_retries", -1)
         self.nodes = cycle(nodes)
         self.url = ''
         self.ws = None

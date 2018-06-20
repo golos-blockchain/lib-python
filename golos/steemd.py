@@ -5,10 +5,7 @@ from typing import List, Any, Union, Set
 from funcy import first
 
 from golos.block import Block
-from golos.consts import DATABASE_API, SOCIAL_NETWORK_API, FOLLOW_API, \
-    MARKET_HISTORY_API, PRIVATE_MESSAGE_API, \
-    ACCOUNT_BY_KEY_API, NETWORK_BROADCAST_API, \
-    RAW_BLOCK_API, BLOCK_INFO_API
+from golos.consts import *
 from golos.utils import resolve_identifier
 from golosbase.chains import known_chains
 from golosbase.connector import Connector
@@ -21,13 +18,11 @@ logger = logging.getLogger(__name__)
 # DATABASE_API = 'database_api'
 #   Doesn't exist
 #       get_reward_fund
-#       get_expiring_vesting_delegations
 #       get_comment_discussions_by_payout
 #       get_post_discussions_by_payout
 #       get_state
 #       get_account_references
 #       get_liquidity_queue
-#       get_vesting_delegations
 
 
 def get_config_node_list():
@@ -64,6 +59,9 @@ class Steemd(Connector):
     def __init__(self, nodes=None, **kwargs):
         if not nodes:
             nodes = get_config_node_list() or ['https://ws.golos.io']
+
+        if isinstance(nodes, str):
+            nodes = [nodes]
 
         super(Steemd, self).__init__(nodes, **kwargs)
 
@@ -213,21 +211,23 @@ class Steemd(Connector):
     def get_reward_fund(self, fund_name: str = 'post'):
         raise DeprecationWarning('This method not supported!')
 
-    def get_expiring_vesting_delegations(self, account,
-                                         start, limit):
-        raise DeprecationWarning('This method not supported!')
+    def get_expiring_vesting_delegations(self,
+                                         account: str,
+                                         from_time: PointInTime,
+                                         limit: int = 100):
+        return self.call('get_expiring_vesting_delegations', account, from_time, limit, api=DATABASE_API)
 
     def get_trending_tags(self, after_tag, limit):
         """ get_trending_tags """
-        return self.call('get_trending_tags', after_tag, limit, api=SOCIAL_NETWORK_API)
+        return self.call('get_trending_tags', after_tag, limit, api=TAGS_API)
 
-    def get_tags_used_by_author(self, account):
+    def get_tags_used_by_author(self, account: str):
         """ get_tags_used_by_author """
-        return self.call('get_tags_used_by_author', account, api=SOCIAL_NETWORK_API)
+        return self.call('get_tags_used_by_author', account, api=TAGS_API)
 
     def get_discussions_by_trending(self, discussion_query):
         """ get_discussions_by_trending """
-        return self.call('get_discussions_by_trending', discussion_query, api=SOCIAL_NETWORK_API)
+        return self.call('get_discussions_by_trending', discussion_query, api=TAGS_API)
 
     def get_comment_discussions_by_payout(self, discussion_query):
         raise DeprecationWarning('This method not supported!')
@@ -237,47 +237,47 @@ class Steemd(Connector):
 
     def get_discussions_by_created(self, discussion_query):
         """ get_discussions_by_created """
-        return self.call('get_discussions_by_created', discussion_query, api=SOCIAL_NETWORK_API)
+        return self.call('get_discussions_by_created', discussion_query, api=TAGS_API)
 
     def get_discussions_by_active(self, discussion_query):
         """ get_discussions_by_active """
-        return self.call('get_discussions_by_active', discussion_query, api=SOCIAL_NETWORK_API)
+        return self.call('get_discussions_by_active', discussion_query, api=TAGS_API)
 
     def get_discussions_by_cashout(self, discussion_query):
         """ get_discussions_by_cashout """
-        return self.call('get_discussions_by_cashout', discussion_query, api=SOCIAL_NETWORK_API)
+        return self.call('get_discussions_by_cashout', discussion_query, api=TAGS_API)
 
     def get_discussions_by_payout(self, discussion_query):
         """ get_discussions_by_payout """
-        return self.call('get_discussions_by_payout', discussion_query, api=SOCIAL_NETWORK_API)
+        return self.call('get_discussions_by_payout', discussion_query, api=TAGS_API)
 
     def get_discussions_by_votes(self, discussion_query):
         """ get_discussions_by_votes """
-        return self.call('get_discussions_by_votes', discussion_query, api=SOCIAL_NETWORK_API)
+        return self.call('get_discussions_by_votes', discussion_query, api=TAGS_API)
 
     def get_discussions_by_children(self, discussion_query):
         """ get_discussions_by_children """
-        return self.call('get_discussions_by_children', discussion_query, api=SOCIAL_NETWORK_API)
+        return self.call('get_discussions_by_children', discussion_query, api=TAGS_API)
 
     def get_discussions_by_hot(self, discussion_query):
         """ get_discussions_by_hot """
-        return self.call('get_discussions_by_hot', discussion_query, api=SOCIAL_NETWORK_API)
+        return self.call('get_discussions_by_hot', discussion_query, api=TAGS_API)
 
     def get_discussions_by_feed(self, discussion_query):
         """ get_discussions_by_feed """
-        return self.call('get_discussions_by_feed', discussion_query, api=SOCIAL_NETWORK_API)
+        return self.call('get_discussions_by_feed', discussion_query, api=TAGS_API)
 
     def get_discussions_by_blog(self, discussion_query):
         """ get_discussions_by_blog """
-        return self.call('get_discussions_by_blog', discussion_query, api=SOCIAL_NETWORK_API)
+        return self.call('get_discussions_by_blog', discussion_query, api=TAGS_API)
 
     def get_discussions_by_comments(self, discussion_query):
         """ get_discussions_by_comments """
-        return self.call('get_discussions_by_comments', discussion_query, api=SOCIAL_NETWORK_API)
+        return self.call('get_discussions_by_comments', discussion_query, api=TAGS_API)
 
     def get_discussions_by_promoted(self, discussion_query):
         """ get_discussions_by_promoted """
-        return self.call('get_discussions_by_promoted', discussion_query, api=SOCIAL_NETWORK_API)
+        return self.call('get_discussions_by_promoted', discussion_query, api=TAGS_API)
 
     def get_block_header(self, block_num):
         """ Get block headers, given a block number.
@@ -347,7 +347,7 @@ class Steemd(Connector):
 
     def get_ops_in_block(self, block_num, virtual_only):
         """ get_ops_in_block """
-        return self.call('get_ops_in_block', block_num, virtual_only, api=DATABASE_API)
+        return self.call('get_ops_in_block', block_num, virtual_only, api=OPERATION_HISTORY_API)
 
     def get_state(self, path):
         raise DeprecationWarning('This method not supported!')
@@ -386,7 +386,7 @@ class Steemd(Connector):
               {'base': '0.093 SBD', 'quote': '1.010 STEEM'},
 
         """
-        return self.call('get_feed_history', api=DATABASE_API)
+        return self.call('get_feed_history', api=WITNESS_API)
 
     def get_current_median_history_price(self):
         """ Get the average STEEM/SBD price.
@@ -398,11 +398,15 @@ class Steemd(Connector):
             {'base': '0.093 SBD', 'quote': '1.010 STEEM'}
 
         """
-        return self.call('get_current_median_history_price', api=DATABASE_API)
+        return self.call('get_current_median_history_price', api=WITNESS_API)
+
+    def get_miner_queue(self):
+        """ get_miner_queue """
+        return self.call('get_miner_queue', api=WITNESS_API)
 
     def get_witness_schedule(self):
         """ get_witness_schedule """
-        return self.call('get_witness_schedule', api=DATABASE_API)
+        return self.call('get_witness_schedule', api=WITNESS_API)
 
     def get_hardfork_version(self):
         """ Get the current version of the chain.
@@ -529,7 +533,7 @@ class Steemd(Connector):
 
 
         """
-        return self.call('get_account_history', account, index_from, limit, api=DATABASE_API)
+        return self.call('get_account_history', account, index_from, limit, api=ACCOUNT_HISTORY_API)
 
     def get_owner_history(self, account: str):
         """ get_owner_history """
@@ -618,7 +622,7 @@ class Steemd(Connector):
 
     def get_transaction(self, transaction_id: str):
         """ get_transaction """
-        return self.call('get_transaction', transaction_id, api=DATABASE_API)
+        return self.call('get_transaction', transaction_id, api=OPERATION_HISTORY_API)
 
     def get_required_signatures(self, signed_transaction: SignedTransaction, available_keys: list):
         """ get_required_signatures """
@@ -636,7 +640,7 @@ class Steemd(Connector):
         """ verify_account_authority """
         return self.call('verify_account_authority', account, keys, api=DATABASE_API)
 
-    def get_active_votes(self, author: str, permlink: str):
+    def get_active_votes(self, author: str, permlink: str, vote_limit: int = 10000):
         """ Get all votes for the given post.
 
         Args:
@@ -669,9 +673,9 @@ class Steemd(Connector):
                  'voter': 'flourish',
                  'weight': '2334690471157'}]
         """
-        return self.call('get_active_votes', author, permlink, api=SOCIAL_NETWORK_API)
+        return self.call('get_active_votes', author, permlink, vote_limit, api=SOCIAL_NETWORK_API)
 
-    def get_account_votes(self, account):
+    def get_account_votes(self, account, votes_from: int = 0, vote_limit: int = 10000):
         """ All votes the given account ever made.
 
         Returned votes are in the following format:
@@ -686,31 +690,43 @@ class Steemd(Connector):
 
         Args:
             account (str): STEEM username that we are looking up.
+            votes_from (int): starting index
+            vote_limit (int): limit of returned votes
 
         Returns:
             list: List of votes.
 
 
         """
-        return self.call('get_account_votes', account, api=SOCIAL_NETWORK_API)
+        return self.call('get_account_votes', account, votes_from, vote_limit, api=SOCIAL_NETWORK_API)
 
-    def get_content(self, author: str, permlink: str):
+    def get_content(self, author: str, permlink: str, vote_limit: int = 10000):
         """ get_content """
-        return self.call('get_content', author, permlink, api=SOCIAL_NETWORK_API)
+        return self.call('get_content', author, permlink, vote_limit, api=SOCIAL_NETWORK_API)
 
-    def get_content_replies(self, author, permlink):
+    def get_post(self, identifier):
+        """ Get the full content of a post.
+
+            :param str identifier: Identifier for the post to upvote Takes
+                                   the form ``@author/permlink``
+        """
+        from golos.post import Post
+        return Post(identifier, steemd_instance=self)
+
+    def get_content_replies(self, author: str, permlink: str, vote_limit: int = 10000):
         """ get_content_replies """
-        return self.call('get_content_replies', author, permlink, api=SOCIAL_NETWORK_API)
+        return self.call('get_content_replies', author, permlink, vote_limit, api=SOCIAL_NETWORK_API)
 
-    def get_all_content_replies(self, author: str, permlink: str):
+    def get_all_content_replies(self, author: str, permlink: str, vote_limit: int = 10000):
         """ get all content replies """
-        return self.call('get_all_content_replies', author, permlink, api=SOCIAL_NETWORK_API)
+        return self.call('get_all_content_replies', author, permlink, vote_limit, api=SOCIAL_NETWORK_API)
 
     def get_discussions_by_author_before_date(self,
                                               author: str,
                                               start_permlink: str,
                                               before_date: PointInTime,
-                                              limit: int):
+                                              limit: int,
+                                              vote_limit: int = 10000):
         """ get_discussions_by_author_before_date """
         return self.call(
             'get_discussions_by_author_before_date',
@@ -718,6 +734,7 @@ class Steemd(Connector):
             start_permlink,
             before_date,
             limit,
+            vote_limit,
             api=SOCIAL_NETWORK_API)
 
     def get_trending_categories(self, after: str, limit: int):
@@ -738,38 +755,48 @@ class Steemd(Connector):
 
     def get_languages(self):
         """ get languages """
-        return self.call('get_languages', api=SOCIAL_NETWORK_API)
+        return self.call('get_languages', api=TAGS_API)
 
-    def get_replies_by_last_update(self, account: str, start_permlink: str, limit: int):
+    def get_replies_by_last_update(self, account: str, start_permlink: str, limit: int, vote_limit: int = 10000):
         """ get_replies_by_last_update """
-        return self.call('get_replies_by_last_update', account, start_permlink, limit, api=SOCIAL_NETWORK_API)
+        return self.call('get_replies_by_last_update',
+                         account,
+                         start_permlink,
+                         limit,
+                         vote_limit,
+                         api=SOCIAL_NETWORK_API)
 
     def get_witnesses(self, witness_ids: list):
         """ get_witnesses """
-        return self.call('get_witnesses', witness_ids, api=DATABASE_API)
+        return self.call('get_witnesses', witness_ids, api=WITNESS_API)
 
     def get_witness_by_account(self, account: str):
         """ get_witness_by_account """
-        return self.call('get_witness_by_account', account, api=DATABASE_API)
+        return self.call('get_witness_by_account', account, api=WITNESS_API)
 
     def get_witnesses_by_vote(self, from_account: str, limit: int):
         """ get_witnesses_by_vote """
-        return self.call('get_witnesses_by_vote', from_account, limit, api=DATABASE_API)
+        return self.call('get_witnesses_by_vote', from_account, limit, api=WITNESS_API)
 
     def lookup_witness_accounts(self, from_account: str, limit: int):
         """ lookup_witness_accounts """
-        return self.call('lookup_witness_accounts', from_account, limit, api=DATABASE_API)
+        return self.call('lookup_witness_accounts', from_account, limit, api=WITNESS_API)
 
     def get_witness_count(self):
         """ get_witness_count """
-        return self.call('get_witness_count', api=DATABASE_API)
+        return self.call('get_witness_count', api=WITNESS_API)
 
     def get_active_witnesses(self):
         """ Get a list of currently active witnesses. """
-        return self.call('get_active_witnesses', api=DATABASE_API)
+        return self.call('get_active_witnesses', api=WITNESS_API)
 
-    def get_vesting_delegations(self, account: str, from_account: str, limit: int):
-        raise DeprecationWarning('This method not supported!')
+    def get_vesting_delegations(self,
+                                account: str,
+                                from_account: str,
+                                limit: int = 100,
+                                delegation_type: str = 'delegated'):
+        """ get_vesting_delegations """
+        return self.call('get_vesting_delegations', account, from_account, limit, delegation_type, api=DATABASE_API)
 
     def login(self, username: str, password: str):
         raise DeprecationWarning('This method not supported!')
@@ -808,9 +835,11 @@ class Steemd(Connector):
         """ get_blog """
         return self.call('get_blog', account, entry_id, limit, api=FOLLOW_API)
 
-    def get_account_reputations(self, account: str, limit: int):
+    def get_account_reputations(self, accounts: Union[List[str], str], limit: int):
         """ get_account_reputations """
-        return self.call('get_account_reputations', account, limit, api=FOLLOW_API)
+        if not isinstance(accounts, (list, tuple)):
+            accounts = [accounts]
+        return self.call('get_account_reputations', accounts, limit, api=FOLLOW_API)
 
     def get_reblogged_by(self, author: str, permlink: str):
         """ get_reblogged_by """
@@ -869,16 +898,16 @@ class Steemd(Connector):
         """ get raw block """
         return self.call('get_raw_block', block, api=RAW_BLOCK_API)
 
-    def get_inbox(self, to: str, newest: str, limit: int):
+    def get_inbox(self, to: str, newest: str, limit: int, offset: int):
         """
         get inbox messages
         :param to: <skip>
         :param newest: ISO-formatted datetime string, for example: datetime.utcnow().isoformat()
         :param limit: limit of the return data
         """
-        return self.call('get_inbox', to, newest, limit, api=PRIVATE_MESSAGE_API)
+        return self.call('get_inbox', to, newest, limit, offset, api=PRIVATE_MESSAGE_API)
 
-    def get_outbox(self, fr: str, newest: str, limit: int):
+    def get_outbox(self, fr: str, newest: str, limit: int, offset: int):
         """
         get outbox messages
         :param fr: <skip>
@@ -886,7 +915,7 @@ class Steemd(Connector):
         :param limit: limit of the return data
         :return:
         """
-        return self.call('get_outbox', fr, newest, limit, api=PRIVATE_MESSAGE_API)
+        return self.call('get_outbox', fr, newest, limit, offset, api=PRIVATE_MESSAGE_API)
 
     def get_block_info(self, start: int, count: int):
         """ get block info """
@@ -895,6 +924,14 @@ class Steemd(Connector):
     def get_blocks_with_info(self, start: int, count: int):
         """ get blocks with info """
         return self.call('get_blocks_with_info', start, count, api=BLOCK_INFO_API)
+
+    def get_proposed_transaction(self, account: str) -> list:
+        """ get_proposed_transaction """
+        return self.call('get_proposed_transaction', account, api=DATABASE_API)
+
+    def get_database_info(self):
+        """ get_database_info """
+        return self.call('get_database_info', api=DATABASE_API)
 
 
 if __name__ == '__main__':

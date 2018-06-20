@@ -929,6 +929,41 @@ class Commit(object):
         )
         return self.finalizeOp(op, account, "active")
 
+    def chain_properties_update(self, props, account=None):
+        """ Update votable chain params
+            :param dict props: Properties
+            :param str account: (optional) witness account name
+
+             Properties:::
+
+                {
+                    "account_creation_fee": x,
+                    "maximum_block_size": x,
+                    "sbd_interest_rate": x,
+                    "create_account_min_golos_fee": x,
+                    "create_account_min_delegation": x,
+                    "create_account_delegation_time": x,
+                    "min_delegation": x,
+                }
+        """
+        if not account:
+            account = configStorage.get("default_account")
+        if not account:
+            raise ValueError("You need to provide an account")
+
+        try:
+            PublicKey(signing_key)
+        except Exception as e:
+            raise e
+
+        op = operations.ChainPropertiesUpdate(
+            **{
+                "owner": account,
+                "props": props,
+            }
+        )
+        return self.finalizeOp(op, account, "active")
+
     def decode_memo(self, enc_memo):
         """ Try to decode an encrypted memo
         """
