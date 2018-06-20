@@ -11,7 +11,7 @@ from golos.commit import Commit
 from golos.instance import shared_steemd_instance
 from golos.utils import construct_identifier, resolve_identifier, parse_time, remove_from_dict, calculate_trending, \
     calculate_hot
-from golosbase.exceptions import PostDoesNotExist, VotingInvalidOnArchivedPost
+from golosbase.exceptions import PostDoesNotExist, VotingInvalidOnArchivedPost, RPCError
 from golosbase.operations import CommentOptions
 
 log = logging.getLogger(__name__)
@@ -64,8 +64,12 @@ class Post(dict):
 
         # TODO: Check
         # This field is returned from blockchain, but it's empty. Fill it
-        # Disabled: api_itr != _registered_apis.end(): Could not find API follow
-        #post['reblogged_by'] = [i for i in self.steemd.get_reblogged_by(post_author, post_permlink) if i != post_author]
+        try:
+            reblogged_by = [i for i in self.steemd.get_reblogged_by(post_author, post_permlink) if i != post_author]
+        except RPCError:
+            reblogged_by = []
+
+        post['reblogged_by'] = reblogged_by
 
         # Parse Times
         parse_times = ["active",
