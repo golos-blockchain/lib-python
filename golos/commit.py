@@ -929,8 +929,9 @@ class Commit(object):
         )
         return self.finalizeOp(op, account, "active")
 
-    def chain_properties_update(self, props, account=None):
+    def chain_properties_update(self, signing_key, props, account=None):
         """ Update votable chain params
+            :param pubkey signing_key: Signing key
             :param dict props: Properties
             :param str account: (optional) witness account name
 
@@ -1347,6 +1348,20 @@ class Commit(object):
             }
         )
         return self.finalizeOp(op, account["name"], "active")
+
+    def account_metadata(self, json_metadata, account=None):
+        if not account:
+            account = configStorage.get("default_account")
+        if not account:
+            raise ValueError("You need to provide an account")
+
+        op = operations.AccountMetadata(
+            **{
+                "account": account,
+                "json_metadata": json_metadata
+            }
+        )
+        return self.finalizeOp(op, account, 'posting')
 
     def comment_options(self, identifier, options, account=None):
         """ Set the comment options
