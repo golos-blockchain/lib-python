@@ -1350,6 +1350,12 @@ class Commit(object):
         return self.finalizeOp(op, account["name"], "active")
 
     def account_metadata(self, json_metadata, account=None):
+        """ Update account metadata with posting key
+
+            :param json_metadata: new value of json_metadata
+            :param account: changed account
+        :return:
+        """
         if not account:
             account = configStorage.get("default_account")
         if not account:
