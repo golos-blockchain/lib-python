@@ -19,7 +19,7 @@ from golos.utils import (
     resolve_identifier,
 )
 from golos.wallet import Wallet
-from golosbase import memo
+from golosbase import memo, transactions
 from golosbase import operations
 from golosbase.account import PrivateKey, PublicKey
 from golosbase.exceptions import AccountExistsException, MissingKeyError
@@ -50,7 +50,6 @@ STEEMIT_1_PERCENT = (STEEMIT_100_PERCENT / 100)
 # custom_binary [any]
 
 # custom [active]
-# delete_comment [posting]
 
 # enable_content_editing_operation [active]
 
@@ -373,6 +372,31 @@ class Commit(object):
                 "author": post_author,
                 "permlink": post_permlink,
                 "weight": int(weight * STEEMIT_1_PERCENT)
+            })
+
+        return self.finalizeOp(op, account, "posting")
+
+    def delete_comment(self, identifier, account=None):
+        """ Vote for a post
+
+            :param str identifier: Identifier for the post to upvote Takes
+                                   the form ``author/permlink``
+            :param str account: Voter to use for voting. (Optional)
+        """
+
+        if not account:
+            account = configStorage.get("default_account")
+        if not account:
+            raise ValueError("You need to provide a voter account")
+
+        post_author, post_permlink = resolve_identifier(identifier)
+
+        assert post_author == account, 'You cannot delete foreign posts'
+
+        op = operations.DeleteComment(
+            **{
+                "author": account,
+                "permlink": post_permlink,
             })
 
         return self.finalizeOp(op, account, "posting")
@@ -1354,7 +1378,6 @@ class Commit(object):
 
             :param json_metadata: new value of json_metadata
             :param account: changed account
-        :return:
         """
         if not account:
             account = configStorage.get("default_account")
@@ -1368,6 +1391,74 @@ class Commit(object):
             }
         )
         return self.finalizeOp(op, account, 'posting')
+
+    def proposal_create(
+            self,
+            title: str,
+            proposed_operations: list,
+            expiration_time: int = 7 * 24 * 60 * 60,
+            memo: str = '',
+            review_period_time: int = None,
+            extensions: list = None,
+            account: str = None):
+        """ Propose transaction with list of operations that require approval from users for
+
+            :param str title: title of proposed transaction
+            :param list proposed_operations: list of operations in purposed transaction. All non GrapheneObject object
+                and operations that are not in golosbase.operationids will be purged
+            :param int expiration_time: maximum time allowed for transaction
+            :param str memo: notice
+            :param int review_period_time: time to make a decision of the transaction participants
+            :param list extensions: extensions, by analogy with other operations
+            :param str account: author of proposed transaction
+        """
+        if not account:
+            account = configStorage.get("default_account")
+        if not account:
+            raise ValueError("You need to provide an account")
+
+        review_period_time = None if review_period_time is None else transactions.fmt_time_from_now(review_period_time)
+
+        op = operations.ProposalCreate(
+            **{
+                'author': account,
+                'title': title,
+                'memo': memo,
+                'proposed_operations': proposed_operations,
+                'expiration_time': transactions.fmt_time_from_now(expiration_time),
+                'review_period_time': review_period_time,
+                'extensions': extensions
+            }
+        )
+        return self.finalizeOp(op, account, 'active')
+
+    def proposal_delete(self,
+                        author: str,
+                        title: str,
+                        extensions: list = None,
+                        account: str = None):
+        """ Request to delete proposed transaction. In case of refusal of one of the participants he can remove proposed
+            transaction
+
+            :param str author: author of proposed transaction
+            :param str title: title of proposed transaction
+            :param list extensions: extensions, by analogy with other operations
+            :param str account: username of requester
+        """
+        if not account:
+            account = configStorage.get("default_account")
+        if not account:
+            raise ValueError("You need to provide an account")
+
+        op = operations.ProposalDelete(
+            **{
+                'author': author,
+                'title': title,
+                'requester': account,
+                'extensions': extensions
+            }
+        )
+        return self.finalizeOp(op, account, 'active')
 
     def comment_options(self, identifier, options, account=None):
         """ Set the comment options

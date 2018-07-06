@@ -331,6 +331,17 @@ class Map:
         return json.dumps(r)
 
 
+class OperationWrapper:
+    def __init__(self, data):
+        self.data = data
+
+    def __bytes__(self):
+        return bytes(self.data)
+
+    def __str__(self):
+        return json.dumps({'op': json.loads(str(self.data))})
+
+
 class Id:
     def __init__(self, d):
         self.data = Varint32(d)
