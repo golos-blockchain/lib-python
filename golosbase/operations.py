@@ -803,6 +803,38 @@ class ProposalCreate(GrapheneObject):
             ]))
 
 
+class ProposalUpdate(GrapheneObject):
+    def __init__(self, *args, **kwargs):
+        if isArgsThisClass(self, args):
+            self.data = args[0].data
+        else:
+            if len(args) == 1 and len(kwargs) == 0:
+                kwargs = args[0]
+
+            active_approvals_to_add = [String(str(x)) for x in kwargs.get('active_approvals_to_add') or []]
+            active_approvals_to_remove = [String(str(x)) for x in kwargs.get('active_approvals_to_remove') or []]
+            owner_approvals_to_add = [String(str(x)) for x in kwargs.get('owner_approvals_to_add') or []]
+            owner_approvals_to_remove = [String(str(x)) for x in kwargs.get('owner_approvals_to_remove') or []]
+            posting_approvals_to_add = [String(str(x)) for x in kwargs.get('posting_approvals_to_add') or []]
+            posting_approvals_to_remove = [String(str(x)) for x in kwargs.get('posting_approvals_to_remove') or []]
+            key_approvals_to_add = [String(str(x)) for x in kwargs.get('key_approvals_to_add') or []]
+            key_approvals_to_remove = [String(str(x)) for x in kwargs.get('key_approvals_to_remove') or []]
+
+            super().__init__(OrderedDict([
+                ('author', String(kwargs['author'])),
+                ('title', String(kwargs['title'])),
+                ('active_approvals_to_add', Array(active_approvals_to_add)),
+                ('active_approvals_to_remove', Array(active_approvals_to_remove)),
+                ('owner_approvals_to_add', Array(owner_approvals_to_add)),
+                ('owner_approvals_to_remove', Array(owner_approvals_to_remove)),
+                ('posting_approvals_to_add', Array(posting_approvals_to_add)),
+                ('posting_approvals_to_remove', Array(posting_approvals_to_remove)),
+                ('key_approvals_to_add', Array(key_approvals_to_add)),
+                ('key_approvals_to_remove', Array(key_approvals_to_remove)),
+                ('extensions', Array(kwargs.get('extensions') or [])),
+            ]))
+
+
 class ProposalDelete(GrapheneObject):
     def __init__(self, *args, **kwargs):
         if isArgsThisClass(self, args):

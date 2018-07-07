@@ -3,6 +3,7 @@ import logging
 import random
 import re
 from datetime import datetime, timedelta
+from typing import Union
 
 import voluptuous as vo
 from funcy import none, silent, first
@@ -1431,6 +1432,64 @@ class Commit(object):
             }
         )
         return self.finalizeOp(op, account, 'active')
+
+    def proposal_update(self,
+                        author: str,
+                        title: str,
+                        username: Union[str, list] = None,
+                        keys: Union[str, list] = None,
+                        permission: str = 'posting',
+                        remove: bool = False,
+                        extensions: list = None,
+                        account: str = None):
+        """ Request to delete proposed transaction. In case of refusal of one of the participants he can remove proposed
+            transaction.
+
+            .. note:: This code wasn't tested for multisig accounts (with passing keys param)
+
+            :param str author: author of proposed transaction
+            :param str title: title of proposed transaction
+            :param str, list username: account(s) for approvals, default is account field
+            :param str keys: public key(s) used for multisig accounts
+            :param str permission: the required permission for signing (active, owner, posting)
+            :param str remove: should approvals be removed, default is adding
+            :param list extensions: extensions, by analogy with other operations
+            :param str account: the account that authorizes the operation
+        """
+        if not account:
+            account = configStorage.get("default_account")
+        if not account:
+            raise ValueError("You need to provide an account")
+
+        assert permission in {'posting', 'active', 'owner'}, 'Invalid permission'
+
+        if username:
+            if not isinstance(username, list):
+                username = [username]
+        else:
+            username = [account]
+
+        payload = {}
+
+        approval_dict_key = '{permission}_approvals_to_{action}'.format(permission=permission,
+                                                                        action='remove' if remove else 'add')
+        payload[approval_dict_key] = username
+
+        if keys:
+            if not isinstance(keys, list):
+                keys = [keys]
+            keys = [PublicKey(k) for k in keys]
+            payload['key_approvals_to_{}'.format('remove' if remove else 'add')] = keys
+
+        op = operations.ProposalUpdate(
+            **{
+                **payload,
+                'author': author,
+                'title': title,
+                'extensions': extensions
+            }
+        )
+        return self.finalizeOp(op, account, permission)
 
     def proposal_delete(self,
                         author: str,
