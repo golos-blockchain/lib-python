@@ -8,7 +8,7 @@ from golosbase.account import PublicKey
 from golosbase.operationids import operations
 from golosbase.types import (Int16, Uint16, Uint32, Uint64, String, Bytes, Array,
                              PointInTime, Bool, Optional, Map, Id, JsonObj,
-                             StaticVariant)
+                             StaticVariant, OperationWrapper)
 
 default_prefix = "GLS"
 
@@ -221,6 +221,20 @@ class Comment(GrapheneObject):
                 ('title', String(kwargs["title"])),
                 ('body', String(kwargs["body"])),
                 ('json_metadata', String(meta)),
+            ]))
+
+
+class DeleteComment(GrapheneObject):
+    def __init__(self, *args, **kwargs):
+        if isArgsThisClass(self, args):
+            self.data = args[0].data
+        else:
+            if len(args) == 1 and len(kwargs) == 0:
+                kwargs = args[0]
+
+            super().__init__(OrderedDict([
+                ('author', String(kwargs['author'])),
+                ('permlink', String(kwargs['permlink'])),
             ]))
 
 
@@ -438,6 +452,27 @@ class AccountUpdate(GrapheneObject):
                 ('active', Optional(active)),
                 ('posting', Optional(posting)),
                 ('memo_key', PublicKey(kwargs["memo_key"], prefix=prefix)),
+                ('json_metadata', String(meta)),
+            ]))
+
+
+class AccountMetadata(GrapheneObject):
+    def __init__(self, *args, **kwargs):
+        if isArgsThisClass(self, args):
+            self.data = args[0].data
+        else:
+            if len(args) == 1 and len(kwargs) == 0:
+                kwargs = args[0]
+
+            meta = ""
+            if kwargs.get('json_metadata'):
+                if isinstance(kwargs["json_metadata"], dict):
+                    meta = json.dumps(kwargs["json_metadata"])
+                else:
+                    meta = kwargs["json_metadata"]
+
+            super().__init__(OrderedDict([
+                ('account', String(kwargs["account"])),
                 ('json_metadata', String(meta)),
             ]))
 
@@ -737,6 +772,81 @@ class CommentOptions(GrapheneObject):
                 ('allow_votes', Bool(bool(kwargs["allow_votes"]))),
                 ('allow_curation_rewards', Bool(bool(kwargs["allow_curation_rewards"]))),
                 ('extensions', extensions),
+            ]))
+
+
+class ProposalCreate(GrapheneObject):
+    def __init__(self, *args, **kwargs):
+        if isArgsThisClass(self, args):
+            self.data = args[0].data
+        else:
+            if len(args) == 1 and len(kwargs) == 0:
+                kwargs = args[0]
+
+            assert kwargs['proposed_operations'], 'proposed_operations cannot be empty!'
+
+            if isinstance(kwargs['proposed_operations'][0], GrapheneObject):
+                proposed_operations = [OperationWrapper(Operation(op)) for op in kwargs['proposed_operations']]
+            else:
+                proposed_operations = [OperationWrapper(Operation(op['op'])) for op in kwargs['proposed_operations']]
+
+            review_period_time = PointInTime(kwargs['review_period_time']) if kwargs.get('review_period_time') else None
+
+            super().__init__(OrderedDict([
+                ('author', String(kwargs['author'])),
+                ('title', String(kwargs['title'])),
+                ('memo', String(kwargs.get('memo', ''))),
+                ('expiration_time', PointInTime(kwargs['expiration_time'])),
+                ('proposed_operations', Array(proposed_operations)),
+                ('review_period_time', Optional(review_period_time)),
+                ('extensions', Array(kwargs.get('extensions') or [])),
+            ]))
+
+
+class ProposalUpdate(GrapheneObject):
+    def __init__(self, *args, **kwargs):
+        if isArgsThisClass(self, args):
+            self.data = args[0].data
+        else:
+            if len(args) == 1 and len(kwargs) == 0:
+                kwargs = args[0]
+
+            active_approvals_to_add = [String(str(x)) for x in kwargs.get('active_approvals_to_add') or []]
+            active_approvals_to_remove = [String(str(x)) for x in kwargs.get('active_approvals_to_remove') or []]
+            owner_approvals_to_add = [String(str(x)) for x in kwargs.get('owner_approvals_to_add') or []]
+            owner_approvals_to_remove = [String(str(x)) for x in kwargs.get('owner_approvals_to_remove') or []]
+            posting_approvals_to_add = [String(str(x)) for x in kwargs.get('posting_approvals_to_add') or []]
+            posting_approvals_to_remove = [String(str(x)) for x in kwargs.get('posting_approvals_to_remove') or []]
+            key_approvals_to_add = [String(str(x)) for x in kwargs.get('key_approvals_to_add') or []]
+            key_approvals_to_remove = [String(str(x)) for x in kwargs.get('key_approvals_to_remove') or []]
+
+            super().__init__(OrderedDict([
+                ('author', String(kwargs['author'])),
+                ('title', String(kwargs['title'])),
+                ('active_approvals_to_add', Array(active_approvals_to_add)),
+                ('active_approvals_to_remove', Array(active_approvals_to_remove)),
+                ('owner_approvals_to_add', Array(owner_approvals_to_add)),
+                ('owner_approvals_to_remove', Array(owner_approvals_to_remove)),
+                ('posting_approvals_to_add', Array(posting_approvals_to_add)),
+                ('posting_approvals_to_remove', Array(posting_approvals_to_remove)),
+                ('key_approvals_to_add', Array(key_approvals_to_add)),
+                ('key_approvals_to_remove', Array(key_approvals_to_remove)),
+                ('extensions', Array(kwargs.get('extensions') or [])),
+            ]))
+
+
+class ProposalDelete(GrapheneObject):
+    def __init__(self, *args, **kwargs):
+        if isArgsThisClass(self, args):
+            self.data = args[0].data
+        else:
+            if len(args) == 1 and len(kwargs) == 0:
+                kwargs = args[0]
+            super().__init__(OrderedDict([
+                ('author', String(kwargs['author'])),
+                ('title', String(kwargs['title'])),
+                ('requester', String(kwargs['requester'])),
+                ('extensions', Array(kwargs.get('extensions') or []))
             ]))
 
 
