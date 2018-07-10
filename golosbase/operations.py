@@ -302,7 +302,6 @@ class ChainProps(GrapheneObject):
         else:
             if len(args) == 1 and len(kwargs) == 0:
                 kwargs = args[0]
-
             super().__init__(OrderedDict([
                 ('account_creation_fee', Amount(kwargs["account_creation_fee"])),
                 ('maximum_block_size', Uint32(kwargs["maximum_block_size"])),
@@ -313,6 +312,11 @@ class ChainProps(GrapheneObject):
                 ('min_delegation', Amount(kwargs["min_delegation"])),
             ]))
 
+class Props(StaticVariant):
+    def __init__(self, o):
+        type_id, data = o
+        data = ChainProps(data['props'])
+        super().__init__(data, type_id)
 
 class Beneficiary(GrapheneObject):
     def __init__(self, *args, **kwargs):
@@ -698,9 +702,18 @@ class ChainPropertiesUpdate(GrapheneObject):
         else:
             if len(args) == 1 and len(kwargs) == 0:
                 kwargs = args[0]
+
+            props = kwargs.get("props")
+
+            if props and type(props) == list:
+                props = props[1]
+            if props and type(props) == dict:
+                obj = [1, {'props': props}]
+                props = Props(obj)
+
             super().__init__(OrderedDict([
                 ('owner', String(kwargs["owner"])),
-                ('props', ChainProps(kwargs["props"])),
+                ('props', props),
             ]))
 
 

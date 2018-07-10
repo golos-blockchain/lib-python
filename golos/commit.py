@@ -954,10 +954,9 @@ class Commit(object):
         )
         return self.finalizeOp(op, account, "active")
 
-    def chain_properties_update(self, signing_key, props, account=None):
+    def chain_properties_update(self, props, account=None):
         """ Update votable chain params
-            :param pubkey signing_key: Signing key
-            :param dict props: Properties
+            :param dict props: Chain Properties
             :param str account: (optional) witness account name
 
              Properties:::
@@ -976,11 +975,6 @@ class Commit(object):
             account = configStorage.get("default_account")
         if not account:
             raise ValueError("You need to provide an account")
-
-        try:
-            PublicKey(signing_key)
-        except Exception as e:
-            raise e
 
         op = operations.ChainPropertiesUpdate(
             **{
