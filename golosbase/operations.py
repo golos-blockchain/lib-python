@@ -279,8 +279,7 @@ class ExchangeRate(GrapheneObject):
                 ('quote', Amount(kwargs["quote"])),
             ]))
 
-
-class WitnessProps(GrapheneObject):
+class ChainProperties(GrapheneObject):
     def __init__(self, *args, **kwargs):
         if isArgsThisClass(self, args):
             self.data = args[0].data
@@ -294,28 +293,63 @@ class WitnessProps(GrapheneObject):
                 ('sbd_interest_rate', Uint16(kwargs["sbd_interest_rate"])),
             ]))
 
-
-class ChainProps(GrapheneObject):
+class ChainProperties18(GrapheneObject):
     def __init__(self, *args, **kwargs):
         if isArgsThisClass(self, args):
             self.data = args[0].data
         else:
             if len(args) == 1 and len(kwargs) == 0:
                 kwargs = args[0]
-            super().__init__(OrderedDict([
-                ('account_creation_fee', Amount(kwargs["account_creation_fee"])),
-                ('maximum_block_size', Uint32(kwargs["maximum_block_size"])),
-                ('sbd_interest_rate', Uint16(kwargs["sbd_interest_rate"])),
+            p = ChainProperties(kwargs).data
+            p.update(OrderedDict([
                 ('create_account_min_golos_fee', Amount(kwargs["create_account_min_golos_fee"])),
                 ('create_account_min_delegation', Amount(kwargs["create_account_min_delegation"])),
                 ('create_account_delegation_time', Uint32(kwargs["create_account_delegation_time"])),
                 ('min_delegation', Amount(kwargs["min_delegation"])),
             ]))
+            super().__init__(p)
+
+class ChainProperties19(GrapheneObject):
+    def __init__(self, *args, **kwargs):
+        if isArgsThisClass(self, args):
+            self.data = args[0].data
+        else:
+            if len(args) == 1 and len(kwargs) == 0:
+                kwargs = args[0]
+            p = ChainProperties18(kwargs).data
+            p.update(OrderedDict([
+                # Note that param order is critical to serialization
+                ('max_referral_interest_rate', Uint16(kwargs["max_referral_interest_rate"])),
+                ('max_referral_term_sec', Uint32(kwargs["max_referral_term_sec"])),
+                ('min_referral_break_fee', Amount(kwargs["min_referral_break_fee"])),
+                ('max_referral_break_fee', Amount(kwargs["max_referral_break_fee"])),
+                ('posts_window', Uint16(kwargs["posts_window"])),
+                ('posts_per_window', Uint16(kwargs["posts_per_window"])),
+                ('comments_window', Uint16(kwargs["comments_window"])),
+                ('comments_per_window', Uint16(kwargs["comments_per_window"])),
+                ('votes_window', Uint16(kwargs["votes_window"])),
+                ('votes_per_window', Uint16(kwargs["votes_per_window"])),
+                ('auction_window_size', Uint16(kwargs["auction_window_size"])),
+                ('max_delegated_vesting_interest_rate', Uint16(kwargs["max_delegated_vesting_interest_rate"])),
+                ('custom_ops_bandwidth_multiplier', Uint16(kwargs["custom_ops_bandwidth_multiplier"])),
+                ('min_curation_percent', Uint16(kwargs["min_curation_percent"])),
+                ('max_curation_percent', Uint16(kwargs["max_curation_percent"])),
+                ('curation_reward_curve', Uint64(kwargs["curation_reward_curve"])),
+                ('allow_distribute_auction_reward', Bool(bool(kwargs["allow_distribute_auction_reward"]))),
+                ('allow_return_auction_reward_to_fund', Bool(bool(kwargs["allow_return_auction_reward_to_fund"]))),
+            ]))
+            super().__init__(p)
 
 class Props(StaticVariant):
     def __init__(self, o):
         type_id, data = o
-        data = ChainProps(data['props'])
+
+        if type_id == 0:
+            data = ChainProperties(data['props'])
+        elif type_id == 1:
+            data = ChainProperties18(data['props'])
+        elif type_id == 2:
+            data = ChainProperties19(data['props'])
         super().__init__(data, type_id)
 
 class Beneficiary(GrapheneObject):
@@ -690,7 +724,7 @@ class WitnessUpdate(GrapheneObject):
                 ('owner', String(kwargs["owner"])),
                 ('url', String(kwargs["url"])),
                 ('block_signing_key', PublicKey(kwargs["block_signing_key"], prefix=prefix)),
-                ('props', WitnessProps(kwargs["props"])),
+                ('props', ChainProperties(kwargs["props"])),
                 ('fee', Amount(kwargs["fee"])),
             ]))
 
@@ -705,10 +739,18 @@ class ChainPropertiesUpdate(GrapheneObject):
 
             props = kwargs.get("props")
 
+            # A hack to extract properties at the second op processing in transactionbuilder
             if props and type(props) == list:
                 props = props[1]
+
             if props and type(props) == dict:
-                obj = [1, {'props': props}]
+                type_id = 0
+                if 'min_delegation' in props:
+                    type_id = 1
+                if 'auction_window_size' in props:
+                    type_id = 2
+
+                obj = [type_id, {'props': props}]
                 props = Props(obj)
 
             super().__init__(OrderedDict([
