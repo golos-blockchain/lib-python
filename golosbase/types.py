@@ -263,7 +263,7 @@ class Bool(Uint8):  # Bool = Uint8
         super().__init__(d)
 
     def __str__(self):
-        return True if self.data else False
+        return json.dumps(True) if self.data else json.dumps(False)
 
 
 class Set(Array):  # Set = Array
@@ -281,22 +281,28 @@ class FixedArray:
     def __str__(self):
         raise NotImplementedError
 
-
-class Optional:
+class Optional():
     def __init__(self, d):
         self.data = d
 
     def __bytes__(self):
-        if not self.data:
+        if not bool(self.data):
             return bytes(Bool(0))
         else:
-            return bytes(Bool(1)) + bytes(self.data) if bytes(self.data) else bytes(Bool(0))
+            return (
+                bytes(Bool(1)) +
+                bytes(self.data)
+                if bytes(self.data)
+                else bytes(Bool(0))
+            )
 
     def __str__(self):
         return str(self.data)
 
     def isempty(self):
-        if not self.data:
+        if self.data is None:
+            return True
+        if not bool(str(self.data)):
             return True
         return not bool(bytes(self.data))
 
