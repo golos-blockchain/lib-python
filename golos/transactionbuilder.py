@@ -94,7 +94,7 @@ class TransactionBuilder(dict):
         super(TransactionBuilder, self).__init__(tx.json())
 
     def sign(self):
-        """ Sign a provided transaction witht he provided key(s)
+        """ Sign a provided transaction with the provided key(s)
 
             :param dict tx: The transaction to be signed and returned
             :param string wifs: One or many wif keys to use for signing
