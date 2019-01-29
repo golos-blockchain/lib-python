@@ -610,7 +610,22 @@ class Steemd(Connector):
         return self.call('get_order_book', limit, api=MARKET_HISTORY_API)
 
     def get_open_orders(self, account: str):
-        """ get_open_orders. Also this api methods exist in DATABASE_API"""
+        """ get_open_orders. Also this api methods exist in DATABASE_API
+
+            Example:
+
+            ::
+
+                [{'id': 265808,
+                  'created': '2018-12-23T12:14:15',
+                  'expiration': '2018-12-30T12:14:14',
+                  'seller': 'vvk',
+                  'orderid': 490504533,
+                  'for_sale': 1000,
+                  'sell_price': {'base': '1.000 GOLOS', 'quote': '1.200 GBG'},
+                  'real_price': '1.19999999999999996',
+                  'rewarded': False}]
+        """
         return self.call('get_open_orders', account, api=MARKET_HISTORY_API)
 
     def get_liquidity_queue(self, start_account: str, limit: int):
