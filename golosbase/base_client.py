@@ -6,7 +6,8 @@ from urllib.parse import urlparse
 
 from golosbase.exceptions import RPCError, decodeRPCErrorMsg, AlreadyTransactedThisBlock, \
     MissingRequiredPostingAuthority, VoteWeightTooSmall, OnlyVoteOnceEvery3Seconds, AlreadyVotedSimilarily, \
-    PostOnlyEvery5Min, DuplicateTransaction, ExceededAllowedBandwidth, NoMethodWithName, UnhandledRPCError
+    PostOnlyEvery5Min, DuplicateTransaction, ExceededAllowedBandwidth, NoMethodWithName, UnhandledRPCError, \
+    ReadLockFail
 
 logger = logging.getLogger(__name__)
 
@@ -96,6 +97,8 @@ class BaseClient(object):
                             raise DuplicateTransaction(msg)
                         elif msg == "Account exceeded maximum allowed bandwidth per vesting share.":
                             raise ExceededAllowedBandwidth(msg)
+                        elif msg == "Internal error: Unable to acquire READ lock":
+                            raise ReadLockFail(msg)
                         elif re.match("^no method with name.*", msg):
                             raise NoMethodWithName(msg)
                         elif msg:

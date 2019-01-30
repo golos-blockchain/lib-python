@@ -1,6 +1,6 @@
 from urllib.parse import urlparse
 
-from golosbase.exceptions import InvalidNodeSchemes
+from golosbase.exceptions import InvalidNodeSchemes, ReadLockFail
 from golosbase.http_client import HttpClient
 from golosbase.ws_client import WsClient
 
@@ -48,7 +48,14 @@ class Connector(object):
             node fail-over, unless we are broadcasting a transaction.
             In latter case, the exception is **re-raised**.
         """
-        return self.client.call(name, *args, api=api, return_with_args=return_with_args, _ret_cnt=_ret_cnt)
+        while True:
+            try:
+                r = self.client.call(name, *args, api=api, return_with_args=return_with_args, _ret_cnt=_ret_cnt)
+            except ReadLockFail:
+                pass
+            else:
+                break
+        return r
 
     def call_multi_with_futures(self, name, params, api=None, max_workers=None):
         return self.client.call_multi_with_futures(name, params, api=api, max_workers=max_workers)

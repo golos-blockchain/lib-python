@@ -114,3 +114,7 @@ class PostDoesNotExist(Exception):
 
 class VotingInvalidOnArchivedPost(Exception):
     pass
+
+
+class ReadLockFail(Exception):
+    pass
