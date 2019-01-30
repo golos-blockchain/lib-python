@@ -76,10 +76,10 @@ class BaseClient(object):
                     error = response_json['error']
 
                     if self.re_raise:
-                        error_message = error.get(
-                            'detail', response_json['error']['message'])
+                        error_message = error.get('message', response_json['error'])
                         e = RPCError(error_message)
                         msg = decodeRPCErrorMsg(e).strip()
+
                         if msg == "Account already transacted this block.":
                             raise AlreadyTransactedThisBlock(msg)
                         elif msg == "missing required posting authority":

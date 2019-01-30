@@ -1,21 +1,11 @@
-import re
-
-
 def decodeRPCErrorMsg(e):
     """ Helper function to decode the raised Exception and give it a
         python Exception class
+
+        Error codes can be obtained from libraries/protocol/include/golos/protocol/exceptions.hpp
     """
-    found = re.search(
-        ("(10 assert_exception: Assert Exception\n|"
-         "Assert Exception \(10\)\n|"
-         "3030000 tx_missing_posting_auth)"
-         ".*: (.*)\n"),
-        str(e),
-        flags=re.M)
-    if found:
-        return found.group(2).strip()
-    else:
-        return str(e)
+    lines = str(e).strip('\n').split('\n')
+    return lines[-1]
 
 
 class RPCError(Exception):
