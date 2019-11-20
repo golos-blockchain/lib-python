@@ -373,6 +373,29 @@ class Beneficiaries(GrapheneObject):
         ]))
 
 
+class Destination(GrapheneObject):
+    def __init__(self, *args, **kwargs):
+        if isArgsThisClass(self, args):
+            self.data = args[0].data
+        else:
+            if len(args) == 1 and len(kwargs) == 0:
+                kwargs = args[0]
+            super().__init__(OrderedDict([
+                ('destination', Uint64(kwargs["destination"])),
+            ]))
+
+
+class Percent(GrapheneObject):
+    def __init__(self, *args, **kwargs):
+        if isArgsThisClass(self, args):
+            self.data = args[0].data
+        else:
+            if len(args) == 1 and len(kwargs) == 0:
+                kwargs = args[0]
+            super().__init__(OrderedDict([
+                ('percent', Uint16(kwargs["percent"])),
+            ]))
+
 class CommentOptionExtensions(StaticVariant):
     """ Serialize Comment Payout Beneficiaries.
 
@@ -394,6 +417,10 @@ class CommentOptionExtensions(StaticVariant):
         type_id, data = o
         if type_id == 0:
             data = Beneficiaries(data)
+        elif type_id == 1:
+            data = Destination(data)
+        elif type_id == 2:
+            data = Percent(data)
         else:
             raise Exception("Unknown CommentOptionExtension")
         super().__init__(data, type_id)
@@ -808,16 +835,24 @@ class CommentOptions(GrapheneObject):
             if len(args) == 1 and len(kwargs) == 0:
                 kwargs = args[0]
 
+            new_extensions = []
+
             # handle beneficiaries
+            if "beneficiaries" in kwargs and kwargs['beneficiaries']:
+                new_extensions.append([0, {'beneficiaries': kwargs['beneficiaries']}])
+
+            if "auction_window_reward_destination" in kwargs and kwargs['auction_window_reward_destination']:
+                new_extensions.append([1, {'destination': kwargs['auction_window_reward_destination']}])
+
+            if "curation_rewards_percent" in kwargs and kwargs['curation_rewards_percent']:
+                new_extensions.append([2, {'percent': kwargs['curation_rewards_percent']}])
+
+            if new_extensions:
+                kwargs["extensions"] = new_extensions
+
             extensions = Array([])
-            beneficiaries = kwargs.get('beneficiaries')
-            # TODO: Explore this 2 lines
-            if not beneficiaries and kwargs['extensions'] and len(kwargs['extensions'][0]) == 2:
-                beneficiaries = kwargs['extensions'][0][1].get('beneficiaries')
-            if beneficiaries and type(beneficiaries) == list:
-                ext_obj = [0, {'beneficiaries': beneficiaries}]
-                ext = CommentOptionExtensions(ext_obj)
-                extensions = Array([ext])
+            if "extensions" in kwargs and kwargs["extensions"]:
+                extensions = Array([CommentOptionExtensions(o) for o in kwargs["extensions"]])
 
             super().__init__(OrderedDict([
                 ('author', String(kwargs["author"])),

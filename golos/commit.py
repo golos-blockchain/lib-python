@@ -172,6 +172,8 @@ class Commit(object):
              community=None,
              tags=None,
              beneficiaries=None,
+             auction_window_reward_destination=None,
+             curation_rewards_percent=None,
              self_vote=False):
         """ Create a new post.
 
@@ -234,6 +236,12 @@ class Commit(object):
                 {'account': 'account2', 'weight': 5000}
             ]
 
+        auction_window_reward_destination (): (Optional) Specify destination of
+            auction window penalty reward (0-3)
+
+        curation_rewards_percent (float): (Optional) Set custom curation reward
+            percent in range 0-100
+
         self_vote (bool): (Optional) Upvote the post as author, right after
             posting.
 
@@ -293,7 +301,7 @@ class Commit(object):
         ops = [post_op]
 
         # if comment_options are used, add a new op to the transaction
-        if comment_options or beneficiaries:
+        if comment_options or beneficiaries or auction_window_reward_destination or curation_rewards_percent:
             options = keep_in_dict(comment_options or {},
                                    ['max_accepted_payout',
                                     'percent_steem_dollars',
@@ -314,7 +322,18 @@ class Commit(object):
                 schema(beneficiaries)
                 options['beneficiaries'] = beneficiaries
 
+            if auction_window_reward_destination:
+                options['auction_window_reward_destination'] = auction_window_reward_destination
+
+            if curation_rewards_percent:
+                options['curation_rewards_percent'] = curation_rewards_percent
+
             default_max_payout = "1000000.000 GBG"
+
+            curation_rewards_percent = options.get("curation_rewards_percent")
+            if curation_rewards_percent:
+                curation_rewards_percent *= 100
+
             comment_op = operations.CommentOptions(
                 **{"author": author,
                    "permlink": permlink,
@@ -324,6 +343,8 @@ class Commit(object):
                    "allow_curation_rewards": options.get("allow_curation_rewards", True),
                    "extensions": options.get("extensions", []),
                    "beneficiaries": options.get("beneficiaries"),
+                   "auction_window_reward_destination": options.get("auction_window_reward_destination"),
+                   "curation_rewards_percent": curation_rewards_percent,
                    }
 
             )
