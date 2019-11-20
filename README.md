@@ -1,4 +1,4 @@
-# Official Python GOLOS Library
+# Python GOLOS Library
 
 `golodranets` is the GOLOS library for Python which was forked from official STEEM library for Python. It comes with a BIP38 encrypted wallet.
 
@@ -11,23 +11,17 @@ The main differences from the `steem-python`:
 * for `Post` instance added two fields - `score_trending` and `score_hot`. This fields may be helpful if you want to sort your saved posts like `get_discussions_by_trending` and `get_discussions_by_trending` methods do. `reblogged_by` field is also filled now
 * for `Account` instance methods `get_followers` and `get_following` were improved - now it takes `limit` and `offset` parameters
 
-GOLOS HF 17 is supported.
+GOLOS HF 17-21 is supported.
 
 This library currently works on Python 3.5 and 3.6.
 
 # Installation
 
-With pip:
-
-```
-pip3 install golodranets
-```
-
 From Source:
 
 ```
-git clone https://github.com/steepshot/golodranets.git
-cd golodranets
+git clone https://github.com/bitfag/golos-python.git
+cd golos-python
 python3 setup.py install
 ```
 
