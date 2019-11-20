@@ -93,8 +93,10 @@ class WsClient(BaseClient):
             cnt += 1
 
             try:
+                logger.debug(body)
                 self.ws.send(body)
                 response = self.ws.recv()
+                logger.debug(response)
                 break
             except KeyboardInterrupt:
                 raise

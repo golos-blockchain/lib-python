@@ -137,6 +137,7 @@ class TransactionBuilder(dict):
         """
         if self.no_broadcast:
             log.warning("Not broadcasting anything!")
+            log.debug(self.json())
             return self
 
         try:
