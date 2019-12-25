@@ -340,6 +340,28 @@ class ChainProperties19(GrapheneObject):
             ]))
             super().__init__(p)
 
+class ChainProperties22(GrapheneObject):
+    def __init__(self, *args, **kwargs):
+        if isArgsThisClass(self, args):
+            self.data = args[0].data
+        else:
+            if len(args) == 1 and len(kwargs) == 0:
+                kwargs = args[0]
+            p = ChainProperties19(kwargs).data
+            p.update(OrderedDict([
+                ('worker_reward_percent', Uint16(kwargs['worker_reward_percent'])),
+                ('witness_reward_percent', Uint16(kwargs['witness_reward_percent'])),
+                ('vesting_reward_percent', Uint16(kwargs['vesting_reward_percent'])),
+                ('worker_request_creation_fee', Amount(kwargs['worker_request_creation_fee'])),
+                ('worker_request_approve_min_percent', Uint16(kwargs['worker_request_approve_min_percent'])),
+                ('sbd_debt_convert_rate', Uint16(kwargs['sbd_debt_convert_rate'])),
+                ('vote_regeneration_per_day', Uint32(kwargs['vote_regeneration_per_day'])),
+                ('witness_skipping_reset_time', Uint32(kwargs['witness_skipping_reset_time'])),
+                ('witness_idleness_time', Uint32(kwargs['witness_idleness_time'])),
+                ('account_idleness_time', Uint32(kwargs['account_idleness_time'])),
+            ]))
+            super().__init__(p)
+
 class Props(StaticVariant):
     def __init__(self, o):
         type_id, data = o
@@ -350,6 +372,8 @@ class Props(StaticVariant):
             data = ChainProperties18(data['props'])
         elif type_id == 2:
             data = ChainProperties19(data['props'])
+        elif type_id == 3:
+            data = ChainProperties22(data['props'])
         super().__init__(data, type_id)
 
 class Beneficiary(GrapheneObject):
@@ -776,6 +800,8 @@ class ChainPropertiesUpdate(GrapheneObject):
                     type_id = 1
                 if 'auction_window_size' in props:
                     type_id = 2
+                if 'worker_reward_percent' in props:
+                    type_id = 3
 
                 obj = [type_id, {'props': props}]
                 props = Props(obj)
