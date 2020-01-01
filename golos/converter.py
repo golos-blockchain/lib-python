@@ -61,7 +61,7 @@ class Converter(object):
         vesting_shares = int(self.sp_to_vests(sp) * 1e6)
 
         # get props
-        props = self.steemd.get_dynamic_global_properties()
+        props = self.steemd.get_chain_properties()
 
         # determine voting power used
         used_power = int((voting_power * vote_pct) / 10000)
