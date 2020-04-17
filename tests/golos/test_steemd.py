@@ -5,7 +5,7 @@ from golos.steemd import Steemd
 
 class SteemdTestCase(unittest.TestCase):
     def setUp(self):
-        self.nodes = ['wss://golosd.steepshot.org']
+        self.nodes = ['wss://golos.lexa.host/ws', 'wss://golos.solox.world/ws']
         self.steemd = Steemd(nodes=self.nodes)
         self.trx = {
             "ref_block_num": 45193,
