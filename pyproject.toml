@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "python-golos"
-version = "1.0.0"
+version = "1.0.1"
 description = "Python library for Golos blockchain"
 authors = ["Vladimir Kamarzin <vvk@vvk.pp.ru>"]
 license = "MIT"
