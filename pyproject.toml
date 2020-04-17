@@ -11,6 +11,10 @@ classifiers = [
     "Topic :: Software Development :: Libraries :: Python Modules",
     "Development Status :: 5 - Production/Stable"
 ]
+packages = [
+    { include = "golosbase" },
+    { include = "golos" },
+]
 
 [tool.poetry.dependencies]
 python = "^3.6.1"
