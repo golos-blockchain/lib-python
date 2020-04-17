@@ -18,12 +18,18 @@ GOLOS HF 17-22 is supported.
 
 # Installation
 
-From source:
+As regular package:
 
 ```
-git clone https://github.com/bitfag/golos-python.git
+pip install python-golos
+```
+
+Local installation from source:
+
+```
 cd golos-python
-python3 setup.py install
+poetry install
+poetry shell
 ```
 
 ## Homebrew Build Prereqs
@@ -35,13 +41,3 @@ brew install openssl
 export CFLAGS="-I$(brew --prefix openssl)/include $CFLAGS"
 export LDFLAGS="-L$(brew --prefix openssl)/lib $LDFLAGS"
 ```
-
-# Documentation
-
-Unfortunately we do not have documentation for Golodranets yet, but documentation from steem-python may help you -  **http://steem.readthedocs.io**
-
-# Tests
-
-Some tests are included.  They can be run via:
-
-* `python setup.py test`
