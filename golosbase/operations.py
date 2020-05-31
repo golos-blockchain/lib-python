@@ -387,6 +387,25 @@ class ChainProperties22(GrapheneObject):
             super().__init__(p)
 
 
+class ChainProperties23(GrapheneObject):
+    def __init__(self, *args, **kwargs):
+        if isArgsThisClass(self, args):
+            self.data = args[0].data
+        else:
+            if len(args) == 1 and len(kwargs) == 0:
+                kwargs = args[0]
+            p = ChainProperties22(kwargs).data
+            p.update(
+                OrderedDict(
+                    [
+                        ("claim_idleness_time", Uint32(kwargs["claim_idleness_time"])),
+                        ("min_invite_balance", Amount(kwargs["min_invite_balance"])),
+                    ]
+                )
+            )
+            super().__init__(p)
+
+
 class Props(StaticVariant):
     def __init__(self, o):
         type_id, data = o
@@ -399,6 +418,8 @@ class Props(StaticVariant):
             data = ChainProperties19(data["props"])
         elif type_id == 3:
             data = ChainProperties22(data["props"])
+        elif type_id == 4:
+            data = ChainProperties23(data["props"])
         super().__init__(data, type_id)
 
 
@@ -874,6 +895,8 @@ class ChainPropertiesUpdate(GrapheneObject):
                     type_id = 2
                 if "worker_reward_percent" in props:
                     type_id = 3
+                if "claim_idleness_time" in props:
+                    type_id = 4
 
                 obj = [type_id, {"props": props}]
                 props = Props(obj)
