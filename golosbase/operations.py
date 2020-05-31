@@ -770,7 +770,7 @@ class WitnessUpdate(GrapheneObject):
             prefix = kwargs.pop("prefix", default_prefix)
 
             if not kwargs["block_signing_key"]:
-                kwargs["block_signing_key"] = "STM1111111111111111111111111111111114T1Anm"
+                kwargs["block_signing_key"] = "GLS1111111111111111111111111111111114T1Anm"
             super().__init__(OrderedDict([
                 ('owner', String(kwargs["owner"])),
                 ('url', String(kwargs["url"])),
