@@ -640,7 +640,6 @@ class Commit(object):
         """ Transfer GBG or GOLOS to another account.
 
             :param str to: Recipient
-
             :param float amount: Amount to transfer
             :param str asset: Asset to transfer (``GBG`` or ``GOLOS``)
             :param str memo: (optional) Memo, may begin with `#` for encrypted messaging
