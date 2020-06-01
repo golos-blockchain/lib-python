@@ -675,6 +675,31 @@ class Commit(object):
             })
         return self.finalizeOp(op, account, "active")
 
+    def claim(self, to, amount, to_vesting=False, extensions=None, account=None):
+        """ Claim GOLOS from accumulative balance
+
+            :param str to: Recipient
+            :param float amount: amount to claim
+            :param bool to_vesting: (optional) claim to vesting if True, otherwise to tip balance
+            :param list extensions: operation extensions
+            :param str account: (optional) the source account for the transfer if not ``default_account``
+
+        """
+        if not account:
+            account = configStorage.get("default_account")
+        if not account:
+            raise ValueError("You need to provide an account")
+
+        op = operations.Claim(
+            **{
+                "from": account,
+                "to": to,
+                "amount": '{:.{prec}f} GOLOS'.format(float(amount), prec=3),
+                "to_vesting": to_vesting,
+                "extensions": extensions
+            })
+        return self.finalizeOp(op, account, "posting")
+
     def withdraw_vesting(self, amount, account=None):
         """ Withdraw GESTS from the vesting account.
 
