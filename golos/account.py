@@ -83,8 +83,16 @@ class Account(dict):
             'GBG': Amount(self['savings_sbd_balance']).amount,
         }
 
+        accumulative = {
+            'GOLOS': Amount(self['accumulative_balance']).amount
+        }
+
+        tip = {
+            'GOLOS': Amount(self['tip_balance']).amount
+        }
+
         totals = {
-            'GOLOS': sum([available['GOLOS'], savings['GOLOS']]),
+            'GOLOS': sum([available['GOLOS'], savings['GOLOS'], accumulative['GOLOS'], tip['GOLOS']]),
             'GBG': sum([available['GBG'], savings['GBG']]),
             'GESTS': sum([available['GESTS']]),
         }
@@ -94,6 +102,8 @@ class Account(dict):
         return {
             'available': available,
             'savings': savings,
+            'accumulative': accumulative,
+            'tip': tip,
             'total': total,
         }
 
