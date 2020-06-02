@@ -1122,7 +1122,10 @@ class VariantObject(GrapheneObject):
                 if isinstance(value, str):
                     _value = String(value)
                 elif isinstance(value, int):
-                    _value = Uint64(value)
+                    if value > 0:
+                        _value = Uint64(value)
+                    else:
+                        _value = Int64(value)
 
                 self.data[key] = _value
 
@@ -1138,6 +1141,8 @@ class VariantObject(GrapheneObject):
 
             if isinstance(value, String):
                 b += b"\x05"  # delimiter
+            elif isinstance(value, Int64):
+                b += b"\x01"
             else:
                 b += b"\x02"
             b += bytes(value)

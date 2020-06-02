@@ -56,6 +56,7 @@ class TestSerialization:
         [
             {"foo": "bar"},
             {"aaa": 123},
+            {"aaa": -123},
             {"author": "ksantoprotein", "permlink": "tip23bot-telegramm-bot-dlya-laikov-avtokleminga-i-igr"},
             {"k{}".format(i): "v{}".format(i) for i in range(0, 35)},
         ],
