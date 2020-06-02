@@ -854,7 +854,7 @@ class Steemd(Connector):
         """ get_account_reputations """
         if not isinstance(accounts, (list, tuple)):
             accounts = [accounts]
-        return self.call('get_account_reputations', accounts, limit, api=FOLLOW_API)
+        return self.call('get_account_reputations', accounts, api=FOLLOW_API)
 
     def get_reblogged_by(self, author: str, permlink: str):
         """ get_reblogged_by """
