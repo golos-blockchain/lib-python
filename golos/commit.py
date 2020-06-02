@@ -3,7 +3,8 @@ import logging
 import random
 import re
 from datetime import datetime, timedelta
-from typing import Union
+from typing import Union, Dict, Any, Optional, List
+from collections import OrderedDict
 
 import voluptuous as vo
 from funcy import none, silent, first
@@ -23,6 +24,7 @@ from golos.wallet import Wallet
 from golosbase import memo, transactions
 from golosbase import operations
 from golosbase.account import PrivateKey, PublicKey
+from golosbase.types import String
 from golosbase.exceptions import AccountExistsException, MissingKeyError
 from golosbase.storage import configStorage
 
@@ -698,6 +700,76 @@ class Commit(object):
                 "to_vesting": to_vesting,
                 "extensions": extensions
             })
+        return self.finalizeOp(op, account, "posting")
+
+    def golosid_donate_v1(self, amount, author, permlink, comment=None, account=None):
+        """ Make donation in golos-id app format, v1
+
+            :param float amount: GOLOS amount to donate
+            :param str author: post author
+            :param str permlink: post permlink
+            :param str comment: additional message
+            :param str account: (optional) the source account for the transfer if not ``default_account``
+        """
+        if not account:
+            account = configStorage.get("default_account")
+        if not account:
+            raise ValueError("You need to provide an account")
+
+        app = 'golos-id'
+        version = 1
+        target = {'author': author, 'permlink': permlink}
+
+        return self.donate(author, amount, app=app, version=version, target=target, comment=comment, account=account)
+
+    def donate(self, to: str, amount: float, app: str, version: int, target: Optional[Dict[str, str]] = None,
+               raw_target: OrderedDict = None,
+               comment: Optional[str] = None, extensions: List = None, account=None) -> dict:
+        """ Make tip (donation)
+
+           :param str to: donate to this account
+           :param float amount: GOLOS amount to donate
+           :param str app: application name
+           :param int version: donation api version of this app
+           :param dict target: something like ``{'author': 'xxx', 'permlink': 'yyy'}``
+           :param OrderedDict raw_target: you can construct a raw target using operations.VariantObject or subclass
+           :param str comment: additional message
+           :param list extensions: operation extensions
+           :param str account: (optional) the source account for the transfer if not ``default_account``
+        """
+        if not account:
+            account = configStorage.get("default_account")
+        if not account:
+            raise ValueError("You need to provide an account")
+
+        if not target and not raw_target:
+            raise ValueError('target or raw_target are required')
+
+        if not isinstance(target, dict):
+            raise ValueError('Expected to see dict as target')
+
+        if raw_target:
+            _target = raw_target
+        else:
+            _target = operations.VariantObject(target)
+
+        _memo = operations.DonateMemo(
+            **{
+                'app': app,
+                'version': version,
+                'target': _target,
+                'comment': comment,
+            })
+
+        op = operations.Donate(
+            **{
+                "from": account,
+                "to": to,
+                "amount": '{:.{prec}f} GOLOS'.format(float(amount), prec=3),
+                "memo": _memo,
+                "extensions": extensions,
+            })
+
         return self.finalizeOp(op, account, "posting")
 
     def withdraw_vesting(self, amount, account=None):
