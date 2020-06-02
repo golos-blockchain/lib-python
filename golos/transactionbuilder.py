@@ -32,9 +32,7 @@ class TransactionBuilder(dict):
 
         self.op = []
         self.wifs = []
-        if tx and not isinstance(tx, dict):
-            raise ValueError("Invalid Transaction (self.tx) Format")
-        super(TransactionBuilder, self).__init__(tx or {})
+        self.tx = tx
 
     def appendOps(self, ops):
         if isinstance(ops, list):
@@ -91,7 +89,7 @@ class TransactionBuilder(dict):
             expiration=expiration,
             operations=ops
         )
-        super(TransactionBuilder, self).__init__(tx.json())
+        self.tx = tx
 
     def sign(self):
         """ Sign a provided transaction with the provided key(s)
@@ -110,16 +108,10 @@ class TransactionBuilder(dict):
         elif "blockchain" in self:
             operations.default_prefix = self["blockchain"]["prefix"]
 
-        try:
-            signedtx = SignedTransaction(**self.json())
-        except Exception as e:  # noqa FIXME(sneak)
-            raise e
-
         if not any(self.wifs):
             raise MissingKeyError
 
-        signedtx.sign(self.wifs, chain=self.steemd.chain_params)
-        self["signatures"].extend(signedtx.json().get("signatures"))
+        self.tx.sign(self.wifs, chain=self.steemd.chain_params)
 
     def verify_authority(self):
         """ Verify the authority of the signed transaction
@@ -138,7 +130,7 @@ class TransactionBuilder(dict):
         if self.no_broadcast:
             log.warning("Not broadcasting anything!")
             log.debug(self.json())
-            return self
+            return self.tx
 
         try:
             if not self.steemd.verify_authority(self.json()):
@@ -157,7 +149,7 @@ class TransactionBuilder(dict):
         except Exception as e:
             raise e
 
-        return self
+        return self.tx
 
     def addSigningInformation(self, account, permission):
         """ This is a private method that adds side information to a
@@ -189,7 +181,7 @@ class TransactionBuilder(dict):
         self["blockchain"] = self.steemd.chain_params
 
     def json(self):
-        return dict(self)
+        return self.tx.json()
 
     def appendMissingSignatures(self, wifs):
         missing_signatures = self.get("missing_signatures", [])
