@@ -12,6 +12,7 @@ from golosbase.types import (
     Bytes,
     Id,
     Int16,
+    Int64,
     JsonObj,
     Map,
     OperationWrapper,
@@ -22,9 +23,8 @@ from golosbase.types import (
     Uint16,
     Uint32,
     Uint64,
-    Int64,
     variable_buffer,
-    varint
+    varint,
 )
 
 default_prefix = "GLS"
@@ -1103,11 +1103,13 @@ class Claim(GrapheneObject):
 
 
 class VariantObject(GrapheneObject):
-    """ Represents fc::variant_object
-
-        variant_object is a dict-like structure with keys and values, where keys are always strings, and values could be
-        anything. We provide here only limited set of values recognition.
     """
+    Represents fc::variant_object.
+
+    variant_object is a dict-like structure with keys and values, where keys are always strings, and values could be
+    anything. We provide here only limited set of values recognition.
+    """
+
     def __init__(self, *args, **kwargs):
         if isArgsThisClass(self, args):
             self.data = args[0].data
@@ -1135,9 +1137,9 @@ class VariantObject(GrapheneObject):
             b += bytes(String(name))
 
             if isinstance(value, String):
-                b += b'\x05'  # delimiter
+                b += b"\x05"  # delimiter
             else:
-                b += b'\x02'
+                b += b"\x02"
             b += bytes(value)
         return b
 
@@ -1150,7 +1152,7 @@ class DonateMemo(GrapheneObject):
             if len(args) == 1 and len(kwargs) == 0:
                 kwargs = args[0]
 
-            comment = String(kwargs["comment"]) if kwargs.get('comment') else None
+            comment = String(kwargs["comment"]) if kwargs.get("comment") else None
 
             super().__init__(
                 OrderedDict(

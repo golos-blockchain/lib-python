@@ -26,28 +26,26 @@ object_type = {
     "account_history": 18,
 }
 
-timeformat = '%Y-%m-%dT%H:%M:%S%Z'
+timeformat = "%Y-%m-%dT%H:%M:%S%Z"
 
 
 def varint(n):
-    """ Varint encoding
-    """
-    data = b''
+    """Varint encoding."""
+    data = b""
     while n >= 0x80:
-        data += bytes([(n & 0x7f) | 0x80])
+        data += bytes([(n & 0x7F) | 0x80])
         n >>= 7
     data += bytes([n])
     return data
 
 
 def varintdecode(data):
-    """ Varint decoding
-    """
+    """Varint decoding."""
     shift = 0
     result = 0
     for c in data:
         b = ord(c)
-        result |= ((b & 0x7f) << shift)
+        result |= (b & 0x7F) << shift
         if not (b & 0x80):
             break
         shift += 7
@@ -55,22 +53,19 @@ def varintdecode(data):
 
 
 def variable_buffer(s):
-    """ Encode variable length buffer
-    """
+    """Encode variable length buffer."""
     return varint(len(s)) + s
 
 
 def JsonObj(data):
-    """ Returns json object from data
-    """
+    """Returns json object from data."""
     try:
         return json.loads(str(data))
     except:
         try:
             return data.__str__()
         except:
-            raise ValueError('JsonObj could not parse %s:\n%s' %
-                             (type(data).__name__, data.__class__))
+            raise ValueError("JsonObj could not parse %s:\n%s" % (type(data).__name__, data.__class__))
 
 
 class Uint8:
@@ -81,7 +76,7 @@ class Uint8:
         return struct.pack("<B", self.data)
 
     def __str__(self):
-        return '%d' % self.data
+        return "%d" % self.data
 
 
 class Int16:
@@ -92,7 +87,7 @@ class Int16:
         return struct.pack("<h", int(self.data))
 
     def __str__(self):
-        return '%d' % self.data
+        return "%d" % self.data
 
 
 class Uint16:
@@ -103,7 +98,7 @@ class Uint16:
         return struct.pack("<H", self.data)
 
     def __str__(self):
-        return '%d' % self.data
+        return "%d" % self.data
 
 
 class Uint32:
@@ -114,7 +109,7 @@ class Uint32:
         return struct.pack("<I", self.data)
 
     def __str__(self):
-        return '%d' % self.data
+        return "%d" % self.data
 
 
 class Uint64:
@@ -125,7 +120,7 @@ class Uint64:
         return struct.pack("<Q", self.data)
 
     def __str__(self):
-        return '%d' % self.data
+        return "%d" % self.data
 
 
 class Varint32:
@@ -136,7 +131,7 @@ class Varint32:
         return varint(self.data)
 
     def __str__(self):
-        return '%d' % self.data
+        return "%d" % self.data
 
 
 class Int64:
@@ -147,7 +142,7 @@ class Int64:
         return struct.pack("<q", self.data)
 
     def __str__(self):
-        return '%d' % self.data
+        return "%d" % self.data
 
 
 class String:
@@ -159,7 +154,7 @@ class String:
         return variable_buffer(d)
 
     def __str__(self):
-        return '%s' % str(self.data)
+        return "%s" % str(self.data)
 
     def unicodify(self):
         r = []
@@ -196,7 +191,7 @@ class Bytes:
 
     def __bytes__(self):
         # FIXME constraint data to self.length
-        d = unhexlify(bytes(self.data, 'utf-8'))
+        d = unhexlify(bytes(self.data, "utf-8"))
         return variable_buffer(d)
 
     def __str__(self):
@@ -208,7 +203,7 @@ class Void:
         pass
 
     def __bytes__(self):
-        return b''
+        return b""
 
     def __str__(self):
         return ""
@@ -255,7 +250,7 @@ class Signature:
         return self.data
 
     def __str__(self):
-        return json.dumps(hexlify(self.data).decode('ascii'))
+        return json.dumps(hexlify(self.data).decode("ascii"))
 
 
 class Bool(Uint8):  # Bool = Uint8
@@ -281,7 +276,8 @@ class FixedArray:
     def __str__(self):
         raise NotImplementedError
 
-class Optional():
+
+class Optional:
     def __init__(self, d):
         self.data = d
 
@@ -289,12 +285,7 @@ class Optional():
         if not bool(self.data):
             return bytes(Bool(0))
         else:
-            return (
-                bytes(Bool(1)) +
-                bytes(self.data)
-                if bytes(self.data)
-                else bytes(Bool(0))
-            )
+            return bytes(Bool(1)) + bytes(self.data) if bytes(self.data) else bytes(Bool(0))
 
     def __str__(self):
         return str(self.data)
@@ -345,7 +336,7 @@ class OperationWrapper:
         return bytes(self.data)
 
     def __str__(self):
-        return json.dumps({'op': json.loads(str(self.data))})
+        return json.dumps({"op": json.loads(str(self.data))})
 
 
 class Id:
@@ -367,7 +358,7 @@ class VoteId:
         self.instance = int(parts[1])
 
     def __bytes__(self):
-        binary = (self.type & 0xff) | (self.instance << 8)
+        binary = (self.type & 0xFF) | (self.instance << 8)
         return struct.pack("<I", binary)
 
     def __str__(self):
@@ -375,8 +366,7 @@ class VoteId:
 
 
 class ObjectId:
-    """ Encodes object/protocol ids
-    """
+    """Encodes object/protocol ids."""
 
     def __init__(self, object_str, type_verify=None):
         if len(object_str.split(".")) == 3:
@@ -386,10 +376,10 @@ class ObjectId:
             self.instance = Id(int(id))
             self.Id = object_str
             if type_verify:
-                assert object_type[type_verify] == int(type), \
-                    "Object id does not match object type! " + \
-                    "Excpected %d, got %d" % \
-                    (object_type[type_verify], int(type))
+                assert object_type[type_verify] == int(type), (
+                    "Object id does not match object type! "
+                    + "Excpected %d, got %d" % (object_type[type_verify], int(type))
+                )
         else:
             raise Exception("Object id is invalid")
 
