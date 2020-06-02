@@ -95,7 +95,7 @@ ENV/
 
 # Vim
 Session.vim
-
+*.swp
 # Pycharm
 .idea
 
@@ -117,3 +117,5 @@ tests/failed_blocks/
 
 .DS_Store
 /.pytest_cache/
+pip-wheel-metadata/
+.mypy_cache/
