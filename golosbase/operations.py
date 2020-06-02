@@ -22,6 +22,9 @@ from golosbase.types import (
     Uint16,
     Uint32,
     Uint64,
+    Int64,
+    variable_buffer,
+    varint
 )
 
 default_prefix = "GLS"
@@ -1097,6 +1100,90 @@ class Claim(GrapheneObject):
                     ]
                 )
             )
+
+
+class VariantObject(GrapheneObject):
+    """ Represents fc::variant_object
+
+        variant_object is a dict-like structure with keys and values, where keys are always strings, and values could be
+        anything. We provide here only limited set of values recognition.
+    """
+    def __init__(self, *args, **kwargs):
+        if isArgsThisClass(self, args):
+            self.data = args[0].data
+        else:
+            if len(args) == 1 and len(kwargs) == 0:
+                kwargs = args[0]
+
+            self.data = OrderedDict()
+            for key, value in kwargs.items():
+                if isinstance(value, str):
+                    _value = String(value)
+                elif isinstance(value, int):
+                    _value = Uint64(value)
+
+                self.data[key] = _value
+
+    def __bytes__(self):
+        if self.data is None:
+            return bytes()
+
+        # Encode number of elements
+        b = varint(len(self.data))
+        for name, value in self.data.items():
+            # All keys are strings
+            b += bytes(String(name))
+
+            if isinstance(value, String):
+                b += b'\x05'  # delimiter
+            else:
+                b += b'\x02'
+            b += bytes(value)
+        return b
+
+
+class DonateMemo(GrapheneObject):
+    def __init__(self, *args, **kwargs):
+        if isArgsThisClass(self, args):
+            self.data = args[0].data
+        else:
+            if len(args) == 1 and len(kwargs) == 0:
+                kwargs = args[0]
+
+            comment = String(kwargs["comment"]) if kwargs.get('comment') else None
+
+            super().__init__(
+                OrderedDict(
+                    [
+                        ("app", String(kwargs["app"])),
+                        ("version", Uint16(int(kwargs["version"]))),
+                        ("target", kwargs["target"]),
+                        ("comment", Optional(comment)),
+                    ]
+                )
+            )
+
+
+class Donate(GrapheneObject):
+    def __init__(self, *args, **kwargs):
+        if isArgsThisClass(self, args):
+            self.data = args[0].data
+        else:
+            if len(args) == 1 and len(kwargs) == 0:
+                kwargs = args[0]
+
+            super().__init__(
+                OrderedDict(
+                    [
+                        ("from", String(kwargs["from"])),
+                        ("to", String(kwargs["to"])),
+                        ("amount", Amount(kwargs["amount"])),
+                        ("memo", kwargs["memo"]),
+                        ("extensions", Array([])),
+                    ]
+                )
+            )
+
 
 def isArgsThisClass(self, args):
     return len(args) == 1 and type(args[0]).__name__ == type(self).__name__

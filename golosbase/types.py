@@ -156,7 +156,7 @@ class String:
 
     def __bytes__(self):
         d = self.unicodify()
-        return varint(len(d)) + d
+        return variable_buffer(d)
 
     def __str__(self):
         return '%s' % str(self.data)
@@ -197,7 +197,7 @@ class Bytes:
     def __bytes__(self):
         # FIXME constraint data to self.length
         d = unhexlify(bytes(self.data, 'utf-8'))
-        return varint(len(d)) + d
+        return variable_buffer(d)
 
     def __str__(self):
         return str(self.data)
