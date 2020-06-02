@@ -106,9 +106,9 @@ class Blockchain(object):
             for block_num in range(*range_params):
                 if end_block is not None:
                     if is_reversed and block_num < end_block:
-                        raise StopIteration("Reached stop block at: #%s" % block_num)
+                        return
                     elif not is_reversed and block_num > end_block:
-                        raise StopIteration("Reached stop block at: #%s" % block_num)
+                        return
 
                 if full_blocks:
                     block = self.steem.get_block(block_num)
