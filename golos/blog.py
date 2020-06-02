@@ -1,4 +1,4 @@
-from funcy import silent, complement, take, first
+from funcy import complement, first, silent, take
 
 from golos.account import Account
 from golos.instance import shared_steemd_instance
@@ -7,44 +7,41 @@ from golos.utils import is_comment
 
 
 class Blog:
-    """ Obtain a list of blog posts for an account
+    """
+    Obtain a list of blog posts for an account.
 
-        Args:
-            account_name (str): Name of the account
-            comments_only (bool): (Default False). Toggle between posts and comments.
-            steemd_instance (Steemd): Steemd instance overload
+    Args:
+        account_name (str): Name of the account
+        comments_only (bool): (Default False). Toggle between posts and comments.
+        steemd_instance (Steemd): Steemd instance overload
 
-        Returns:
-            Generator with Post objects in reverse chronological order.
+    Returns:
+        Generator with Post objects in reverse chronological order.
 
-        Example:
-            To get all posts, you can use either generator:
+    Example:
+        To get all posts, you can use either generator:
 
-            ::
+        ::
 
-                gen1 = Blog('furion')
-                gen2 = b.all()
+            gen1 = Blog('furion')
+            gen2 = b.all()
 
-                next(gen1)
-                next(gen2)
+            next(gen1)
+            next(gen2)
 
-            To get some posts, you can call `take()`:
+        To get some posts, you can call `take()`:
 
-            ::
+        ::
 
-                b = Blog('furion')
-                posts = b.take(5)
-
+            b = Blog('furion')
+            posts = b.take(5)
     """
 
-    def __init__(self,
-                 account_name: str,
-                 comments_only: bool = False,
-                 steemd_instance=None):
+    def __init__(self, account_name: str, comments_only: bool = False, steemd_instance=None):
         self.steem = steemd_instance or shared_steemd_instance()
         self.comments_only = comments_only
         self.account = Account(account_name, steemd_instance=steemd_instance)
-        self.history = self.account.history_reverse(filter_by='comment')
+        self.history = self.account.history_reverse(filter_by="comment")
         self.seen_items = set()
 
     def take(self, limit=5):
@@ -61,13 +58,13 @@ class Blog:
         hist = filter(comment_filter, self.history)
 
         # filter out reblogs
-        hist2 = filter(lambda x: x['author'] == self.account.name, hist)
+        hist2 = filter(lambda x: x["author"] == self.account.name, hist)
 
         # post edits will re-appear in history
         # we should therefore filter out already seen posts
         def ensure_unique(post):
-            if post['permlink'] not in self.seen_items:
-                self.seen_items.add(post['permlink'])
+            if post["permlink"] not in self.seen_items:
+                self.seen_items.add(post["permlink"])
                 return True
 
         unique = filter(ensure_unique, hist2)
@@ -78,7 +75,7 @@ class Blog:
         return batch
 
     def all(self):
-        """ A generator that will return ALL of account history. """
+        """A generator that will return ALL of account history."""
         while True:
             chunk = self.take(10)
             if chunk:

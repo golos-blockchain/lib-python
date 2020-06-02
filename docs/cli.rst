@@ -163,4 +163,3 @@ You can see all available commands with ``steempy -h``
       --verbose VERBOSE, -v VERBOSE
                             Verbosity
       --version             show program's version number and exit
-

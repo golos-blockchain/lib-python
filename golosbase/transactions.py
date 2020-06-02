@@ -10,15 +10,8 @@ import ecdsa
 
 from golosbase.account import PrivateKey, PublicKey
 from golosbase.chains import known_chains
-from golosbase.operations import Operation, GrapheneObject, isArgsThisClass
-from golosbase.types import (
-    Array,
-    Set,
-    Signature,
-    PointInTime,
-    Uint16,
-    Uint32,
-)
+from golosbase.operations import GrapheneObject, Operation, isArgsThisClass
+from golosbase.types import Array, PointInTime, Set, Signature, Uint16, Uint32
 
 log = logging.getLogger(__name__)
 
@@ -29,18 +22,17 @@ try:
     log.debug("Loaded secp256k1 binding.")
 except:
     USE_SECP256K1 = False
-    log.debug("To speed up transactions signing install \n"
-              "    pip install secp256k1")
+    log.debug("To speed up transactions signing install \n" "    pip install secp256k1")
 
 
 class SignedTransaction(GrapheneObject):
-    """ Create a signed transaction and offer method to create the
-        signature
+    """
+    Create a signed transaction and offer method to create the signature.
 
-        :param num refNum: parameter ref_block_num (see ``getBlockParams``)
-        :param num refPrefix: parameter ref_block_prefix (see ``getBlockParams``)
-        :param str expiration: expiration date
-        :param Array operations:  array of operations
+    :param num refNum: parameter ref_block_num (see ``getBlockParams``)
+    :param num refPrefix: parameter ref_block_prefix (see ``getBlockParams``)
+    :param str expiration: expiration date
+    :param Array operations:  array of operations
     """
 
     def __init__(self, *args, **kwargs):
@@ -59,28 +51,26 @@ class SignedTransaction(GrapheneObject):
                 kwargs["signatures"] = Array([Signature(unhexlify(a)) for a in kwargs["signatures"]])
 
             if "operations" in kwargs:
-                if all([
-                    not isinstance(a, Operation)
-                    for a in kwargs["operations"]
-                ]):
-                    kwargs['operations'] = Array(
-                        [Operation(a) for a in kwargs["operations"]])
+                if all([not isinstance(a, Operation) for a in kwargs["operations"]]):
+                    kwargs["operations"] = Array([Operation(a) for a in kwargs["operations"]])
                 else:
-                    kwargs['operations'] = Array(kwargs["operations"])
+                    kwargs["operations"] = Array(kwargs["operations"])
 
-            super().__init__(OrderedDict([
-                ('ref_block_num', Uint16(kwargs['ref_block_num'])),
-                ('ref_block_prefix', Uint32(kwargs['ref_block_prefix'])),
-                ('expiration', PointInTime(kwargs['expiration'])),
-                ('operations', kwargs['operations']),
-                ('extensions', kwargs['extensions']),
-                ('signatures', kwargs['signatures']),
-            ]))
+            super().__init__(
+                OrderedDict(
+                    [
+                        ("ref_block_num", Uint16(kwargs["ref_block_num"])),
+                        ("ref_block_prefix", Uint32(kwargs["ref_block_prefix"])),
+                        ("expiration", PointInTime(kwargs["expiration"])),
+                        ("operations", kwargs["operations"]),
+                        ("extensions", kwargs["extensions"]),
+                        ("signatures", kwargs["signatures"]),
+                    ]
+                )
+            )
 
     def recoverPubkeyParameter(self, digest, signature, pubkey):
-        """ Use to derive a number that allows to easily recover the
-            public key from the signature
-        """
+        """Use to derive a number that allows to easily recover the public key from the signature."""
         for i in range(0, 4):
             if USE_SECP256K1:
                 sig = pubkey.ecdsa_recoverable_deserialize(signature, i)
@@ -89,37 +79,34 @@ class SignedTransaction(GrapheneObject):
                     return i
             else:
                 p = self.recover_public_key(digest, signature, i)
-                if (p.to_string() == pubkey.to_string() or
-                        self.compressedPubkey(p) == pubkey.to_string()):
+                if p.to_string() == pubkey.to_string() or self.compressedPubkey(p) == pubkey.to_string():
                     return i
         return None
 
     def derSigToHexSig(self, s):
-        """ Format DER to HEX signature
-        """
+        """Format DER to HEX signature."""
         s, junk = ecdsa.der.remove_sequence(unhexlify(s))
         if junk:
-            log.debug('JUNK: %s', hexlify(junk).decode('ascii'))
-        assert (junk == b'')
+            log.debug("JUNK: %s", hexlify(junk).decode("ascii"))
+        assert junk == b""
         x, s = ecdsa.der.remove_integer(s)
         y, s = ecdsa.der.remove_integer(s)
-        return '%064x%064x' % (x, y)
+        return "%064x%064x" % (x, y)
 
     def compressedPubkey(self, pk):
         order = pk.curve.generator.order()
         p = pk.pubkey.point
         x_str = ecdsa.util.number_to_string(p.x(), order)
-        return bytes(chr(2 + (p.y() & 1)), 'ascii') + x_str
+        return bytes(chr(2 + (p.y() & 1)), "ascii") + x_str
 
     def recover_public_key(self, digest, signature, i):
-        """ Recover the public key from the the signature
-        """
+        """Recover the public key from the the signature."""
         # See http: //www.secg.org/download/aid-780/sec1-v2.pdf
         # section 4.1.6 primarily
         curve = ecdsa.SECP256k1.curve
         G = ecdsa.SECP256k1.generator
         order = ecdsa.SECP256k1.order
-        yp = (i % 2)
+        yp = i % 2
         r, s = ecdsa.util.sigdecode_string(signature, order)
         # 1.1
         x = r + (i // 2) * order
@@ -137,13 +124,12 @@ class SignedTransaction(GrapheneObject):
         # 1.5 Compute e
         e = ecdsa.util.string_to_number(digest)
         # 1.6 Compute Q = r^-1(sR - eG)
-        Q = ecdsa.numbertheory.inverse_mod(r, order) * (s * R +
-                                                        (-e % order) * G)
+        Q = ecdsa.numbertheory.inverse_mod(r, order) * (s * R + (-e % order) * G)
         # Not strictly necessary, but let's verify the message for
         # paranoia's sake.
-        if not ecdsa.VerifyingKey.from_public_point(
-                Q, curve=ecdsa.SECP256k1).verify_digest(
-            signature, digest, sigdecode=ecdsa.util.sigdecode_string):
+        if not ecdsa.VerifyingKey.from_public_point(Q, curve=ecdsa.SECP256k1).verify_digest(
+            signature, digest, sigdecode=ecdsa.util.sigdecode_string
+        ):
             return None
         return ecdsa.VerifyingKey.from_public_point(Q, curve=ecdsa.SECP256k1)
 
@@ -194,8 +180,7 @@ class SignedTransaction(GrapheneObject):
             recoverParameter = (bytes(signature)[0]) - 4 - 27  # recover parameter only
 
             if USE_SECP256K1:
-                ALL_FLAGS = secp256k1.lib.SECP256K1_CONTEXT_VERIFY | \
-                            secp256k1.lib.SECP256K1_CONTEXT_SIGN
+                ALL_FLAGS = secp256k1.lib.SECP256K1_CONTEXT_VERIFY | secp256k1.lib.SECP256K1_CONTEXT_SIGN
                 # Placeholder
                 pub = secp256k1.PublicKey(flags=ALL_FLAGS)
                 # Recover raw signature
@@ -206,17 +191,13 @@ class SignedTransaction(GrapheneObject):
                 normalSig = verifyPub.ecdsa_recoverable_convert(sig)
                 # Verify
                 verifyPub.ecdsa_verify(bytes(self.message), normalSig)
-                phex = hexlify(verifyPub.serialize(compressed=True)).decode('ascii')
+                phex = hexlify(verifyPub.serialize(compressed=True)).decode("ascii")
                 pubKeysFound.append(phex)
             else:
                 p = self.recover_public_key(self.digest, sig, recoverParameter)
                 # Will throw an exception of not valid
-                p.verify_digest(
-                    sig,
-                    self.digest,
-                    sigdecode=ecdsa.util.sigdecode_string
-                )
-                phex = hexlify(self.compressedPubkey(p)).decode('ascii')
+                p.verify_digest(sig, self.digest, sigdecode=ecdsa.util.sigdecode_string)
+                phex = hexlify(self.compressedPubkey(p)).decode("ascii")
                 pubKeysFound.append(phex)
 
         for pubkey in pubkeys:
@@ -231,17 +212,19 @@ class SignedTransaction(GrapheneObject):
         return pubKeysFound
 
     def _is_canonical(self, sig):
-        return (not (sig[0] & 0x80)
-                and not (sig[0] == 0 and not (sig[1] & 0x80))
-                and not (sig[32] & 0x80)
-                and not (sig[32] == 0 and not (sig[33] & 0x80)))
+        return (
+            not (sig[0] & 0x80)
+            and not (sig[0] == 0 and not (sig[1] & 0x80))
+            and not (sig[32] & 0x80)
+            and not (sig[32] == 0 and not (sig[33] & 0x80))
+        )
 
     def sign(self, wifkeys, chain=None):
-        """ Sign the transaction with the provided private keys.
+        """
+        Sign the transaction with the provided private keys.
 
-            :param list wifkeys: Array of wif keys
-            :param str chain: identifier for the chain
-
+        :param list wifkeys: Array of wif keys
+        :param str chain: identifier for the chain
         """
         if not chain:
             raise ValueError("Chain needs to be provided!")
@@ -249,10 +232,7 @@ class SignedTransaction(GrapheneObject):
 
         # Get Unique private keys
         self.privkeys = []
-        [
-            self.privkeys.append(item) for item in wifkeys
-            if item not in self.privkeys
-        ]
+        [self.privkeys.append(item) for item in wifkeys if item not in self.privkeys]
 
         # Sign the message with every private key given!
         sigs = []
@@ -265,14 +245,9 @@ class SignedTransaction(GrapheneObject):
                 while True:
                     ndata[0] += 1
                     privkey = secp256k1.PrivateKey(p, raw=True)
-                    sig = secp256k1.ffi.new('secp256k1_ecdsa_recoverable_signature *')
+                    sig = secp256k1.ffi.new("secp256k1_ecdsa_recoverable_signature *")
                     signed = secp256k1.lib.secp256k1_ecdsa_sign_recoverable(
-                        privkey.ctx,
-                        sig,
-                        self.digest,
-                        privkey.private_key,
-                        secp256k1.ffi.NULL,
-                        ndata
+                        privkey.ctx, sig, self.digest, privkey.private_key, secp256k1.ffi.NULL, ndata
                     )
                     assert signed == 1
                     signature, i = privkey.ecdsa_recoverable_serialize(sig)
@@ -295,14 +270,12 @@ class SignedTransaction(GrapheneObject):
                         hashlib.sha256,
                         hashlib.sha256(
                             self.digest + struct.pack("d", time.time())  # use the local time to randomize the signature
-                        ).digest())
+                        ).digest(),
+                    )
 
                     # Sign message
                     #
-                    sigder = sk.sign_digest(
-                        self.digest,
-                        sigencode=ecdsa.util.sigencode_der,
-                        k=k)
+                    sigder = sk.sign_digest(self.digest, sigencode=ecdsa.util.sigencode_der, k=k)
 
                     # Reformating of signature
                     #
@@ -332,13 +305,14 @@ class SignedTransaction(GrapheneObject):
         return self
 
 
-time_format = '%Y-%m-%dT%H:%M:%S%Z'
+time_format = "%Y-%m-%dT%H:%M:%S%Z"
 
 
 def get_block_params(steem):
-    """ Auxiliary method to obtain ``ref_block_num`` and
-        ``ref_block_prefix``. Requires a websocket connection to a
-        witness node!
+    """
+    Auxiliary method to obtain ``ref_block_num`` and ``ref_block_prefix``.
+
+    Requires a websocket connection to a witness node!
     """
     props = steem.get_dynamic_global_properties()
     ref_block_num = props["head_block_number"] & 0xFFFF
@@ -347,11 +321,11 @@ def get_block_params(steem):
 
 
 def fmt_time_from_now(secs=0):
-    """ Properly Format Time that is `x` seconds in the future
+    """
+    Properly Format Time that is `x` seconds in the future.
 
-     :param int secs: Seconds to go in the future (`x>0`) or the past (`x<0`)
-     :return: Properly formated time for Graphene (`%Y-%m-%dT%H:%M:%S`)
-     :rtype: str
-
+    :param int secs: Seconds to go in the future (`x>0`) or the past (`x<0`)
+    :return: Properly formated time for Graphene (`%Y-%m-%dT%H:%M:%S`)
+    :rtype: str
     """
     return datetime.utcfromtimestamp(time.time() + int(secs)).strftime(time_format)

@@ -12,44 +12,44 @@ logger = logging.getLogger(__name__)
 
 
 class WsClient(BaseClient):
-    """ Simple Golos JSON-WebSocket-RPC API
+    """
+    Simple Golos JSON-WebSocket-RPC API.
 
-        This class serves as an abstraction layer for easy use of the Golos API.
+    This class serves as an abstraction layer for easy use of the Golos API.
 
-        Args:
-          nodes (list): A list of Golos WebSocket RPC nodes to connect to.
+    Args:
+      nodes (list): A list of Golos WebSocket RPC nodes to connect to.
 
-        .. code-block:: python
+    .. code-block:: python
 
-           from golosbase.http_client import HttpClient
-           rpc = HttpClient(['https://steemd-node1.com', 'https://steemd-node2.com'])
+       from golosbase.http_client import HttpClient
+       rpc = HttpClient(['https://steemd-node1.com', 'https://steemd-node2.com'])
 
-        any call available to that port can be issued using the instance
-        via the syntax ``rpc.exec('command', *parameters)``.
+    any call available to that port can be issued using the instance
+    via the syntax ``rpc.exec('command', *parameters)``.
 
-        Example:
+    Example:
 
-        .. code-block:: python
+    .. code-block:: python
 
-           rpc.exec(
-               'get_followers',
-               'furion', 'abit', 'blog', 10,
-               api='follow'
-           )
-
-        """
+       rpc.exec(
+           'get_followers',
+           'furion', 'abit', 'blog', 10,
+           api='follow'
+       )
+    """
 
     def __init__(self, nodes: list, **kwargs):
         super().__init__()
 
-        self.return_with_args = kwargs.get('return_with_args', False)
+        self.return_with_args = kwargs.get("return_with_args", False)
 
         self.num_retries = kwargs.get("num_retries", -1)
         self.nodes = cycle(nodes)
-        self.url = ''
+        self.url = ""
         self.ws = None
 
-        log_level = kwargs.get('log_level', logging.INFO)
+        log_level = kwargs.get("log_level", logging.INFO)
         logger.setLevel(log_level)
         self.ws_connect()
 
@@ -60,7 +60,7 @@ class WsClient(BaseClient):
             self.url = next(self.nodes)
             logger.debug("Trying to connect to node %s" % self.url)
             if self.url[:3] == "wss":
-                sslopt_ca_certs = {'cert_reqs': ssl.CERT_NONE}
+                sslopt_ca_certs = {"cert_reqs": ssl.CERT_NONE}
                 self.ws = websocket.WebSocket(sslopt=sslopt_ca_certs)
             else:
                 self.ws = websocket.WebSocket()
@@ -77,9 +77,8 @@ class WsClient(BaseClient):
                 sleeptime = (cnt - 1) * 2 if cnt < 10 else 10
                 if sleeptime:
                     logger.warning(
-                        "Lost connection to node during wsconnect(): %s (%d/%d) "
-                        % (self.url, cnt, self.num_retries) +
-                        "Retrying in %d seconds" % sleeptime
+                        "Lost connection to node during wsconnect(): %s (%d/%d) " % (self.url, cnt, self.num_retries)
+                        + "Retrying in %d seconds" % sleeptime
                     )
                     time.sleep(sleeptime)
 
@@ -106,9 +105,8 @@ class WsClient(BaseClient):
                 sleeptime = (cnt - 1) * 2 if cnt < 10 else 10
                 if sleeptime:
                     logger.warning(
-                        "Lost connection to node during call(): %s (%d/%d) "
-                        % (self.url, cnt, self.num_retries) +
-                        "Retrying in %d seconds" % sleeptime
+                        "Lost connection to node during call(): %s (%d/%d) " % (self.url, cnt, self.num_retries)
+                        + "Retrying in %d seconds" % sleeptime
                     )
                     time.sleep(sleeptime)
 
@@ -120,7 +118,4 @@ class WsClient(BaseClient):
                 except:
                     pass
 
-        return self._return(
-            response=response,
-            args=args,
-            return_with_args=return_with_args)
+        return self._return(response=response, args=args, return_with_args=return_with_args)

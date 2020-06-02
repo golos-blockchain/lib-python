@@ -12,15 +12,13 @@ from urllib.parse import urlparse
 import w3lib.url
 from langdetect import DetectorFactory, detect
 from langdetect.lang_detect_exception import LangDetectException
-from toolz import update_in, assoc
+from toolz import assoc, update_in
 
 logger = logging.getLogger(__name__)
 
 # https://github.com/matiasb/python-unidiff/blob/master/unidiff/constants.py#L37
 # @@ (source offset, length) (target offset, length) @@ (section header)
-RE_HUNK_HEADER = re.compile(
-    r"^@@ -(\d+)(?:,(\d+))? \+(\d+)(?:,(\d+))?\ @@[ ]?(.*)$",
-    flags=re.MULTILINE)
+RE_HUNK_HEADER = re.compile(r"^@@ -(\d+)(?:,(\d+))? \+(\d+)(?:,(\d+))?\ @@[ ]?(.*)$", flags=re.MULTILINE)
 
 # ensure deterministec language detection
 DetectorFactory.seed = 0
@@ -30,21 +28,72 @@ epoch = datetime(1970, 1, 1)
 
 
 rus_d = {
-    'а': 'a', 'б': 'b', 'в': 'v', 'г': 'g', 'д': 'd',
-    'е': 'e', 'ё': 'yo', 'ж': 'zh', 'з': 'z', 'и': 'i',
-    'й': 'ij', 'к': 'k', 'л': 'l', 'м': 'm', 'н': 'n',
-    'о': 'o', 'п': 'p', 'р': 'r', 'с': 's', 'т': 't',
-    'у': 'u', 'ф': 'f', 'х': 'kh', 'ц': 'cz', 'ч': 'ch',
-    'ш': 'sh', 'щ': 'shch', 'ъ': 'xx', 'ы': 'y', 'ь': 'x',
-    'э': 'ye', 'ю': 'yu', 'я': 'ya',
-
-    'А': "A", 'Б': "B", 'В': "V", 'Г': "G", 'Д': "D",
-    'Е': "E", 'Ё': "yo", 'Ж': "ZH", 'З': "Z", 'И': "I",
-    'Й': "IJ", 'К': "K", 'Л': "L", 'М': "M", 'Н': "N",
-    'О': "O", 'П': "P", 'Р': "R", 'С': "S", 'Т': "T",
-    'У': "U", 'Ф': "F", 'Х': "KH", 'Ц': "CZ", 'Ч': "CH",
-    'Ш': "SH", 'Щ': "SHCH", 'Ъ': "XX", 'Ы': "Y", 'Ь': "X",
-    'Э': "YE", 'Ю': "YU", 'Я': "YA",
+    "а": "a",
+    "б": "b",
+    "в": "v",
+    "г": "g",
+    "д": "d",
+    "е": "e",
+    "ё": "yo",
+    "ж": "zh",
+    "з": "z",
+    "и": "i",
+    "й": "ij",
+    "к": "k",
+    "л": "l",
+    "м": "m",
+    "н": "n",
+    "о": "o",
+    "п": "p",
+    "р": "r",
+    "с": "s",
+    "т": "t",
+    "у": "u",
+    "ф": "f",
+    "х": "kh",
+    "ц": "cz",
+    "ч": "ch",
+    "ш": "sh",
+    "щ": "shch",
+    "ъ": "xx",
+    "ы": "y",
+    "ь": "x",
+    "э": "ye",
+    "ю": "yu",
+    "я": "ya",
+    "А": "A",
+    "Б": "B",
+    "В": "V",
+    "Г": "G",
+    "Д": "D",
+    "Е": "E",
+    "Ё": "yo",
+    "Ж": "ZH",
+    "З": "Z",
+    "И": "I",
+    "Й": "IJ",
+    "К": "K",
+    "Л": "L",
+    "М": "M",
+    "Н": "N",
+    "О": "O",
+    "П": "P",
+    "Р": "R",
+    "С": "S",
+    "Т": "T",
+    "У": "U",
+    "Ф": "F",
+    "Х": "KH",
+    "Ц": "CZ",
+    "Ч": "CH",
+    "Ш": "SH",
+    "Щ": "SHCH",
+    "Ъ": "XX",
+    "Ы": "Y",
+    "Ь": "X",
+    "Э": "YE",
+    "Ю": "YU",
+    "Я": "YA",
 }
 
 
@@ -73,14 +122,14 @@ def block_num_from_previous(previous_block_hash: str) -> int:
 
 
 def chunkify(iterable, chunksize=10000):
-    """Yield successive chunksized chunks from iterable.
+    """
+    Yield successive chunksized chunks from iterable.
 
     Args:
       iterable:
       chunksize:  (Default value = 10000)
 
     Returns:
-
     """
     i = 0
     chunk = []
@@ -97,34 +146,31 @@ def chunkify(iterable, chunksize=10000):
 
 def ensure_decoded(thing):
     if not thing:
-        logger.debug('ensure_decoded thing is logically False')
+        logger.debug("ensure_decoded thing is logically False")
         return None
     if isinstance(thing, (list, dict)):
-        logger.debug('ensure_decoded thing is already decoded')
+        logger.debug("ensure_decoded thing is already decoded")
         return thing
     single_encoded_dict = double_encoded_dict = None
     try:
         single_encoded_dict = json.loads(thing)
         if isinstance(single_encoded_dict, dict):
-            logger.debug('ensure_decoded thing is single encoded dict')
+            logger.debug("ensure_decoded thing is single encoded dict")
             return single_encoded_dict
         elif isinstance(single_encoded_dict, str):
-            logger.debug('ensure_decoded thing is single encoded str')
+            logger.debug("ensure_decoded thing is single encoded str")
             if single_encoded_dict == "":
-                logger.debug(
-                    'ensure_decoded thing is single encoded str == ""')
+                logger.debug('ensure_decoded thing is single encoded str == ""')
                 return None
             else:
                 double_encoded_dict = json.loads(single_encoded_dict)
-                logger.debug('ensure_decoded thing is double encoded')
+                logger.debug("ensure_decoded thing is double encoded")
                 return double_encoded_dict
     except Exception as e:
         extra = dict(
-            thing=thing,
-            single_encoded_dict=single_encoded_dict,
-            double_encoded_dict=double_encoded_dict,
-            error=e)
-        logger.error('ensure_decoded error', extra=extra)
+            thing=thing, single_encoded_dict=single_encoded_dict, double_encoded_dict=double_encoded_dict, error=e
+        )
+        logger.error("ensure_decoded error", extra=extra)
         return None
 
 
@@ -152,31 +198,30 @@ def extract_keys_from_meta(meta, keys):
             elif isinstance(item, (list, tuple)):
                 extracted.extend(item)
             else:
-                logger.warning('unusual item in meta: %s', item)
+                logger.warning("unusual item in meta: %s", item)
     return extracted
 
 
 def build_comment_url(parent_permlink=None, author=None, permlink=None):
-    return '/'.join([parent_permlink, author, permlink])
+    return "/".join([parent_permlink, author, permlink])
 
 
 def canonicalize_url(url, **kwargs):
     try:
         canonical_url = w3lib.url.canonicalize_url(url, **kwargs)
     except Exception as e:
-        logger.warning('url preparation error', extra=dict(url=url, error=e))
+        logger.warning("url preparation error", extra=dict(url=url, error=e))
         return None
     if canonical_url != url:
-        logger.debug('canonical_url changed %s to %s', url, canonical_url)
+        logger.debug("canonical_url changed %s to %s", url, canonical_url)
     try:
         parsed_url = urlparse(canonical_url)
         if not parsed_url.scheme and not parsed_url.netloc:
-            _log = dict(
-                url=url, canonical_url=canonical_url, parsed_url=parsed_url)
-            logger.warning('bad url encountered', extra=_log)
+            _log = dict(url=url, canonical_url=canonical_url, parsed_url=parsed_url)
+            logger.warning("bad url encountered", extra=_log)
             return None
     except Exception as e:
-        logger.warning('url parse error', extra=dict(url=url, error=e))
+        logger.warning("url parse error", extra=dict(url=url, error=e))
         return None
     return canonical_url
 
@@ -187,7 +232,7 @@ def findall_patch_hunks(body=None):
 
 def detect_language(text):
     if not text or len(text) < MIN_TEXT_LENGTH_FOR_DETECTION:
-        logger.debug('not enough text to perform langdetect')
+        logger.debug("not enough text to perform langdetect")
         return None
     try:
         return detect(text)
@@ -197,24 +242,24 @@ def detect_language(text):
 
 
 def is_comment(item):
-    """Quick check whether an item is a comment (reply) to another post.
+    """
+    Quick check whether an item is a comment (reply) to another post.
+
     The item can be a Post object or just a raw comment object from the blockchain.
     """
-    return item['permlink'][:3] == "re-" and item['parent_author']
+    return item["permlink"][:3] == "re-" and item["parent_author"]
 
 
 def time_elapsed(posting_time):
-    """Takes a string time from a post or blockchain event, and returns a time delta from now.
-    """
+    """Takes a string time from a post or blockchain event, and returns a time delta from now."""
     if type(posting_time) == str:
         posting_time = parse_time(posting_time)
     return datetime.utcnow() - posting_time
 
 
 def parse_time(block_time):
-    """Take a string representation of time from the blockchain, and parse it into datetime object.
-    """
-    return datetime.strptime(block_time, '%Y-%m-%dT%H:%M:%S')
+    """Take a string representation of time from the blockchain, and parse it into datetime object."""
+    return datetime.strptime(block_time, "%Y-%m-%dT%H:%M:%S")
 
 
 def time_diff(time1, time2):
@@ -222,8 +267,7 @@ def time_diff(time1, time2):
 
 
 def keep_in_dict(obj, allowed_keys=list()):
-    """ Prune a class or dictionary of all but allowed keys.
-    """
+    """Prune a class or dictionary of all but allowed keys."""
     if type(obj) == dict:
         items = obj.items()
     else:
@@ -233,8 +277,7 @@ def keep_in_dict(obj, allowed_keys=list()):
 
 
 def remove_from_dict(obj, remove_keys=list()):
-    """ Prune a class or dictionary of specified keys.
-    """
+    """Prune a class or dictionary of specified keys."""
     if type(obj) == dict:
         items = obj.items()
     else:
@@ -244,7 +287,8 @@ def remove_from_dict(obj, remove_keys=list()):
 
 
 def construct_identifier(*args):
-    """ Create a post identifier from comment/post object or arguments.
+    """
+    Create a post identifier from comment/post object or arguments.
 
     Examples:
 
@@ -256,21 +300,20 @@ def construct_identifier(*args):
 
     if len(args) == 1:
         op = args[0]
-        author, permlink = op['author'], op['permlink']
+        author, permlink = op["author"], op["permlink"]
     elif len(args) == 2:
         author, permlink = args
     else:
-        raise ValueError(
-            'construct_identifier() received unparsable arguments')
+        raise ValueError("construct_identifier() received unparsable arguments")
 
     # remove the @ sign in case it was passed in by the user.
-    author = author.replace('@', '')
+    author = author.replace("@", "")
     fields = dict(author=author, permlink=permlink)
-    return '@{author}/{permlink}'.format(**fields)
+    return "@{author}/{permlink}".format(**fields)
 
 
-def json_expand(json_op, key_name='json'):
-    """ Convert a string json object to Python dict in an op. """
+def json_expand(json_op, key_name="json"):
+    """Convert a string json object to Python dict in an op."""
     if type(json_op) == dict and key_name in json_op and json_op[key_name]:
         try:
             return update_in(json_op, [key_name], json.loads)
@@ -284,10 +327,10 @@ def sanitize_permlink(permlink):
     permlink = permlink.strip()
     permlink = re.sub("_|\s|\.", "-", permlink)
     permlink = re.sub("[^\w-]", "", permlink)
-    pattern = re.compile('|'.join(rus_d.keys()))
+    pattern = re.compile("|".join(rus_d.keys()))
     new_permlink = pattern.sub(lambda x: rus_d[x.group()], permlink)
     if new_permlink != permlink:
-        permlink = 'ru--%s' % new_permlink
+        permlink = "ru--%s" % new_permlink
     permlink = re.sub("[^a-zA-Z0-9-]", "", permlink)
     permlink = permlink.lower()
     return permlink
@@ -308,7 +351,7 @@ def derive_permlink(title, parent_permlink=None):
 def resolve_identifier(identifier):
 
     # in case the user supplied the @ sign.
-    identifier = identifier.replace('@', '')
+    identifier = identifier.replace("@", "")
 
     match = re.match("([\w\-\.]*)/([\w\-]*)", identifier)
     if not hasattr(match, "group"):
@@ -317,43 +360,40 @@ def resolve_identifier(identifier):
 
 
 def fmt_time(t):
-    """ Properly Format Time for permlinks
-    """
+    """Properly Format Time for permlinks."""
     return datetime.utcfromtimestamp(t).strftime("%Y%m%dt%H%M%S%Z")
 
 
 def fmt_time_string(t):
-    """ Properly Format Time for permlinks
-    """
-    return datetime.strptime(t, '%Y-%m-%dT%H:%M:%S')
+    """Properly Format Time for permlinks."""
+    return datetime.strptime(t, "%Y-%m-%dT%H:%M:%S")
 
 
 def fmt_time_from_now(secs=0):
-    """ Properly Format Time that is `x` seconds in the future
-
-        :param int secs: Seconds to go in the future (`x>0`) or the
-                         past (`x<0`)
-        :return: Properly formated time for Graphene (`%Y-%m-%dT%H:%M:%S`)
-        :rtype: str
-
     """
-    return datetime.utcfromtimestamp(time.time() + int(secs)).strftime('%Y-%m-%dT%H:%M:%S')
+    Properly Format Time that is `x` seconds in the future.
+
+    :param int secs: Seconds to go in the future (`x>0`) or the
+                     past (`x<0`)
+    :return: Properly formated time for Graphene (`%Y-%m-%dT%H:%M:%S`)
+    :rtype: str
+    """
+    return datetime.utcfromtimestamp(time.time() + int(secs)).strftime("%Y-%m-%dT%H:%M:%S")
 
 
 def env_unlocked():
-    """ Check if wallet password is provided as ENV variable. """
-    return os.getenv('UNLOCK', False)
+    """Check if wallet password is provided as ENV variable."""
+    return os.getenv("UNLOCK", False)
 
 
 # todo remove these
 def strfage(time, fmt=None):
-    """ Format time/age
-    """
+    """Format time/age."""
     if not hasattr(time, "days"):  # dirty hack
         now = datetime.utcnow()
         if isinstance(time, str):
-            time = datetime.strptime(time, '%Y-%m-%dT%H:%M:%S')
-        time = (now - time)
+            time = datetime.strptime(time, "%Y-%m-%dT%H:%M:%S")
+        time = now - time
 
     d = {"days": time.days}
     d["hours"], rem = divmod(time.seconds, 3600)
@@ -370,8 +410,7 @@ def strfage(time, fmt=None):
 
 
 def strfdelta(tdelta, fmt):
-    """ Format time/age
-    """
+    """Format time/age."""
     if not tdelta or not hasattr(tdelta, "days"):  # dirty hack
         return None
 
@@ -382,7 +421,7 @@ def strfdelta(tdelta, fmt):
 
 
 def is_valid_account_name(name):
-    return re.match('^[a-z][a-z0-9\-.]{2,15}$', name)
+    return re.match("^[a-z][a-z0-9\-.]{2,15}$", name)
 
 
 def epoch_seconds(date: datetime):

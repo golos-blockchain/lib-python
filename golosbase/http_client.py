@@ -8,7 +8,7 @@ from itertools import cycle
 import certifi
 import urllib3
 from urllib3.connection import HTTPConnection
-from urllib3.exceptions import MaxRetryError, ReadTimeoutError, ProtocolError
+from urllib3.exceptions import MaxRetryError, ProtocolError, ReadTimeoutError
 
 from golos.consts import NETWORK_BROADCAST_API
 from golosbase.base_client import BaseClient
@@ -17,7 +17,8 @@ logger = logging.getLogger(__name__)
 
 
 class HttpClient(BaseClient):
-    """ Simple Golos JSON-HTTP-RPC API
+    """
+    Simple Golos JSON-HTTP-RPC API.
 
     This class serves as an abstraction layer for easy use of the Steem API.
 
@@ -41,26 +42,26 @@ class HttpClient(BaseClient):
            'furion', 'abit', 'blog', 10,
            api='follow'
        )
-
     """
 
     def __init__(self, nodes, **kwargs):
         super().__init__()
 
-        self.return_with_args = kwargs.get('return_with_args', False)
-        self.re_raise = kwargs.get('re_raise', True)
-        self.max_workers = kwargs.get('max_workers', None)
+        self.return_with_args = kwargs.get("return_with_args", False)
+        self.re_raise = kwargs.get("re_raise", True)
+        self.max_workers = kwargs.get("max_workers", None)
 
-        num_pools = kwargs.get('num_pools', 10)
-        maxsize = kwargs.get('maxsize', 10)
-        timeout = kwargs.get('timeout', 60)
-        retries = kwargs.get('retries', 20)
-        pool_block = kwargs.get('pool_block', False)
-        tcp_keepalive = kwargs.get('tcp_keepalive', True)
+        num_pools = kwargs.get("num_pools", 10)
+        maxsize = kwargs.get("maxsize", 10)
+        timeout = kwargs.get("timeout", 60)
+        retries = kwargs.get("retries", 20)
+        pool_block = kwargs.get("pool_block", False)
+        tcp_keepalive = kwargs.get("tcp_keepalive", True)
 
         if tcp_keepalive:
-            socket_options = HTTPConnection.default_socket_options + \
-                             [(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1), ]
+            socket_options = HTTPConnection.default_socket_options + [
+                (socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1),
+            ]
         else:
             socket_options = HTTPConnection.default_socket_options
 
@@ -71,38 +72,42 @@ class HttpClient(BaseClient):
             timeout=timeout,
             retries=retries,
             socket_options=socket_options,
-            headers={'Content-Type': 'application/json'},
-            cert_reqs='CERT_REQUIRED',
-            ca_certs=certifi.where())
-        '''
+            headers={"Content-Type": "application/json"},
+            cert_reqs="CERT_REQUIRED",
+            ca_certs=certifi.where(),
+        )
+        """
             urlopen(method, url, body=None, headers=None, retries=None,
             redirect=True, assert_same_host=True, timeout=<object object>,
             pool_timeout=None, release_conn=None, chunked=False, body_pos=None,
             **response_kw)
-        '''
+        """
 
         self.nodes = cycle(nodes)
-        self.url = ''
+        self.url = ""
         self.request = None
         self.next_node()
 
-        log_level = kwargs.get('log_level', logging.INFO)
+        log_level = kwargs.get("log_level", logging.INFO)
         logger.setLevel(log_level)
 
     def next_node(self):
-        """ Switch to the next available node.
+        """
+        Switch to the next available node.
 
-        This method will change base URL of our requests.
-        Use it when the current node goes down to change to a fallback node. """
+        This method will change base URL of our requests. Use it when the current node goes down to change to a fallback
+        node.
+        """
         self.set_node(next(self.nodes))
 
     def set_node(self, node_url):
-        """ Change current node to provided node URL. """
+        """Change current node to provided node URL."""
         self.url = node_url
-        self.request = partial(self.http.urlopen, 'POST', self.url)
+        self.request = partial(self.http.urlopen, "POST", self.url)
 
     def call(self, name, *args, api=None, return_with_args=None, _ret_cnt=0):
-        """ Call a remote procedure in golosd.
+        """
+        Call a remote procedure in golosd.
 
         Warnings:
             This command will auto-retry in case of node failure, as well as handle
@@ -115,11 +120,7 @@ class HttpClient(BaseClient):
 
         try:
             response = self.request(body=body)
-        except (MaxRetryError,
-                ConnectionResetError,
-                ReadTimeoutError,
-                RemoteDisconnected,
-                ProtocolError) as e:
+        except (MaxRetryError, ConnectionResetError, ReadTimeoutError, RemoteDisconnected, ProtocolError) as e:
             # if we broadcasted a transaction, always raise
             # this is to prevent potential for double spend scenario
             if api == NETWORK_BROADCAST_API:
@@ -131,27 +132,17 @@ class HttpClient(BaseClient):
             elif _ret_cnt > 10:
                 raise e
             self.next_node()
-            logging.debug('Switched node to %s due to exception: %s' %
-                          (self.hostname, e.__class__.__name__))
-            return self.call(name, *args,
-                             return_with_args=return_with_args,
-                             _ret_cnt=_ret_cnt + 1
-                             )
+            logging.debug("Switched node to %s due to exception: %s" % (self.hostname, e.__class__.__name__))
+            return self.call(name, *args, return_with_args=return_with_args, _ret_cnt=_ret_cnt + 1)
         except Exception as e:
             if self.re_raise:
                 raise e
             else:
                 extra = dict(err=e, request=self.request)
-                logger.info('Request error', extra=extra)
-                return self._return(
-                    response=response,
-                    args=args,
-                    return_with_args=return_with_args)
+                logger.info("Request error", extra=extra)
+                return self._return(response=response, args=args, return_with_args=return_with_args)
         else:
             if response.status not in [*response.REDIRECT_STATUSES, 200]:
-                logger.info('non 200 response:%s', response.status)
+                logger.info("non 200 response:%s", response.status)
 
-            return self._return(
-                response=response,
-                args=args,
-                return_with_args=return_with_args)
+            return self._return(response=response, args=args, return_with_args=return_with_args)

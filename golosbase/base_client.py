@@ -4,24 +4,33 @@ import logging
 import re
 from urllib.parse import urlparse
 
-from golosbase.exceptions import RPCError, decodeRPCErrorMsg, AlreadyTransactedThisBlock, \
-    MissingRequiredPostingAuthority, VoteWeightTooSmall, OnlyVoteOnceEvery3Seconds, AlreadyVotedSimilarily, \
-    PostOnlyEvery5Min, DuplicateTransaction, ExceededAllowedBandwidth, NoMethodWithName, UnhandledRPCError, \
-    ReadLockFail
+from golosbase.exceptions import (
+    AlreadyTransactedThisBlock,
+    AlreadyVotedSimilarily,
+    DuplicateTransaction,
+    ExceededAllowedBandwidth,
+    MissingRequiredPostingAuthority,
+    NoMethodWithName,
+    OnlyVoteOnceEvery3Seconds,
+    PostOnlyEvery5Min,
+    ReadLockFail,
+    RPCError,
+    UnhandledRPCError,
+    VoteWeightTooSmall,
+    decodeRPCErrorMsg,
+)
 
 logger = logging.getLogger(__name__)
 
 
 class BaseClient(object):
-    """
-    This class provides general methods to process requests and responses from blockchain nodes
-    """
+    """This class provides general methods to process requests and responses from blockchain nodes."""
 
     def __init__(self):
         self.return_with_args = False
         self.re_raise = True
         self.max_workers = None
-        self.url = ''
+        self.url = ""
 
     @property
     def hostname(self):
@@ -29,7 +38,8 @@ class BaseClient(object):
 
     @staticmethod
     def json_rpc_body(name, *args, api=None, as_json=True, _id=0):
-        """ Build request body for steemd RPC requests.
+        """
+        Build request body for steemd RPC requests.
 
         Args:
             name (str): Name of a method we are trying to call. (ie: `get_accounts`)
@@ -50,12 +60,12 @@ class BaseClient(object):
         else:
             body_dict = {**headers, "method": name, "params": args}
         if as_json:
-            return json.dumps(body_dict, ensure_ascii=False).encode('utf8')
+            return json.dumps(body_dict, ensure_ascii=False).encode("utf8")
         else:
             return body_dict
 
     def call(self, name, *args, api=None, return_with_args=None, _ret_cnt=0):
-        raise NotImplementedError('`call` method should be implemented')
+        raise NotImplementedError("`call` method should be implemented")
 
     def _return(self, response=None, args=None, return_with_args=None):
         return_with_args = return_with_args or self.return_with_args
@@ -63,21 +73,21 @@ class BaseClient(object):
 
         if response:
             try:
-                if hasattr(response, 'data'):
-                    data = response.data.decode('utf-8')
+                if hasattr(response, "data"):
+                    data = response.data.decode("utf-8")
                 else:
-                    data = response if isinstance(response, str) else response.decode('utf-8')
+                    data = response if isinstance(response, str) else response.decode("utf-8")
                 response_json = json.loads(data)
             except Exception as e:
                 extra = dict(response=response, request_args=args, err=e)
-                logger.info('failed to load response', extra=extra)
+                logger.info("failed to load response", extra=extra)
                 result = None
             else:
-                if 'error' in response_json:
-                    error = response_json['error']
+                if "error" in response_json:
+                    error = response_json["error"]
 
                     if self.re_raise:
-                        error_message = error.get('message', response_json['error'])
+                        error_message = error.get("message", response_json["error"])
                         e = RPCError(error_message)
                         msg = decodeRPCErrorMsg(e).strip()
 
@@ -106,17 +116,16 @@ class BaseClient(object):
                         else:
                             raise e
 
-                    result = response_json['error']
+                    result = response_json["error"]
                 else:
-                    result = response_json.get('result', None)
+                    result = response_json.get("result", None)
         if return_with_args:
             return result, args
         else:
             return result
 
     def call_multi_with_futures(self, name, params, api=None, max_workers=None):
-        with concurrent.futures.ThreadPoolExecutor(
-                max_workers=max_workers) as executor:
+        with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
             # Start the load operations and mark each future with its URL
             def ensure_list(parameter):
                 return parameter if type(parameter) in (list, tuple, set) else [parameter]

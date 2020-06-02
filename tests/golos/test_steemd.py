@@ -1,4 +1,5 @@
 import unittest
+
 import pytest
 
 from golos.steemd import Steemd
@@ -6,7 +7,7 @@ from golos.steemd import Steemd
 
 class SteemdTestCase(unittest.TestCase):
     def setUp(self):
-        self.nodes = ['wss://golos.lexa.host/ws', 'wss://golos.solox.world/ws']
+        self.nodes = ["wss://golos.lexa.host/ws", "wss://golos.solox.world/ws"]
         self.steemd = Steemd(nodes=self.nodes)
         self.trx = {
             "ref_block_num": 45193,
@@ -19,16 +20,14 @@ class SteemdTestCase(unittest.TestCase):
                         "required_auths": [],
                         "required_posting_auths": ["joseph.kalu"],
                         "id": "follow",
-                        "json": "[\"follow\", {\"follower\": \"joseph.kalu\", \"following\": \"steepshot\", \"what\": [\"blog\"]}]"
-                    }
+                        "json": '["follow", {"follower": "joseph.kalu", "following": "steepshot", "what": ["blog"]}]',
+                    },
                 ]
             ],
-            "extensions": [
-
-            ],
+            "extensions": [],
             "signatures": [
                 "1f610ca0afcfa7de5074ebcf9c46e7377836ed780f6181faf67151c7e92778ba29430b73be2cc0ad2dffdd2a6a503ea52ada13d7571bf8c0bf79fcd29830284c65"
-            ]
+            ],
         }
 
     def get_discusison_by(self, sort):
@@ -51,38 +50,38 @@ class SteemdTestCase(unittest.TestCase):
         blocks = self.steemd.get_blocks(block_nums)
 
         for i, block in enumerate(blocks):
-            self.assertEqual(block['block_num'], block_nums[i])
+            self.assertEqual(block["block_num"], block_nums[i])
 
     def test_get_trending_tags(self):
-        after_tag = ''
+        after_tag = ""
         limit = 10
         tags = self.steemd.get_trending_tags(after_tag, limit)
 
         self.assertEqual(len(tags), limit)
 
-        tags_next = self.steemd.get_trending_tags(tags[-1]['name'], limit)
+        tags_next = self.steemd.get_trending_tags(tags[-1]["name"], limit)
         self.assertEqual(len(tags_next), limit)
-        self.assertEqual(tags[-1]['name'], tags_next[0]['name'])
+        self.assertEqual(tags[-1]["name"], tags_next[0]["name"])
 
     @pytest.mark.xfail
     def test_get_tags_used_by_author(self):
-        tags = self.steemd.get_tags_used_by_author('istfak')
+        tags = self.steemd.get_tags_used_by_author("istfak")
         self.assertGreaterEqual(len(tags), 1)
 
     def test_get_discussions_by_trending(self):
-        self.get_discusison_by('trending')
+        self.get_discusison_by("trending")
 
     def test_get_discussions_by_created(self):
-        self.get_discusison_by('created')
+        self.get_discusison_by("created")
 
     def test_get_discussions_by_active(self):
-        self.get_discusison_by('active')
+        self.get_discusison_by("active")
 
     def test_get_discussions_by_payout(self):
-        self.get_discusison_by('payout')
+        self.get_discusison_by("payout")
 
     def test_get_discussions_by_hot(self):
-        self.get_discusison_by('hot')
+        self.get_discusison_by("hot")
 
     def test_get_block_header(self):
         block_header = self.steemd.get_block_header(15311463)
@@ -104,8 +103,8 @@ class SteemdTestCase(unittest.TestCase):
     def test_get_dynamic_global_properties(self):
         props = self.steemd.get_dynamic_global_properties()
         self.assertIsNotNone(props)
-        self.assertTrue('last_irreversible_block_num' in props)
-        self.assertTrue('head_block_number' in props)
+        self.assertTrue("last_irreversible_block_num" in props)
+        self.assertTrue("head_block_number" in props)
 
     def test_get_chain_properties(self):
         props = self.steemd.get_chain_properties()
@@ -125,23 +124,23 @@ class SteemdTestCase(unittest.TestCase):
 
     def test_get_hardfork_version(self):
         version = self.steemd.get_hardfork_version()
-        self.assertRegex(version, r'\d+\.\d+\.\d+')
+        self.assertRegex(version, r"\d+\.\d+\.\d+")
 
     def test_get_next_scheduled_hardfork(self):
         version = self.steemd.get_next_scheduled_hardfork()
-        self.assertRegex(version['hf_version'], r'\d+\.\d+\.\d+')
+        self.assertRegex(version["hf_version"], r"\d+\.\d+\.\d+")
 
     def test_get_accounts(self):
-        accounts = self.steemd.get_accounts(['steepshot'])
+        accounts = self.steemd.get_accounts(["steepshot"])
         self.assertEqual(len(accounts), 1)
 
     def test_lookup_account_names(self):
-        accounts = self.steemd.lookup_account_names(['steepshot'])
+        accounts = self.steemd.lookup_account_names(["steepshot"])
         self.assertEqual(len(accounts), 1)
 
     def test_lookup_accounts(self):
         limit = 10
-        accounts = self.steemd.lookup_accounts('steepshot', limit)
+        accounts = self.steemd.lookup_accounts("steepshot", limit)
         self.assertEqual(len(accounts), limit)
 
     def test_get_account_count(self):
@@ -149,7 +148,7 @@ class SteemdTestCase(unittest.TestCase):
 
     def test_get_account_history(self):
         limit = 10
-        history = self.steemd.get_account_history('steepshot', 1000, limit)
+        history = self.steemd.get_account_history("steepshot", 1000, limit)
         self.assertEqual(len(history), limit + 1)
 
     def test_get_order_book(self):
@@ -162,7 +161,7 @@ class SteemdTestCase(unittest.TestCase):
 
     @pytest.mark.xfail
     def test_get_transaction(self):
-        trx_id = '5461e87076e385e6f0da6b09a886022bb4538bc0'
+        trx_id = "5461e87076e385e6f0da6b09a886022bb4538bc0"
         trx = self.steemd.get_transaction(trx_id)
         self.assertIsNotNone(trx)
 
@@ -176,31 +175,31 @@ class SteemdTestCase(unittest.TestCase):
 
     @pytest.mark.xfail
     def test_get_active_votes(self):
-        votes = self.steemd.get_active_votes('optimist', 'spasibo-golos')
+        votes = self.steemd.get_active_votes("optimist", "spasibo-golos")
         self.assertGreater(len(votes), 0)
 
     @pytest.mark.xfail
     def test_get_account_votes(self):
-        votes = self.steemd.get_account_votes('optimist')
+        votes = self.steemd.get_account_votes("optimist")
         self.assertGreater(len(votes), 0)
 
     def test_get_content(self):
-        content = self.steemd.get_content('optimist', 'spasibo-golos')
-        self.assertEqual(content['author'], 'optimist')
+        content = self.steemd.get_content("optimist", "spasibo-golos")
+        self.assertEqual(content["author"], "optimist")
 
     def test_get_content_replies(self):
-        replies = self.steemd.get_content_replies('optimist', 'spasibo-golos')
+        replies = self.steemd.get_content_replies("optimist", "spasibo-golos")
         self.assertGreater(len(replies), 0)
 
     def test_get_all_content_replies(self):
         # replies = self.steemd.get_all_content_replies('optimist', 'spasibo-golos')
-        replies = self.steemd.get_all_content_replies('joseph.kalu', 'test-2018-03-22-08-26-15')
+        replies = self.steemd.get_all_content_replies("joseph.kalu", "test-2018-03-22-08-26-15")
         self.assertGreater(len(replies), 0)
 
     @pytest.mark.xfail
     def test_get_trending_categories(self):
         limit = 10
-        replies = self.steemd.get_trending_categories('', limit)
+        replies = self.steemd.get_trending_categories("", limit)
         self.assertEqual(len(replies), limit)
 
     def test_get_languages(self):
@@ -209,25 +208,25 @@ class SteemdTestCase(unittest.TestCase):
 
     def test_get_replies_by_last_update(self):
         limit = 10
-        replies = self.steemd.get_replies_by_last_update('steepshot', '', limit)
+        replies = self.steemd.get_replies_by_last_update("steepshot", "", limit)
         self.assertEqual(len(replies), limit)
 
     def test_get_witnesses(self):
         witnesses = self.steemd.get_witnesses([1672])
-        self.assertEqual(witnesses[0]['owner'], 'steepshot')
+        self.assertEqual(witnesses[0]["owner"], "steepshot")
 
     def test_get_witness_by_account(self):
-        witness = self.steemd.get_witness_by_account('steepshot')
-        self.assertEqual(witness['owner'], 'steepshot')
+        witness = self.steemd.get_witness_by_account("steepshot")
+        self.assertEqual(witness["owner"], "steepshot")
 
     def test_get_witnesses_by_vote(self):
         limit = 10
-        witnesses = self.steemd.get_witnesses_by_vote('', limit)
+        witnesses = self.steemd.get_witnesses_by_vote("", limit)
         self.assertEqual(len(witnesses), limit)
 
     def test_lookup_witness_accounts(self):
         limit = 10
-        witnesses = self.steemd.get_witnesses_by_vote('', limit)
+        witnesses = self.steemd.get_witnesses_by_vote("", limit)
         self.assertEqual(len(witnesses), limit)
 
     def test_get_witness_count(self):
@@ -240,28 +239,27 @@ class SteemdTestCase(unittest.TestCase):
 
     def test_get_followers(self):
         limit = 10
-        followers = self.steemd.get_followers('joseph.kalu', '', 'blog', limit)
+        followers = self.steemd.get_followers("joseph.kalu", "", "blog", limit)
         self.assertEqual(len(followers), limit)
 
     def test_get_following(self):
         limit = 10
-        following = self.steemd.get_following('joseph.kalu', '', 'blog', limit)
+        following = self.steemd.get_following("joseph.kalu", "", "blog", limit)
         self.assertEqual(len(following), limit)
 
     def test_get_follow_count(self):
-        follow = self.steemd.get_follow_count('joseph.kalu')
-        self.assertGreater(follow['follower_count'], 0)
+        follow = self.steemd.get_follow_count("joseph.kalu")
+        self.assertGreater(follow["follower_count"], 0)
 
     @pytest.mark.xfail
     def test_get_account_reputations(self):
         limit = 10
-        accounts = self.steemd.get_account_reputations(['steepshot'], limit)
+        accounts = self.steemd.get_account_reputations(["steepshot"], limit)
         self.assertEqual(len(accounts), limit)
 
     def test_get_reblogged_by(self):
         reblogged_by = self.steemd.get_reblogged_by(
-            'vp-liganovi4kov',
-            'novaya-rubrika-obratnaya-svyaz-otvety-komandy-golos-io-na-voprosy-novichkov'
+            "vp-liganovi4kov", "novaya-rubrika-obratnaya-svyaz-otvety-komandy-golos-io-na-voprosy-novichkov"
         )
         self.assertGreater(len(reblogged_by), 0)
 
@@ -272,4 +270,3 @@ class SteemdTestCase(unittest.TestCase):
     def test_get_volume(self):
         volume = self.steemd.get_volume()
         self.assertIsNotNone(volume)
-

@@ -1,23 +1,22 @@
-import json
 import collections
+import json
 
 
 class DotDict(dict):
     def __init__(self, *args, **kwargs):
-        """ This class simplifies the use of "."-separated
-            keys when defining a nested dictionary:::
+        """
+        This class simplifies the use of "."-separated keys when defining a nested dictionary:::
 
                 >>> keys = ['profile.url', 'profile.img']
                 >>> values = ["http:", "foobar"]
                 >>> print(Profile(keys, values))
 
                 {"profile": {"url": "http:", "img": "foobar"}}
-
         """
         if len(args) == 2:
             for i, item in enumerate(args[0]):
                 t = self
-                parts = item.split('.')
+                parts = item.split(".")
                 for j, part in enumerate(parts):
                     if j < len(parts) - 1:
                         t = t.setdefault(part, {})
@@ -32,10 +31,10 @@ class DotDict(dict):
 
 
 class Profile(DotDict):
-    """ This class is a template to model a user's on-chain
-        profile according to
+    """
+    This class is a template to model a user's on-chain profile according to.
 
-            * https://github.com/adcpm/steemscript
+    * https://github.com/adcpm/steemscript
     """
 
     def __init__(self, *args, **kwargs):
@@ -59,8 +58,8 @@ class Profile(DotDict):
             super(Profile, self).pop(parts[0], None)
 
 
-if __name__ == '__main__':
-    keys = ['profile.url', 'profile.img']
+if __name__ == "__main__":
+    keys = ["profile.url", "profile.img"]
     values = ["http:", "foobar"]
     print(Profile(keys, values))
     print(Profile({"foo": "bar"}))

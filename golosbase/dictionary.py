@@ -49741,4 +49741,6 @@ zymosis
 zymotic
 zymurgy
 zythem
-zythum""".replace("\n", ",")
+zythum""".replace(
+    "\n", ","
+)

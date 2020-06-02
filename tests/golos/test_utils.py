@@ -1,12 +1,6 @@
 import unittest
 
-from golos.utils import (
-    construct_identifier,
-    sanitize_permlink,
-    derive_permlink,
-    resolve_identifier,
-    fmt_time,
-)
+from golos.utils import construct_identifier, derive_permlink, fmt_time, resolve_identifier, sanitize_permlink
 
 
 class Testcases(unittest.TestCase):
@@ -29,5 +23,5 @@ class Testcases(unittest.TestCase):
         self.assertEqual(fmt_time(1463480746), "20160517t102546")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

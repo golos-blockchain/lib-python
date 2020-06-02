@@ -1,10 +1,10 @@
 def decodeRPCErrorMsg(e):
-    """ Helper function to decode the raised Exception and give it a
-        python Exception class
-
-        Error codes can be obtained from libraries/protocol/include/golos/protocol/exceptions.hpp
     """
-    lines = str(e).strip('\n').split('\n')
+    Helper function to decode the raised Exception and give it a python Exception class.
+
+    Error codes can be obtained from libraries/protocol/include/golos/protocol/exceptions.hpp
+    """
+    lines = str(e).strip("\n").split("\n")
     return lines[-1]
 
 

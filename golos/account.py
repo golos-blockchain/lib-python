@@ -1,26 +1,25 @@
 import datetime
-import math
 import time
 from contextlib import suppress
 
-from funcy import walk_values, get_in, take, rpartial
+from funcy import get_in, rpartial, take, walk_values
 from toolz import dissoc
 
 from golos.amount import Amount
 from golos.blockchain import Blockchain
 from golos.converter import Converter
 from golos.instance import shared_steemd_instance
-from golos.utils import parse_time, json_expand
+from golos.utils import json_expand, parse_time
 from golosbase.exceptions import AccountDoesNotExistsException
 
 
 class Account(dict):
-    """ This class allows to easily access Account data
+    """
+    This class allows to easily access Account data.
 
-        :param str account_name: Name of the account
-        :param Steemd steemd_instance: Steemd() instance to use when
-            accessing a RPC
-
+    :param str account_name: Name of the account
+    :param Steemd steemd_instance: Steemd() instance to use when
+        accessing a RPC
     """
 
     def __init__(self, account_name, steemd_instance=None):
@@ -38,7 +37,7 @@ class Account(dict):
             raise AccountDoesNotExistsException
 
         # load json_metadata
-        account = json_expand(account, 'json_metadata')
+        account = json_expand(account, "json_metadata")
         super(Account, self).__init__(account)
 
     def __getitem__(self, key):
@@ -56,16 +55,16 @@ class Account(dict):
     @property
     def profile(self):
         with suppress(TypeError):
-            return get_in(self, ['json_metadata', 'profile'], default={})
+            return get_in(self, ["json_metadata", "profile"], default={})
 
     @property
     def sp(self):
-        vests = Amount(self['vesting_shares']).amount
+        vests = Amount(self["vesting_shares"]).amount
         return round(self.converter.vests_to_sp(vests), 3)
 
     @property
     def rep(self):
-        raise DeprecationWarning('Reputations field was removed from result struct')
+        raise DeprecationWarning("Reputations field was removed from result struct")
 
     @property
     def balances(self):
@@ -73,56 +72,49 @@ class Account(dict):
 
     def get_balances(self):
         available = {
-            'GOLOS': Amount(self['balance']).amount,
-            'GBG': Amount(self['sbd_balance']).amount,
-            'GESTS': Amount(self['vesting_shares']).amount,
+            "GOLOS": Amount(self["balance"]).amount,
+            "GBG": Amount(self["sbd_balance"]).amount,
+            "GESTS": Amount(self["vesting_shares"]).amount,
         }
 
         savings = {
-            'GOLOS': Amount(self['savings_balance']).amount,
-            'GBG': Amount(self['savings_sbd_balance']).amount,
+            "GOLOS": Amount(self["savings_balance"]).amount,
+            "GBG": Amount(self["savings_sbd_balance"]).amount,
         }
 
-        accumulative = {
-            'GOLOS': Amount(self['accumulative_balance']).amount
-        }
+        accumulative = {"GOLOS": Amount(self["accumulative_balance"]).amount}
 
-        tip = {
-            'GOLOS': Amount(self['tip_balance']).amount
-        }
+        tip = {"GOLOS": Amount(self["tip_balance"]).amount}
 
         totals = {
-            'GOLOS': sum([available['GOLOS'], savings['GOLOS'], accumulative['GOLOS'], tip['GOLOS']]),
-            'GBG': sum([available['GBG'], savings['GBG']]),
-            'GESTS': sum([available['GESTS']]),
+            "GOLOS": sum([available["GOLOS"], savings["GOLOS"], accumulative["GOLOS"], tip["GOLOS"]]),
+            "GBG": sum([available["GBG"], savings["GBG"]]),
+            "GESTS": sum([available["GESTS"]]),
         }
 
         total = walk_values(rpartial(round, 3), totals)
 
         return {
-            'available': available,
-            'savings': savings,
-            'accumulative': accumulative,
-            'tip': tip,
-            'total': total,
+            "available": available,
+            "savings": savings,
+            "accumulative": accumulative,
+            "tip": tip,
+            "total": total,
         }
 
     def voting_power(self):
-        return self['voting_power'] / 100
+        return self["voting_power"] / 100
 
     def get_followers(self, limit: int = None, offset: str = None):
-        return [x['follower'] for x in self._get_followers(direction="follower", limit=limit, offset=offset)]
+        return [x["follower"] for x in self._get_followers(direction="follower", limit=limit, offset=offset)]
 
     def get_following(self, limit: int = None, offset: str = None):
-        return [x['following'] for x in self._get_followers(direction="following", limit=limit, offset=offset)]
+        return [x["following"] for x in self._get_followers(direction="following", limit=limit, offset=offset)]
 
-    def _get_followers(self, direction='follower', limit=None, offset=''):
+    def _get_followers(self, direction="follower", limit=None, offset=""):
         users = []
 
-        get_users = {
-            'follower': self.steemd.get_followers,
-            'following': self.steemd.get_following
-        }[direction]
+        get_users = {"follower": self.steemd.get_followers, "following": self.steemd.get_following}[direction]
 
         limit = limit or 10 ** 6
         max_request_limit = 100
@@ -130,7 +122,7 @@ class Account(dict):
 
         while left_number > 0:
             select_limit = min(left_number, max_request_limit)
-            result = get_users(self.name, offset, 'blog', select_limit)
+            result = get_users(self.name, offset, "blog", select_limit)
             users.extend(result)
 
             has_next = len(users) < limit and len(result) >= select_limit
@@ -158,12 +150,12 @@ class Account(dict):
 
         for reward in take(5000, self.history_reverse(filter_by="curation_reward")):
 
-            timestamp = parse_time(reward['timestamp']).timestamp()
+            timestamp = parse_time(reward["timestamp"]).timestamp()
             if timestamp > trailing_7d_t:
-                reward_7d += Amount(reward['reward']).amount
+                reward_7d += Amount(reward["reward"]).amount
 
             if timestamp > trailing_24hr_t:
-                reward_24h += Amount(reward['reward']).amount
+                reward_24h += Amount(reward["reward"]).amount
 
         reward_7d = self.converter.vests_to_sp(reward_7d)
         reward_24h = self.converter.vests_to_sp(reward_24h)
@@ -185,7 +177,7 @@ class Account(dict):
         return self.steemd.get_account_votes(self.name)
 
     def get_withdraw_routes(self):
-        return self.steemd.get_withdraw_routes(self.name, 'all')
+        return self.steemd.get_withdraw_routes(self.name, "all")
 
     def get_conversion_requests(self):
         return self.steemd.get_conversion_requests(self.name)
@@ -201,10 +193,10 @@ class Account(dict):
         filtered_items = []
         for item in items:
             item_time = None
-            if 'time' in item:
-                item_time = item['time']
-            elif 'timestamp' in item:
-                item_time = item['timestamp']
+            if "time" in item:
+                item_time = item["time"]
+            elif "timestamp" in item:
+                item_time = item["timestamp"]
 
             if item_time:
                 timestamp = parse_time(item_time).timestamp()
@@ -214,9 +206,10 @@ class Account(dict):
         return filtered_items
 
     def export(self, load_extras=True):
-        """ This method returns a dictionary that is type-safe to store as JSON or in a database.
+        """
+        This method returns a dictionary that is type-safe to store as JSON or in a database.
 
-            :param bool load_extras: Fetch extra information related to the account (this might take a while).
+        :param bool load_extras: Fetch extra information related to the account (this might take a while).
         """
         extras = dict()
         if load_extras:
@@ -235,24 +228,14 @@ class Account(dict):
         composed_dict = self.copy()
         composed_dict.update(extras)
         composed_dict.update(
-            {
-                "profile": self.profile,
-                "sp": self.sp,
-                "balances": self.get_balances(),
-            }
+            {"profile": self.profile, "sp": self.sp, "balances": self.get_balances(),}
         )
 
         return composed_dict
 
-    def get_account_history(self,
-                            index,
-                            limit,
-                            start=None,
-                            stop=None,
-                            order=-1,
-                            filter_by=None,
-                            raw_output=False):
-        """ A generator over steemd.get_account_history.
+    def get_account_history(self, index, limit, start=None, stop=None, order=-1, filter_by=None, raw_output=False):
+        """
+        A generator over steemd.get_account_history.
 
         It offers serialization, filtering and fine grained iteration control.
 
@@ -277,8 +260,8 @@ class Account(dict):
             if stop and index > stop:
                 return
 
-            op_type, op = event['op']
-            block_props = dissoc(event, 'op')
+            op_type, op = event["op"]
+            block_props = dissoc(event, "op")
 
             def construct_op(account_name):
                 # verbatim output from steemd
@@ -289,15 +272,13 @@ class Account(dict):
                 # future hard-forks. Thus we cannot take it for granted.
                 immutable = op.copy()
                 immutable.update(block_props)
-                immutable.update({
-                    'account': account_name,
-                    'type': op_type,
-                })
+                immutable.update(
+                    {"account": account_name, "type": op_type,}
+                )
                 _id = Blockchain.hash_op(immutable)
-                immutable.update({
-                    '_id': _id,
-                    'index': index,
-                })
+                immutable.update(
+                    {"_id": _id, "index": index,}
+                )
                 return immutable
 
             if filter_by is None:
@@ -311,13 +292,8 @@ class Account(dict):
                     if op_type == filter_by:
                         yield construct_op(self.name)
 
-    def history(self,
-                filter_by=None,
-                start=0,
-                batch_size=1000,
-                raw_output=False):
-        """ Stream account history in chronological order.
-        """
+    def history(self, filter_by=None, start=0, batch_size=1000, raw_output=False):
+        """Stream account history in chronological order."""
         max_index = self.virtual_op_count()
         if not max_index:
             return
@@ -334,14 +310,10 @@ class Account(dict):
                 filter_by=filter_by,
                 raw_output=raw_output,
             )
-            i += (batch_size + 1)
+            i += batch_size + 1
 
-    def history_reverse(self,
-                        filter_by=None,
-                        batch_size=1000,
-                        raw_output=False):
-        """ Stream account history in reverse chronological order.
-        """
+    def history_reverse(self, filter_by=None, batch_size=1000, raw_output=False):
+        """Stream account history in reverse chronological order."""
         start_index = self.virtual_op_count()
         if not start_index:
             return
@@ -351,26 +323,19 @@ class Account(dict):
             if i - batch_size < 0:
                 batch_size = i
             yield from self.get_account_history(
-                index=i,
-                limit=batch_size,
-                order=-1,
-                filter_by=filter_by,
-                raw_output=raw_output,
+                index=i, limit=batch_size, order=-1, filter_by=filter_by, raw_output=raw_output,
             )
-            i -= (batch_size + 1)
+            i -= batch_size + 1
 
-    def rawhistory(
-        self, first=99999999999,
-        limit=-1, only_ops=[], exclude_ops=[]
-    ):
-        """ Returns a generator for individual account transactions. The
-            latest operation will be first. This call can be used in a
-            ``for`` loop.
+    def rawhistory(self, first=99999999999, limit=-1, only_ops=[], exclude_ops=[]):
+        """
+        Returns a generator for individual account transactions. The latest operation will be first. This call can be
+        used in a ``for`` loop.
 
-            :param str account: account name to get history for
-            :param int first: sequence number of the first transaction to return
-            :param int limit: limit number of filtered operations to return
-            :param array only_ops: Limit generator by these operations
+        :param str account: account name to get history for
+        :param int first: sequence number of the first transaction to return
+        :param int limit: limit number of filtered operations to return
+        :param array only_ops: Limit generator by these operations
         """
         cnt = 0
         _limit = 100

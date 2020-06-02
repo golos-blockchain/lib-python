@@ -9,17 +9,17 @@ class Connector(object):
     def __init__(self, nodes, **kwargs):
         scheme = self.get_scheme(nodes)
 
-        if scheme == 'http':
+        if scheme == "http":
             self.client = HttpClient(nodes, **kwargs)
-        elif scheme == 'ws':
+        elif scheme == "ws":
             self.client = WsClient(nodes, **kwargs)
         else:
-            raise InvalidNodeSchemes('Unsupported node scheme.')
+            raise InvalidNodeSchemes("Unsupported node scheme.")
 
     @staticmethod
     def get_scheme(nodes):
-        ws_schemas = ['ws', 'wss']
-        http_schemas = ['', 'http', 'https']
+        ws_schemas = ["ws", "wss"]
+        http_schemas = ["", "http", "https"]
 
         is_ws = False
         is_http = False
@@ -32,16 +32,17 @@ class Connector(object):
                 is_http = True
 
         if (is_ws and is_http) or (not is_ws and not is_http):
-            raise InvalidNodeSchemes('Invalid node schemas. All schemas should be of one type: http(s) or ws(s).')
+            raise InvalidNodeSchemes("Invalid node schemas. All schemas should be of one type: http(s) or ws(s).")
 
-        return 'ws' * is_ws + 'http' * is_http
+        return "ws" * is_ws + "http" * is_http
 
     @property
     def hostname(self):
         return self.client.hostname
 
     def call(self, name, *args, api=None, return_with_args=None, _ret_cnt=0):
-        """ Execute a method against steemd RPC.
+        """
+        Execute a method against steemd RPC.
 
         Warnings:
             This command will auto-retry in case of node failure, as well as handle

@@ -1,70 +1,68 @@
 from golos.commit import Commit
 from golos.consts import API_LIST
 from golos.steemd import Steemd
-from golosbase.exceptions import RPCError
 
 
 class Steem:
-    """ Connect to the Steem network.
+    """
+    Connect to the Steem network.
 
-        Args:
+    Args:
 
-            nodes (list): A list of Steem HTTP RPC nodes to connect to. If
-            not provided, official Steemit nodes will be used.
+        nodes (list): A list of Steem HTTP RPC nodes to connect to. If
+        not provided, official Steemit nodes will be used.
 
-            debug (bool): Elevate logging level to `logging.DEBUG`.
-            Defaults to `logging.INFO`.
+        debug (bool): Elevate logging level to `logging.DEBUG`.
+        Defaults to `logging.INFO`.
 
-            no_broadcast (bool): If set to ``True``, committal actions like
-            sending funds will have no effect (simulation only).
+        no_broadcast (bool): If set to ``True``, committal actions like
+        sending funds will have no effect (simulation only).
 
-            num_retries (int): Limit connection attempts to the node. Defaults to -1
-            (unlimited).
+        num_retries (int): Limit connection attempts to the node. Defaults to -1
+        (unlimited).
 
-        Optional Arguments (kwargs):
+    Optional Arguments (kwargs):
 
-        Args:
+    Args:
 
-            keys (list): A list of wif keys. If provided, the Wallet will
-            use these keys rather than the ones found in BIP38 encrypted
-            wallet.
+        keys (list): A list of wif keys. If provided, the Wallet will
+        use these keys rather than the ones found in BIP38 encrypted
+        wallet.
 
-            unsigned (bool): (Defaults to False) Use this for offline signing.
+        unsigned (bool): (Defaults to False) Use this for offline signing.
 
-            expiration (int): (Defualts to 60) Size of window in seconds
-            that the transaction needs to be broadcasted in, before it
-            expires.
+        expiration (int): (Defualts to 60) Size of window in seconds
+        that the transaction needs to be broadcasted in, before it
+        expires.
 
-        Returns:
+    Returns:
 
-            Steemd class instance. It can be used to execute commands
-            against golos node.
+        Steemd class instance. It can be used to execute commands
+        against golos node.
 
-        Example:
+    Example:
 
-           If you would like to override the official Steemit nodes
-           (default), you can pass your own.  When currently used node goes
-           offline, ``Steemd`` will automatically fail-over to the next
-           available node.
+       If you would like to override the official Steemit nodes
+       (default), you can pass your own.  When currently used node goes
+       offline, ``Steemd`` will automatically fail-over to the next
+       available node.
 
-           .. code-block:: python
+       .. code-block:: python
 
-               nodes = [
-                   'https://steemd.yournode1.com',
-                   'https://steemd.yournode2.com',
-               ]
+           nodes = [
+               'https://steemd.yournode1.com',
+               'https://steemd.yournode2.com',
+           ]
 
-               s = Steemd(nodes)
-
-       """
+           s = Steemd(nodes)
+    """
 
     def __init__(self, nodes=None, no_broadcast=False, **kwargs):
         self.steemd = Steemd(nodes=nodes, **kwargs)
-        self.commit = Commit(
-            steemd_instance=self.steemd, no_broadcast=no_broadcast, **kwargs)
+        self.commit = Commit(steemd_instance=self.steemd, no_broadcast=no_broadcast, **kwargs)
 
     def __getattr__(self, item):
-        """ Bind .commit, .steemd methods here as a convenience. """
+        """Bind .commit, .steemd methods here as a convenience."""
         if hasattr(self.steemd, item):
             return getattr(self.steemd, item)
         if hasattr(self.commit, item):
@@ -81,11 +79,7 @@ class Steem:
             return
 
         def __getattr__(self, method_name):
-            return Steem.Method(
-                api_name=self.api_name,
-                method_name=method_name,
-                exec_method=self.exec_method,
-            )
+            return Steem.Method(api_name=self.api_name, method_name=method_name, exec_method=self.exec_method,)
 
     class Method(object):
         def __init__(self, api_name="", method_name="", exec_method=None):
@@ -97,11 +91,10 @@ class Steem:
         def __call__(self, *args, **kwargs):
             assert not (args and kwargs), "specified both args and kwargs"
             if len(kwargs) > 0:
-                return self.exec_method(
-                    self.method_name, kwargs=kwargs, api=self.api_name)
+                return self.exec_method(self.method_name, kwargs=kwargs, api=self.api_name)
             return self.exec_method(self.method_name, *args, api=self.api_name)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     s = Steem()
     print(s.get_account_count())

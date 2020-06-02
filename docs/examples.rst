@@ -12,7 +12,7 @@ You can run this script as many times as you like, and it will continue from the
 
         import json
         import os
-        
+
         from steem.blockchain import Blockchain
 
 
