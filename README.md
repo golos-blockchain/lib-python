@@ -14,7 +14,7 @@ The main differences from the `steem-python`:
 * for `Post` instance added two fields - `score_trending` and `score_hot`. This fields may be helpful if you want to sort your saved posts like `get_discussions_by_trending` and `get_discussions_by_trending` methods do. `reblogged_by` field is also filled now
 * for `Account` instance methods `get_followers` and `get_following` were improved - now it takes `limit` and `offset` parameters
 
-GOLOS HF 17-22 is supported.
+GOLOS HF 23 is supported.
 
 # Installation
 
