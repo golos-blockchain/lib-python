@@ -89,7 +89,8 @@ class Blockchain(object):
 
         _ = kwargs  # we need this
         # Let's find out how often blocks are generated!
-        block_interval = self.config.get("STEEMIT_BLOCK_INTERVAL") or 3
+        block_sec = self.config.get("STEEMIT_BLOCK_INTERVAL") or 3
+        remain_sec = block_sec
 
         is_reversed = end_block and start_block > end_block
 
@@ -114,6 +115,14 @@ class Blockchain(object):
                     block = self.steem.get_block(block_num)
                     # inject block number
                     block.update({"block_num": block_num})
+                    try:
+                        timestamp_msec = int(block.get("timestamp_msec"))
+                        request_time_msec = int(block.get("request_time_msec"))
+                        delta = (request_time_msec - timestamp_msec) / 1000
+                        remain_sec = block_sec - delta if (0.1 <= delta <= block_sec) else block_sec
+                    except:
+                        remain_sec = block_sec
+                        pass
                     yield block
                 elif batch_operations:
                     yield self.steem.get_ops_in_block(block_num, only_virtual_ops)
@@ -126,7 +135,7 @@ class Blockchain(object):
 
             # next round
             start_block = head_block + 1
-            time.sleep(block_interval)
+            time.sleep(remain_sec)
 
     def reliable_stream(
         self,
