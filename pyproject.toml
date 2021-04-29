@@ -17,6 +17,7 @@ packages = [
 ]
 
 [tool.poetry.dependencies]
+appdirs = "^1.4.4"
 python = "^3.6.1"
 funcy = "^1.14"
 langdetect = "^1.0.8"
