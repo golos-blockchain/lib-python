@@ -256,12 +256,14 @@ class DeleteComment(GrapheneObject):
 class Amount:
     def __init__(self, d):
         self.amount, self.asset = d.strip().split(" ")
+        self.precision = len(self.amount.split('.')[-1])
         self.amount = float(self.amount)
 
         if self.asset in asset_precision:
             self.precision = asset_precision[self.asset]
+            self.isUIA = False
         else:
-            raise Exception("Asset unknown")
+            self.isUIA = True
 
     def __bytes__(self):
         # padding
