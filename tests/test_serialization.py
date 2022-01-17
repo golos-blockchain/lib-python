@@ -13,7 +13,7 @@ expiration = "2020-06-02T13:38:03"
 
 @pytest.fixture()
 def golos(request):
-    nodes = ["wss://golos.lexa.host/ws", "wss://golos.solox.world/ws"]
+    nodes = ["wss://golos.lexai.host/ws", "wss://golos.solox.world/ws"]
     golos = Steem(nodes=nodes, no_broadcast=True)
     request.cls.golos = golos
     return golos

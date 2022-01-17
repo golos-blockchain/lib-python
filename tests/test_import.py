@@ -10,5 +10,5 @@ sys.path.insert(0, os.path.abspath(".."))
 
 # pylint: disable=unused-import,unused-variable
 def test_import():
-    _ = Steem(["wss://golos.lexa.host/ws"])
+    _ = Steem(["wss://golos.lexai.host/ws"])
     _ = account.PasswordKey

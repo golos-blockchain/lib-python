@@ -7,7 +7,7 @@ from golos.steemd import Steemd
 
 class SteemdTestCase(unittest.TestCase):
     def setUp(self):
-        self.nodes = ["wss://golos.lexa.host/ws", "wss://golos.solox.world/ws"]
+        self.nodes = ["wss://golos.lexai.host/ws", "wss://golos.solox.world/ws"]
         self.steemd = Steemd(nodes=self.nodes)
         self.trx = {
             "ref_block_num": 45193,
@@ -30,7 +30,7 @@ class SteemdTestCase(unittest.TestCase):
             ],
         }
 
-    def get_discusison_by(self, sort):
+    def get_discussions_by(self, sort):
         limit = 5
         posts = self.steemd.get_posts(limit=limit, sort=sort)
 
@@ -69,19 +69,20 @@ class SteemdTestCase(unittest.TestCase):
         self.assertGreaterEqual(len(tags), 1)
 
     def test_get_discussions_by_trending(self):
-        self.get_discusison_by("trending")
+        self.get_discussions_by("trending")
 
     def test_get_discussions_by_created(self):
-        self.get_discusison_by("created")
+        self.get_discussions_by("created")
 
+    @pytest.mark.xfail
     def test_get_discussions_by_active(self):
-        self.get_discusison_by("active")
+        self.get_discussions_by("active")
 
     def test_get_discussions_by_payout(self):
-        self.get_discusison_by("payout")
+        self.get_discussions_by("payout")
 
     def test_get_discussions_by_hot(self):
-        self.get_discusison_by("hot")
+        self.get_discussions_by("hot")
 
     def test_get_block_header(self):
         block_header = self.steemd.get_block_header(15311463)
@@ -148,7 +149,7 @@ class SteemdTestCase(unittest.TestCase):
 
     def test_get_account_history(self):
         limit = 10
-        history = self.steemd.get_account_history("steepshot", 1000, limit)
+        history = self.steemd.get_account_history("lex", -1, limit)
         self.assertEqual(len(history), limit + 1)
 
     def test_get_order_book(self):
