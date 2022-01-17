@@ -1,10 +1,10 @@
 [tool.poetry]
-name = "python-golos"
-version = "1.1.0"
+name = "golos-lib-python"
+version = "0.9.21"
 description = "Python library for Golos blockchain"
 authors = ["Vladimir Kamarzin <vvk@vvk.pp.ru>"]
 license = "MIT"
-repository = "https://github.com/bitfag/golos-python"
+repository = "https://github.com/golos-blockchain/lib-python"
 readme = "README.md"
 classifiers = [
     "Intended Audience :: Developers",
