@@ -59,6 +59,15 @@ op_names = [
     "invite",
     "invite_claim",
     "account_create_with_invite",
+    "asset_create",
+    "asset_update",
+    "asset_issue",
+    "asset_transfer",
+    "override_transfer",
+    "invite_donate",
+    "invite_transfer",
+    "limit_order_cancel_ex",
+
     "fill_convert_request",
     "author_reward",
     "curation_reward",
@@ -80,6 +89,14 @@ op_names = [
     "worker_reward",
     "worker_state",
     "convert_sbd_debt",
+    "internal_transfer",
+    "comment_feed",
+    "account_reputation",
+    "minus_reputation",
+    "comment_reply",
+    "comment_mention",
+    "accumulative_remainder",
+    "authority_updated"
 ]
 
 #: assign operation ids

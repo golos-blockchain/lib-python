@@ -1,5 +1,6 @@
 from binascii import hexlify
 
+import json
 import pytest
 
 from golos import Steem
@@ -71,4 +72,59 @@ class TestSerialization:
         )
 
         self.print_serialization(op)
+        self.do_test(op)
+
+    def test_invite_transfer(self):
+        op = operations.InviteTransfer(**{
+            "from": "GLS7Pbawjjr71ybgT6L2yni3B3LXYiJqEGnuFSq1MV9cjnV24dMG3",
+            "to": "GLS7Pbawjjr71ybgT6L2yni3B3LXYiJqEGnuFSq1MV9cjnV24dMG3",
+            "amount": "1.000 GOLOS",
+            "memo": "foo"
+        })
+
+        self.do_test(op)
+
+    # test last operation in operationids, in order to check no ids skipped in operationids
+    # also it tests extension serialization
+    def test_limit_order_cancel_ex(self):
+        op = operations.LimitOrderCancelEx(**{
+            "owner": "vvk",
+            "orderid": 123,
+        })
+
+        self.do_test(op)
+        op = operations.LimitOrderCancelEx(**{
+            "owner": "vvk",
+            "pair_to_cancel": {
+                "base": "GOLOS",
+                "quote": "GBG",
+                "reverse": True,
+            },
+        })
+
+        self.do_test(op)
+        obj = str(op)
+        obj = json.loads(obj)
+        assert len(obj['extensions']) == 1
+        assert len(obj['extensions'][0]) == 2
+        assert obj['extensions'][0][0] == 0
+        assert obj['extensions'][0][1]['base'] == 'GOLOS'
+        assert obj['extensions'][0][1]['quote'] == 'GBG'
+        assert obj['extensions'][0][1]['reverse'] == True
+
+    def test_delegate_vesting_shares(self):
+        op = operations.DelegateVestingShares(**{
+            "delegator": "vvk",
+            "delegatee": "vvk2",
+            "vesting_shares": "10.000001 GESTS",
+        })
+
+        self.do_test(op)
+        op = operations.DelegateVestingSharesWithInterest(**{
+            "delegator": "vvk",
+            "delegatee": "vvk2",
+            "vesting_shares": "10.000001 GESTS",
+            "interest_rate": 1000,
+        })
+
         self.do_test(op)

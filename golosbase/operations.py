@@ -411,6 +411,48 @@ class ChainProperties23(GrapheneObject):
             super().__init__(p)
 
 
+class ChainProperties24(GrapheneObject):
+    def __init__(self, *args, **kwargs):
+        if isArgsThisClass(self, args):
+            self.data = args[0].data
+        else:
+            if len(args) == 1 and len(kwargs) == 0:
+                kwargs = args[0]
+            p = ChainProperties23(kwargs).data
+            p.update(
+                OrderedDict(
+                    [
+                        ("asset_creation_fee", Amount(kwargs["asset_creation_fee"])),
+                        ("invite_transfer_interval_sec", Uint32(kwargs["invite_transfer_interval_sec"])),
+                    ]
+                )
+            )
+            super().__init__(p)
+
+
+class ChainProperties26(GrapheneObject):
+    def __init__(self, *args, **kwargs):
+        if isArgsThisClass(self, args):
+            self.data = args[0].data
+        else:
+            if len(args) == 1 and len(kwargs) == 0:
+                kwargs = args[0]
+            p = ChainProperties24(kwargs).data
+            p.update(
+                OrderedDict(
+                    [
+                        ("convert_fee_percent", Uint16(kwargs["convert_fee_percent"])),
+                        ("min_golos_power_to_curate", Amount(kwargs["min_golos_power_to_curate"])),
+                        ("worker_emission_percent", Uint16(kwargs["worker_emission_percent"])),
+                        ("vesting_of_remain_percent", Uint16(kwargs["vesting_of_remain_percent"])),
+                        ("negrep_posting_window", Uint16(kwargs["negrep_posting_window"])),
+                        ("negrep_posting_per_window", Uint16(kwargs["negrep_posting_per_window"])),
+                    ]
+                )
+            )
+            super().__init__(p)
+
+
 class Props(StaticVariant):
     def __init__(self, o):
         type_id, data = o
@@ -425,6 +467,10 @@ class Props(StaticVariant):
             data = ChainProperties22(data["props"])
         elif type_id == 4:
             data = ChainProperties23(data["props"])
+        elif type_id == 5:
+            data = ChainProperties24(data["props"])
+        elif type_id == 6:
+            data = ChainProperties26(data["props"])
         super().__init__(data, type_id)
 
 
@@ -493,6 +539,92 @@ class CommentOptionExtensions(StaticVariant):
             data = Percent(data)
         else:
             raise Exception("Unknown CommentOptionExtension")
+        super().__init__(data, type_id)
+
+
+class IsInviteReferral(GrapheneObject):
+    def __init__(self, *args, **kwargs):
+        if isArgsThisClass(self, args):
+            self.data = args[0].data
+        else:
+            if len(args) == 1 and len(kwargs) == 0:
+                kwargs = args[0]
+            super().__init__(
+                OrderedDict(
+                    [
+                        ("is_invite_referral", Bool(kwargs["is_invite_referral"]))
+                    ]
+                )
+            )
+
+
+class InviteExtensions(StaticVariant):
+    """
+    Serialize Invite Operation Extensions.
+
+    Args:
+        is_invite_referral (bool): If someone will create account with that invite, should it be referral of invite creator or not.
+
+    Example:
+
+        ::
+
+            [0,
+                {'is_invite_referral': True}
+            ]
+    """
+
+    def __init__(self, o):
+        type_id, data = o
+        if type_id == 0:
+            data = IsInviteReferral(data)
+        else:
+            raise Exception("Unknown InviteExtension")
+        super().__init__(data, type_id)
+
+
+class PairToCancel(GrapheneObject):
+    def __init__(self, *args, **kwargs):
+        if isArgsThisClass(self, args):
+            self.data = args[0].data
+        else:
+            if len(args) == 1 and len(kwargs) == 0:
+                kwargs = args[0]
+            super().__init__(
+                OrderedDict(
+                    [
+                        ("base", String(kwargs["base"])),
+                        ("quote", String(kwargs["quote"])),
+                        ("reverse", Bool(kwargs["reverse"]))
+                    ]
+                )
+            )
+
+
+class LimitOrderCancelExExtensions(StaticVariant):
+    """
+    Serialize LimitOrderCancelEx Operation Extensions.
+
+    Args:
+        base (string): Base asset in the pair.
+        quote (string): Quote asset in the pair.
+        reverse (bool): If True, also cancel orders with reversed pair (e.g. GBG/GOLOS when pair is GOLOS/GBG).
+
+    Example:
+
+        ::
+
+            [0,
+                {'base': 'GOLOS', 'quote': 'GBG', 'reverse': True}
+            ]
+    """
+
+    def __init__(self, o):
+        type_id, data = o
+        if type_id == 0:
+            data = PairToCancel(data)
+        else:
+            raise Exception("Unknown LimitOrderCancelExExtension")
         super().__init__(data, type_id)
 
 
@@ -767,6 +899,26 @@ class DelegateVestingShares(GrapheneObject):
             )
 
 
+class DelegateVestingSharesWithInterest(GrapheneObject):
+    def __init__(self, *args, **kwargs):
+        if isArgsThisClass(self, args):
+            self.data = args[0].data
+        else:
+            if len(args) == 1 and len(kwargs) == 0:
+                kwargs = args[0]
+            super().__init__(
+                OrderedDict(
+                    [
+                        ("delegator", String(kwargs["delegator"])),
+                        ("delegatee", String(kwargs["delegatee"])),
+                        ("vesting_shares", Amount(kwargs["vesting_shares"])),
+                        ("interest_rate", Uint16(kwargs["interest_rate"])),
+                        ("extensions", Array(kwargs.get("extensions") or [])),
+                    ]
+                )
+            )
+
+
 class LimitOrderCreate(GrapheneObject):
     def __init__(self, *args, **kwargs):
         if isArgsThisClass(self, args):
@@ -796,7 +948,46 @@ class LimitOrderCancel(GrapheneObject):
             if len(args) == 1 and len(kwargs) == 0:
                 kwargs = args[0]
             super().__init__(
-                OrderedDict([("owner", String(kwargs["owner"])), ("orderid", Uint32(int(kwargs["orderid"]))),])
+                OrderedDict(
+                    [
+                        ("owner", String(kwargs["owner"])),
+                        ("orderid", Uint32(int(kwargs["orderid"]))),
+                    ]
+                )
+            )
+
+
+class LimitOrderCancelEx(GrapheneObject):
+    def __init__(self, *args, **kwargs):
+        if isArgsThisClass(self, args):
+            self.data = args[0].data
+        else:
+            if len(args) == 1 and len(kwargs) == 0:
+                kwargs = args[0]
+
+            new_extensions = []
+
+            if "pair_to_cancel" in kwargs and kwargs["pair_to_cancel"]:
+                new_extensions.append([0, kwargs["pair_to_cancel"]])
+
+            if new_extensions:
+                kwargs["extensions"] = new_extensions
+
+            extensions = Array([])
+            if "extensions" in kwargs and kwargs["extensions"]:
+                extensions = Array([LimitOrderCancelExExtensions(o) for o in kwargs["extensions"]])
+
+            if "orderid" not in kwargs:
+                kwargs["orderid"] = 0
+
+            super().__init__(
+                OrderedDict(
+                    [
+                        ("owner", String(kwargs["owner"])),
+                        ("orderid", Uint32(int(kwargs["orderid"]))),
+                        ("extensions", extensions),
+                    ]
+                )
             )
 
 
@@ -902,6 +1093,10 @@ class ChainPropertiesUpdate(GrapheneObject):
                     type_id = 3
                 if "claim_idleness_time" in props:
                     type_id = 4
+                if "asset_creation_fee" in props:
+                    type_id = 5
+                if "convert_fee_percent" in props:
+                    type_id = 6
 
                 obj = [type_id, {"props": props}]
                 props = Props(obj)
@@ -1189,6 +1384,287 @@ class Donate(GrapheneObject):
                         ("amount", Amount(kwargs["amount"])),
                         ("memo", kwargs["memo"]),
                         ("extensions", Array([])),
+                    ]
+                )
+            )
+
+
+class TransferToTip(GrapheneObject):
+    def __init__(self, *args, **kwargs):
+        if isArgsThisClass(self, args):
+            self.data = args[0].data
+        else:
+            if len(args) == 1 and len(kwargs) == 0:
+                kwargs = args[0]
+            if "memo" not in kwargs:
+                kwargs["memo"] = ""
+            super().__init__(
+                OrderedDict(
+                    [
+                        ("from", String(kwargs["from"])),
+                        ("to", String(kwargs["to"])),
+                        ("amount", Amount(kwargs["amount"])),
+                        ("memo", String(kwargs["memo"])),
+                        ("extensions", Array(kwargs.get("extensions") or [])),
+                    ]
+                )
+            )
+
+
+class TransferFromTip(GrapheneObject):
+    def __init__(self, *args, **kwargs):
+        if isArgsThisClass(self, args):
+            self.data = args[0].data
+        else:
+            if len(args) == 1 and len(kwargs) == 0:
+                kwargs = args[0]
+            if "memo" not in kwargs:
+                kwargs["memo"] = ""
+            super().__init__(
+                OrderedDict(
+                    [
+                        ("from", String(kwargs["from"])),
+                        ("to", String(kwargs["to"])),
+                        ("amount", Amount(kwargs["amount"])),
+                        ("memo", String(kwargs["memo"])),
+                        ("extensions", Array(kwargs.get("extensions") or [])),
+                    ]
+                )
+            )
+
+
+class Invite(GrapheneObject):
+    def __init__(self, *args, **kwargs):
+        if isArgsThisClass(self, args):
+            self.data = args[0].data
+        else:
+            if len(args) == 1 and len(kwargs) == 0:
+                kwargs = args[0]
+            prefix = kwargs.pop("prefix", default_prefix)
+
+            new_extensions = []
+
+            if "is_invite_referral" in kwargs and kwargs["is_invite_referral"]:
+                new_extensions.append([0, {"is_invite_referral": kwargs["is_invite_referral"]}])
+
+            if new_extensions:
+                kwargs["extensions"] = new_extensions
+
+            extensions = Array([])
+            if "extensions" in kwargs and kwargs["extensions"]:
+                extensions = Array([InviteExtensions(o) for o in kwargs["extensions"]])
+
+            super().__init__(
+                OrderedDict(
+                    [
+                        ("creator", String(kwargs["creator"])),
+                        ("balance", Amount(kwargs["balance"])),
+                        ("invite_key", PublicKey(kwargs["invite_key"], prefix=prefix)),
+                        ("extensions", extensions),
+                    ]
+                )
+            )
+
+
+class InviteClaim(GrapheneObject):
+    def __init__(self, *args, **kwargs):
+        if isArgsThisClass(self, args):
+            self.data = args[0].data
+        else:
+            if len(args) == 1 and len(kwargs) == 0:
+                kwargs = args[0]
+            super().__init__(
+                OrderedDict(
+                    [
+                        ("initiator", String(kwargs["initiator"])),
+                        ("receiver", String(kwargs["receiver"])),
+                        ("invite_secret", String(kwargs["invite_secret"])),
+                        ("extensions", Array(kwargs.get("extensions") or [])),
+                    ]
+                )
+            )
+
+
+class AssetCreate(GrapheneObject):
+    def __init__(self, *args, **kwargs):
+        if isArgsThisClass(self, args):
+            self.data = args[0].data
+        else:
+            if len(args) == 1 and len(kwargs) == 0:
+                kwargs = args[0]
+            super().__init__(
+                OrderedDict(
+                    [
+                        ("creator", String(kwargs["creator"])),
+                        ("max_supply", Amount(kwargs["max_supply"])),
+                        ("allow_fee", Bool(kwargs["allow_fee"])),
+                        ("allow_override_transfer", Bool(kwargs["allow_override_transfer"])),
+                        ("json_metadata", String(kwargs["json_metadata"])),
+                        ("extensions", Array(kwargs.get("extensions") or [])),
+                    ]
+                )
+            )
+
+
+class AssetUpdate(GrapheneObject):
+    def __init__(self, *args, **kwargs):
+        if isArgsThisClass(self, args):
+            self.data = args[0].data
+        else:
+            if len(args) == 1 and len(kwargs) == 0:
+                kwargs = args[0]
+            super().__init__(
+                OrderedDict(
+                    [
+                        ("creator", String(kwargs["creator"])),
+                        ("symbol", String(kwargs["symbol"])),
+                        ("symbols_whitelist", Array([String(o) for o in kwargs["symbols_whitelist"]])),
+                        ("fee_percent", Uint16(kwargs["fee_percent"])),
+                        ("json_metadata", String(kwargs["json_metadata"])),
+                        ("extensions", Array(kwargs.get("extensions") or [])),
+                    ]
+                )
+            )
+
+
+class AssetIssue(GrapheneObject):
+    def __init__(self, *args, **kwargs):
+        if isArgsThisClass(self, args):
+            self.data = args[0].data
+        else:
+            if len(args) == 1 and len(kwargs) == 0:
+                kwargs = args[0]
+            super().__init__(
+                OrderedDict(
+                    [
+                        ("creator", String(kwargs["creator"])),
+                        ("amount", Amount(kwargs["amount"])),
+                        ("to", String(kwargs["to"])),
+                        ("extensions", Array(kwargs.get("extensions") or [])),
+                    ]
+                )
+            )
+
+
+class AssetTransfer(GrapheneObject):
+    def __init__(self, *args, **kwargs):
+        if isArgsThisClass(self, args):
+            self.data = args[0].data
+        else:
+            if len(args) == 1 and len(kwargs) == 0:
+                kwargs = args[0]
+            super().__init__(
+                OrderedDict(
+                    [
+                        ("creator", String(kwargs["creator"])),
+                        ("symbol", String(kwargs["symbol"])),
+                        ("new_owner", String(kwargs["new_owner"])),
+                        ("extensions", Array(kwargs.get("extensions") or [])),
+                    ]
+                )
+            )
+
+
+class OverrideTransfer(GrapheneObject):
+    def __init__(self, *args, **kwargs):
+        if isArgsThisClass(self, args):
+            self.data = args[0].data
+        else:
+            if len(args) == 1 and len(kwargs) == 0:
+                kwargs = args[0]
+            if "memo" not in kwargs:
+                kwargs["memo"] = ""
+            super().__init__(
+                OrderedDict(
+                    [
+                        ("creator", String(kwargs["creator"])),
+                        ("from", String(kwargs["from"])),
+                        ("to", String(kwargs["to"])),
+                        ("amount", Amount(kwargs["amount"])),
+                        ("memo", String(kwargs["memo"])),
+                        ("extensions", Array(kwargs.get("extensions") or [])),
+                    ]
+                )
+            )
+
+
+class InviteDonate(GrapheneObject):
+    def __init__(self, *args, **kwargs):
+        if isArgsThisClass(self, args):
+            self.data = args[0].data
+        else:
+            if len(args) == 1 and len(kwargs) == 0:
+                kwargs = args[0]
+            if "memo" not in kwargs:
+                kwargs["memo"] = ""
+            super().__init__(
+                OrderedDict(
+                    [
+                        ("from", String(kwargs["from"])),
+                        ("invite_key", PublicKey(kwargs["invite_key"])),
+                        ("amount", Amount(kwargs["amount"])),
+                        ("memo", String(kwargs["memo"])),
+                        ("extensions", Array(kwargs.get("extensions") or [])),
+                    ]
+                )
+            )
+
+
+class InviteTransfer(GrapheneObject):
+    def __init__(self, *args, **kwargs):
+        if isArgsThisClass(self, args):
+            self.data = args[0].data
+        else:
+            if len(args) == 1 and len(kwargs) == 0:
+                kwargs = args[0]
+            if "memo" not in kwargs:
+                kwargs["memo"] = ""
+            super().__init__(
+                OrderedDict(
+                    [
+                        ("from", PublicKey(kwargs["from"])),
+                        ("to", PublicKey(kwargs["to"])),
+                        ("amount", Amount(kwargs["amount"])),
+                        ("memo", String(kwargs["memo"])),
+                        ("extensions", Array(kwargs.get("extensions") or [])),
+                    ]
+                )
+            )
+
+
+class WorkerRequestDelete(GrapheneObject):
+    def __init__(self, *args, **kwargs):
+        if isArgsThisClass(self, args):
+            self.data = args[0].data
+        else:
+            if len(args) == 1 and len(kwargs) == 0:
+                kwargs = args[0]
+            super().__init__(
+                OrderedDict(
+                    [
+                        ("author", String(kwargs["author"])),
+                        ("permlink", String(kwargs["permlink"])),
+                        ("extensions", Array(kwargs.get("extensions") or [])),
+                    ]
+                )
+            )
+
+
+class WorkerRequestVote(GrapheneObject):
+    def __init__(self, *args, **kwargs):
+        if isArgsThisClass(self, args):
+            self.data = args[0].data
+        else:
+            if len(args) == 1 and len(kwargs) == 0:
+                kwargs = args[0]
+            super().__init__(
+                OrderedDict(
+                    [
+                        ("voter", String(kwargs["voter"])),
+                        ("author", String(kwargs["author"])),
+                        ("permlink", String(kwargs["permlink"])),
+                        ("vote_percent", Uint16(kwargs["vote_percent"])),
+                        ("extensions", Array(kwargs.get("extensions") or [])),
                     ]
                 )
             )

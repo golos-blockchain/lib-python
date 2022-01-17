@@ -3,6 +3,7 @@ import unittest
 import pytest
 
 from golos.steemd import Steemd
+from golosbase.operations import Amount
 
 
 class SteemdTestCase(unittest.TestCase):
@@ -267,7 +268,27 @@ class SteemdTestCase(unittest.TestCase):
     def test_get_ticker(self):
         ticker = self.steemd.get_ticker()
         self.assertIsNotNone(ticker)
+        self.assertEqual(Amount(ticker['asset1_volume']).asset, 'GOLOS')
+        self.assertEqual(Amount(ticker['asset2_volume']).asset, 'GBG')
+        ticker = self.steemd.get_ticker(['GBG', 'GOLOS'])
+        self.assertIsNotNone(ticker)
+        self.assertEqual(Amount(ticker['asset1_volume']).asset, 'GBG')
+        self.assertEqual(Amount(ticker['asset2_volume']).asset, 'GOLOS')
+        ticker = self.steemd.get_ticker(['VIZUIA', 'GOLOS'])
+        self.assertIsNotNone(ticker)
+        self.assertEqual(Amount(ticker['asset1_volume']).asset, 'VIZUIA')
+        self.assertEqual(Amount(ticker['asset2_volume']).asset, 'GOLOS')
 
     def test_get_volume(self):
         volume = self.steemd.get_volume()
         self.assertIsNotNone(volume)
+        self.assertEqual(Amount(volume['asset1_volume']).asset, 'GOLOS')
+        self.assertEqual(Amount(volume['asset2_volume']).asset, 'GBG')
+        volume = self.steemd.get_volume(['GBG', 'GOLOS'])
+        self.assertIsNotNone(volume)
+        self.assertEqual(Amount(volume['asset1_volume']).asset, 'GBG')
+        self.assertEqual(Amount(volume['asset2_volume']).asset, 'GOLOS')
+        volume = self.steemd.get_volume(['VIZUIA', 'GOLOS'])
+        self.assertIsNotNone(volume)
+        self.assertEqual(Amount(volume['asset1_volume']).asset, 'VIZUIA')
+        self.assertEqual(Amount(volume['asset2_volume']).asset, 'GOLOS')

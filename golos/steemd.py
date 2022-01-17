@@ -33,13 +33,13 @@ def get_config_node_list():
 
 class Steemd(Connector):
     """
-    Connect to the Steem network.
+    Connect to the Golos network.
 
     Args:
         nodes (list): A list of Steem HTTP RPC nodes to connect to. If not provided, official Steemit nodes will be used.
 
     Returns:
-        Steemd class instance. It can be used to execute commands against steem node.
+        Steemd class instance. It can be used to execute commands against golos node.
 
     Example:
 
@@ -136,15 +136,27 @@ class Steemd(Connector):
         Lookup account information such as user profile, public keys, balances, etc.
 
         Args:
-            account (str): STEEM username that we are looking up.
+            account (str): GOLOS username that we are looking up.
 
         Returns:
             dict: Account information.
         """
         return first(self.call("get_accounts", [account], api=DATABASE_API))
 
+    def get_account_balances(self, account):
+        """
+        Lookup UIA balances of specified account. Not including GOLOS, GBG and GESTS. For them use ``get_account``.
+
+        Args:
+            account (str): GOLOS username that we are looking up.
+
+        Returns:
+            dict: Account UIA balances. Key is symbol, value is dict with data.
+        """
+        return first(self.call("get_accounts_balances", [account], api=DATABASE_API))
+
     def get_all_usernames(self, last_user=""):
-        """Fetch the full list of STEEM usernames."""
+        """Fetch the full list of GOLOS usernames."""
         usernames = self.lookup_accounts(last_user, 1000)
         batch = []
         while len(batch) != 1:
@@ -155,7 +167,7 @@ class Steemd(Connector):
 
     def _get_blocks(self, blocks: Union[List[int], Set[int]]):
         """
-        Fetch multiple blocks from steemd at once.
+        Fetch multiple blocks from golosd at once.
 
         Warning: This method does not ensure that all blocks are returned,
         or that the results are ordered.  You will probably want to use
@@ -172,7 +184,7 @@ class Steemd(Connector):
 
     def get_blocks(self, block_nums: List[int]):
         """
-        Fetch multiple blocks from steemd at once, given a range.
+        Fetch multiple blocks from golosd at once, given a range.
 
         Args:
             block_nums (list): A list of all block numbers we would like to tech.
@@ -196,7 +208,7 @@ class Steemd(Connector):
 
     def get_blocks_range(self, start: int, end: int):
         """
-        Fetch multiple blocks from steemd at once, given a range.
+        Fetch multiple blocks from golosd at once, given a range.
 
         Args:
             start (int): The number of the block to start with
@@ -361,7 +373,7 @@ class Steemd(Connector):
 
         ::
 
-            {'account_creation_fee': '30.000 STEEM',
+            {'account_creation_fee': '30.000 GOLOS',
              'maximum_block_size': 65536,
              'sbd_interest_rate': 250}
 
@@ -369,30 +381,30 @@ class Steemd(Connector):
         return self.call("get_chain_properties", api=DATABASE_API)
 
     def get_feed_history(self):
-        """ Get the hourly averages of witness reported STEEM/SBD prices.
+        """ Get the hourly averages of witness reported GOLOS/GBG prices.
 
         ::
 
-            {'current_median_history': {'base': '0.093 SBD', 'quote': '1.010 STEEM'},
+            {'current_median_history': {'base': '0.093 GBG', 'quote': '1.010 GOLOS'},
              'id': 0,
-             'price_history': [{'base': '0.092 SBD', 'quote': '1.010 STEEM'},
-              {'base': '0.093 SBD', 'quote': '1.020 STEEM'},
-              {'base': '0.093 SBD', 'quote': '1.010 STEEM'},
-              {'base': '0.094 SBD', 'quote': '1.020 STEEM'},
-              {'base': '0.093 SBD', 'quote': '1.010 STEEM'},
+             'price_history': [{'base': '0.092 GBG', 'quote': '1.010 GOLOS'},
+              {'base': '0.093 GBG', 'quote': '1.020 GOLOS'},
+              {'base': '0.093 GBG', 'quote': '1.010 GOLOS'},
+              {'base': '0.094 GBG', 'quote': '1.020 GOLOS'},
+              {'base': '0.093 GBG', 'quote': '1.010 GOLOS'},
 
         """
         return self.call("get_feed_history", api=WITNESS_API)
 
     def get_current_median_history_price(self):
         """
-        Get the average STEEM/SBD price.
+        Get the average GOLOS/GBG price.
 
         This price is based on moving average of witness reported price feeds.
 
         ::
 
-            {'base': '0.093 SBD', 'quote': '1.010 STEEM'}
+            {'base': '0.093 GBG', 'quote': '1.010 GOLOS'}
         """
         return self.call("get_current_median_history_price", api=WITNESS_API)
 
@@ -425,6 +437,14 @@ class Steemd(Connector):
         """
         return self.call("get_accounts", account_names, api=DATABASE_API)
 
+    def get_accounts_balances(self, account_names: list):
+        """
+        Lookup UIA balances of specified accounts. Not including GOLOS, GBG and GESTS. For them use ``get_accounts``.
+
+        This method is same as ``get_account_balances``, but supports querying for multiple accounts at the time.
+        """
+        return self.call("get_accounts_balances", account_names, api=DATABASE_API)
+
     def get_account_references(self, account_id: int):
         raise DeprecationWarning("This method not supported!")
 
@@ -446,7 +466,7 @@ class Steemd(Connector):
         return self.call("lookup_accounts", after, limit, api=DATABASE_API)
 
     def get_account_count(self):
-        """How many accounts are currently registered on STEEM?"""
+        """How many accounts are currently registered on GOLOS?"""
         return self.call("get_account_count", api=DATABASE_API)
 
     def get_conversion_requests(self, account: str):
@@ -458,7 +478,7 @@ class Steemd(Connector):
         History of all operations for a given account.
 
         Args:
-           account (str): STEEM username that we are looking up.
+           account (str): GOLOS username that we are looking up.
            index_from (int): The highest database index we take as a starting point.
            limit (int): How many items are we interested in.
 
@@ -495,7 +515,7 @@ class Steemd(Connector):
                   {'comment_author': 'leongkhan',
                    'comment_permlink': 'steem-investor-report-5-march-2017',
                    'curator': 'furion',
-                   'reward': '112.397602 VESTS'}],
+                   'reward': '112.397602 GESTS'}],
                  'op_in_trx': 1,
                  'timestamp': '2017-03-06T17:11:30',
                  'trx_id': '0000000000000000000000000000000000000000',
@@ -559,7 +579,7 @@ class Steemd(Connector):
         """get_savings_withdraw_to."""
         return self.call("get_savings_withdraw_to", account, api=DATABASE_API)
 
-    def get_order_book(self, limit):
+    def get_order_book(self, limit, pair=["GOLOS", "GBG"]):
         """
         Get the internal market order book.
 
@@ -567,6 +587,7 @@ class Steemd(Connector):
 
         Args:
             limit (int): How many levels deep into the book to show.
+            pair (array): Market pair, default is ["GOLOS", "GBG"].
 
         Returns:
             dict: Order book.
@@ -602,9 +623,9 @@ class Steemd(Connector):
                    'gbg': 36385,
                    'golos': 379608}]}
         """
-        return self.call("get_order_book", limit, api=MARKET_HISTORY_API)
+        return self.call("get_order_book", limit, pair, api=MARKET_HISTORY_API)
 
-    def get_open_orders(self, account: str):
+    def get_open_orders(self, account: str, pair=["GOLOS", "GBG"]):
         """
         get_open_orders. Also this api methods exist in DATABASE_API.
 
@@ -622,7 +643,7 @@ class Steemd(Connector):
               'real_price': '1.19999999999999996',
               'rewarded': False}]
         """
-        return self.call("get_open_orders", account, api=MARKET_HISTORY_API)
+        return self.call("get_open_orders", account, pair, api=MARKET_HISTORY_API)
 
     def get_liquidity_queue(self, start_account: str, limit: int):
         raise DeprecationWarning("This method not supported!")
@@ -656,7 +677,7 @@ class Steemd(Connector):
         Get all votes for the given post.
 
         Args:
-            author (str): OP's STEEM username.
+            author (str): OP's GOLOS username.
             permlink (str): Post identifier following the username. It looks like slug-ified title.
 
         Returns:
@@ -702,7 +723,7 @@ class Steemd(Connector):
 
 
         Args:
-            account (str): STEEM username that we are looking up.
+            account (str): GOLOS username that we are looking up.
             votes_from (int): starting index
             vote_limit (int): limit of returned votes
 
@@ -870,25 +891,29 @@ class Steemd(Connector):
     def set_max_block_age(self, max_block_age: int):
         raise DeprecationWarning("This method not supported!")
 
-    def get_ticker(self):
-        """Returns the market ticker for the internal SBD:STEEM market."""
-        return self.call("get_ticker", api=MARKET_HISTORY_API)
+    def get_depth(self, pair=["GOLOS", "GBG"]):
+        """Returns the market depth for specified market pair, default is GOLOS/GBG."""
+        return self.call("get_volume", pair, api=MARKET_HISTORY_API)
 
-    def get_volume(self):
-        """Returns the market volume for the past 24 hours."""
-        return self.call("get_volume", api=MARKET_HISTORY_API)
+    def get_ticker(self, pair=["GOLOS", "GBG"]):
+        """Returns the market ticker for specified market pair, default is GOLOS/GBG."""
+        return self.call("get_ticker", pair, api=MARKET_HISTORY_API)
 
-    def get_trade_history(self, start: PointInTime, end: PointInTime, limit: int):
-        """Returns the trade history for the internal SBD:STEEM market."""
-        return self.call("get_trade_history", start, end, limit, api=MARKET_HISTORY_API)
+    def get_volume(self, pair=["GOLOS", "GBG"]):
+        """Returns the market volume for the past 24 hours, for specified market pair, default is GOLOS/GBG."""
+        return self.call("get_volume", pair, api=MARKET_HISTORY_API)
 
-    def get_recent_trades(self, limit: int) -> List[Any]:
-        """Returns the N most recent trades for the internal GBG:GOLOS market."""
-        return self.call("get_recent_trades", limit, api=MARKET_HISTORY_API)
+    def get_trade_history(self, start: PointInTime, end: PointInTime, limit: int, pair=["GOLOS", "GBG"]):
+        """Returns the trade history for specified market pair, default is GOLOS/GBG."""
+        return self.call("get_trade_history", start, end, limit, pair, api=MARKET_HISTORY_API)
 
-    def get_market_history(self, bucket_seconds: int, start: PointInTime, end: PointInTime):
-        """Returns the market history for the internal SBD:STEEM market."""
-        return self.call("get_market_history", bucket_seconds, start, end, api=MARKET_HISTORY_API)
+    def get_recent_trades(self, limit: int, pair=["GOLOS", "GBG"]) -> List[Any]:
+        """Returns the N most recent trades for specified market pair, default is GOLOS/GBG."""
+        return self.call("get_recent_trades", limit, pair, api=MARKET_HISTORY_API)
+
+    def get_market_history(self, bucket_seconds: int, start: PointInTime, end: PointInTime, pair=["GOLOS", "GBG"]):
+        """Returns the market history for specified market pair, default is GOLOS/GBG."""
+        return self.call("get_market_history", bucket_seconds, start, end, pair, api=MARKET_HISTORY_API)
 
     def get_market_history_buckets(self):
         """Returns the bucket seconds being tracked by the plugin."""
