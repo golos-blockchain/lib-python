@@ -267,9 +267,13 @@ class Amount:
 
     def __bytes__(self):
         # padding
-        asset = self.asset + "\x00" * (7 - len(self.asset))
+        sym_len = len(self.asset)
+        is_v2 = sym_len > 6
+        sym_pad = (15 if is_v2 else 7) - sym_len
+        asset = self.asset + "\x00" * sym_pad
         amount = round(float(self.amount) * 10 ** self.precision)
-        return struct.pack("<q", amount) + struct.pack("<b", self.precision) + bytes(asset, "ascii")
+        precision = (self.precision + 100) if is_v2 else self.precision
+        return struct.pack("<q", amount) + struct.pack("<b", precision) + bytes(asset, "ascii")
 
     def __str__(self):
         return "{:.{}f} {}".format(self.amount, self.precision, self.asset)
